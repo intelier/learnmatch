@@ -276,9 +276,17 @@ h3{font-size:15px; font-weight:600;}
 <body>
 <div id="wrap">
   <header id="site-header">
-    <div class="logo">Learn<span>Match</span></div>
-    <div class="badge-theory">교육심리학 기반 진단</div>
+    <div class="logo" onclick="goHome()" style="cursor:pointer;">Learn<span>Match</span></div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button id="home-btn" onclick="goHome()" style="display:none; font-size:12px; font-weight:500; color:var(--navy-muted); border:1px solid var(--ivory-border); border-radius:20px; padding:4px 12px; background:transparent; cursor:pointer; font-family:var(--sans);">← 처음으로</button>
+      <button onclick="window.open('learning_diagnostic_full.html','_blank')" style="font-size:12px; font-weight:600; color:var(--white); border:1px solid var(--navy); border-radius:20px; padding:4px 12px; background:var(--navy); cursor:pointer; font-family:var(--sans);">🏫 학원 등록</button>
+      <div class="badge-theory">교육심리학 기반</div>
+    </div>
   </header>
+  <div id="back-bar" style="display:none; align-items:center; justify-content:space-between; padding:.65rem 0; margin-bottom:1.25rem; border-bottom:1px solid var(--ivory-border);">
+    <button onclick="goBack()" style="font-size:13px; color:var(--navy-muted); background:transparent; border:none; cursor:pointer; font-family:var(--sans); display:flex; align-items:center; gap:5px;">← 이전 질문</button>
+    <span id="back-label" style="font-size:12px; color:var(--navy-muted);"></span>
+  </div>
   <div id="app"></div>
 </div>
 
@@ -536,15 +544,42 @@ function matchAcad(child, ct, acad){
   return {excluded:false,score:Math.round(total*100),q:Math.round(q*100),ts:Math.round(ts*100),reason:reasons[0]};
 }
 
+/* ───── 네비게이션 ───── */
+function goHome(){
+  S={step:0,answers:{},kwBag:[],wants:[],subject:'academic'};
+  render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function goBack(){
+  if(S.step>0){ S.step--; render(); }
+}
+function updateNav(){
+  var QS=S.subject==='arts'?QUESTIONS_ARTS:QUESTIONS;
+  var hb=document.getElementById('home-btn');
+  var bb=document.getElementById('back-bar');
+  var bl=document.getElementById('back-label');
+  var inProg=S.step>0&&S.step<3+QS.length;
+  var inRep=S.step>=3+QS.length;
+  if(hb) hb.style.display=(inProg||inRep)?'inline-block':'none';
+  if(bb){
+    var show=S.step>=3&&S.step<3+QS.length;
+    bb.style.display=show?'flex':'none';
+    if(bl&&show) bl.textContent='질문 '+(S.step-2)+' / '+QS.length;
+  }
+}
+
 /* ───── 렌더 ───── */
 function render(){
   var app=document.getElementById('app');
   app.innerHTML='';
+  var QS=S.subject==='arts'?QUESTIONS_ARTS:QUESTIONS;
   if(S.step===0) app.appendChild(renderIntro());
-  else if(S.step===1) app.appendChild(renderNeeds());
-  else if(S.step>=2&&S.step<2+QUESTIONS.length) app.appendChild(renderQ(S.step-2));
-  else if(S.step===2+QUESTIONS.length) app.appendChild(renderLoading());
-  else app.appendChild(renderReport());
+  else if(S.step===1) app.appendChild(renderSubjectSelect());
+  else if(S.step===2) app.appendChild(renderNeeds());
+  else if(S.step>=3&&S.step<3+QS.length) app.appendChild(renderQ(S.step-3,QS));
+  else if(S.step===3+QS.length) app.appendChild(renderLoading());
+  else app.appendChild(renderReport(QS));
+  updateNav();
 }
 
 /* 스텝 인디케이터 */
