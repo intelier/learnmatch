@@ -714,10 +714,13 @@ function renderSubjectSelect(){
 
 /* 학부모 니즈 */
 function renderNeeds(){
-  var wants=['성적을 올리고 싶다','선행을 시키고 싶다','기초를 잡아주면 좋겠다','공부 습관을 만들고 싶다','아이가 즐겁게 다녔으면 한다'];
+  var isArts = S.subject==='arts';
+  var wants = isArts
+    ? ['실력을 키우고 싶다','좋은 선생님을 만나게 해주고 싶다','자신감을 길러주고 싶다','즐겁게 배웠으면 한다','친구를 사귀었으면 한다','무대·발표 경험을 쌓게 해주고 싶다']
+    : ['성적을 올리고 싶다','선행을 시키고 싶다','기초를 잡아주면 좋겠다','공부 습관을 만들고 싶다','아이가 즐겁게 다녔으면 한다'];
   var wrap=el('<div></div>');
-  wrap.appendChild(stepIndicator(1));
-  wrap.appendChild(el('<div class="progress-track"><div class="progress-fill" style="width:8%;"></div></div>'));
+  wrap.appendChild(stepIndicator(2));
+  wrap.appendChild(el('<div class="progress-track"><div class="progress-fill" style="width:16%;"></div></div>'));
   var card=el('<div class="card"></div>');
   card.innerHTML=
     '<div class="eyebrow">사전 질문</div>' +
@@ -737,7 +740,7 @@ function renderNeeds(){
   });
   wrap.appendChild(card);
   var nb=el('<button class="btn-primary">다음 단계로</button>');
-  nb.onclick=function(){S.step=2;render();};
+  nb.onclick=function(){S.step=3;render();};
   wrap.appendChild(nb);
   return wrap;
 }
