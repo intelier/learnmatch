@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>아이 학습 성향 진단 | LearnMatch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* 색상 시스템 */
+  --navy:       #1a2e4a;
+  --navy-light: #243d61;
+  --navy-muted: #6b7f97;
+  --ivory:      #faf8f4;
+  --ivory-dark: #f0ece3;
+  --ivory-border:#e2ddd3;
+  --amber:      #c8860a;
+  --amber-light:#fdf3e0;
+  --amber-border:#e8c57a;
+  --sage:       #3d6b4f;
+  --sage-light: #eaf3ec;
+  --sage-border:#9ec9aa;
+  --warning-bg: #fdf0e0;
+  --warning:    #9a5c00;
+  --error-bg:   #fdecea;
+  --error:      #8b1a1a;
+  --white:      #ffffff;
+
+  /* 타이포 */
+  --serif:  'Noto Serif KR', 'Georgia', serif;
+  --sans:   'Noto Sans KR', -apple-system, sans-serif;
+
+  --radius-sm: 4px;
+  --radius:    10px;
+  --radius-lg: 16px;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--ivory);
+  color:var(--navy);
+  font-family:var(--sans);
+  font-size:15px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── 레이아웃 ── */
+#wrap{max-width:580px; margin:0 auto; padding:0 1.25rem 5rem;}
+
+/* ── 헤더 ── */
+#site-header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:1.25rem 0; border-bottom:1px solid var(--ivory-border);
+  margin-bottom:2rem;
+}
+.logo{font-family:var(--serif); font-size:17px; font-weight:600; color:var(--navy); letter-spacing:-.3px;}
+.logo span{color:var(--amber);}
+.badge-theory{
+  font-size:10px; font-weight:500; letter-spacing:.6px; text-transform:uppercase;
+  color:var(--navy-muted); border:1px solid var(--ivory-border); border-radius:20px;
+  padding:3px 10px;
+}
+
+/* ── 스텝 인디케이터 ── */
+#step-indicator{
+  display:flex; align-items:center; gap:0; margin-bottom:2rem;
+}
+.step-dot{
+  width:28px; height:28px; border-radius:50%; border:1.5px solid var(--ivory-border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:600; color:var(--navy-muted);
+  background:var(--white); flex-shrink:0; position:relative; z-index:1;
+}
+.step-dot.active{border-color:var(--navy); color:var(--navy); background:var(--ivory-dark);}
+.step-dot.done{border-color:var(--sage); color:var(--white); background:var(--sage);}
+.step-line{flex:1; height:1px; background:var(--ivory-border);}
+.step-line.done{background:var(--sage);}
+
+/* ── 진행 바 ── */
+.progress-track{
+  height:3px; background:var(--ivory-border); border-radius:2px;
+  margin-bottom:2rem; overflow:hidden;
+}
+.progress-fill{height:100%; background:var(--amber); border-radius:2px; transition:width .4s ease;}
+
+/* ── 레이블 ── */
+.eyebrow{
+  font-size:10px; letter-spacing:.8px; text-transform:uppercase;
+  font-weight:600; color:var(--navy-muted); margin-bottom:.4rem;
+  font-family:var(--sans);
+}
+.theory-tag{
+  display:inline-block; font-size:10px; letter-spacing:.4px;
+  color:var(--amber); border:1px solid var(--amber-border);
+  background:var(--amber-light); border-radius:20px;
+  padding:2px 9px; margin-bottom:1rem; font-weight:500;
+}
+
+/* ── 타이포 ── */
+h1{font-family:var(--serif); font-size:24px; font-weight:600; line-height:1.4; letter-spacing:-.5px;}
+h2{font-family:var(--serif); font-size:20px; font-weight:600; line-height:1.4; letter-spacing:-.3px;}
+h3{font-size:15px; font-weight:600;}
+.lead{font-size:15px; color:var(--navy-muted); line-height:1.75;}
+
+/* ── 카드 ── */
+.card{
+  background:var(--white); border:1px solid var(--ivory-border);
+  border-radius:var(--radius-lg); padding:1.5rem;
+  margin-bottom:1rem;
+}
+.card-inner{
+  background:var(--ivory); border:1px solid var(--ivory-border);
+  border-radius:var(--radius); padding:1rem 1.25rem; margin-bottom:.75rem;
+}
+
+/* ── 선택지 버튼 ── */
+.opt{
+  width:100%; text-align:left;
+  border:1px solid var(--ivory-border); background:var(--white);
+  border-radius:var(--radius); padding:14px 16px;
+  font-size:14px; font-family:var(--sans); color:var(--navy);
+  display:block; margin-bottom:8px; cursor:pointer;
+  transition:border-color .15s, background .15s, transform .1s;
+  line-height:1.5;
+}
+.opt:hover{border-color:var(--navy); background:var(--ivory); transform:translateX(2px);}
+.opt:active{transform:translateX(0);}
+
+/* ── 필 버튼 ── */
+.pill{
+  border:1px solid var(--ivory-border); background:var(--white);
+  border-radius:20px; padding:7px 15px; font-size:13px;
+  font-family:var(--sans); color:var(--navy-muted); cursor:pointer;
+  display:inline-block; margin:0 6px 6px 0;
+  transition:all .15s;
+}
+.pill.on{
+  border-color:var(--navy); background:var(--navy); color:var(--white);
+}
+
+/* ── 버튼 ── */
+.btn-primary{
+  width:100%; background:var(--navy); color:var(--white);
+  border:none; padding:14px; font-size:14px; font-weight:600;
+  border-radius:var(--radius); font-family:var(--sans);
+  cursor:pointer; letter-spacing:.1px;
+  transition:background .15s, transform .1s;
+}
+.btn-primary:hover{background:var(--navy-light); transform:translateY(-1px);}
+.btn-ghost{
+  background:transparent; border:1px solid var(--ivory-border);
+  color:var(--navy-muted); padding:13px 20px; font-size:14px;
+  font-weight:500; border-radius:var(--radius); font-family:var(--sans);
+  cursor:pointer; transition:all .15s;
+}
+.btn-ghost:hover{border-color:var(--navy); color:var(--navy);}
+
+/* ── 알림 ── */
+.alert{border-radius:var(--radius); padding:14px 16px; font-size:13px; line-height:1.7; margin-bottom:1rem;}
+.alert.warn{background:var(--warning-bg); color:var(--warning); border:1px solid #e8c57a;}
+.alert.info{background:var(--amber-light); color:var(--amber); border:1px solid var(--amber-border);}
+.alert.good{background:var(--sage-light); color:var(--sage); border:1px solid var(--sage-border);}
+
+/* ── 리포트 특화 ── */
+.report-section{
+  border-top:1px solid var(--ivory-border); padding-top:1.5rem; margin-top:1.5rem;
+}
+.report-section:first-child{border-top:none; padding-top:0; margin-top:0;}
+
+.metric-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:1.25rem;}
+.metric-box{
+  background:var(--ivory); border:1px solid var(--ivory-border);
+  border-radius:var(--radius); padding:12px 14px;
+}
+.metric-label{font-size:11px; letter-spacing:.4px; color:var(--navy-muted); margin-bottom:8px; font-weight:500;}
+.metric-bar-track{display:flex; gap:3px;}
+.metric-bar-seg{flex:1; height:5px; border-radius:3px;}
+
+/* 레이더 차트 */
+#radar-wrap{display:flex; justify-content:center; margin:1.25rem 0;}
+
+/* 학원 매칭 카드 */
+.match-card{
+  background:var(--white); border:1px solid var(--ivory-border);
+  border-radius:var(--radius-lg); overflow:hidden; margin-bottom:12px;
+}
+.match-rank{
+  background:var(--navy); color:var(--white);
+  font-size:10px; letter-spacing:.8px; font-weight:600;
+  padding:5px 14px; display:inline-block;
+  border-radius:0 0 var(--radius-sm) 0;
+  text-transform:uppercase;
+}
+.match-body{padding:14px 16px 16px;}
+.match-score{
+  font-size:26px; font-weight:600; font-family:var(--serif);
+  color:var(--navy); line-height:1;
+}
+.match-score span{font-size:13px; font-weight:400; color:var(--navy-muted); font-family:var(--sans);}
+.score-breakdown{
+  display:flex; gap:12px; font-size:11px; color:var(--navy-muted);
+  margin:6px 0 10px; letter-spacing:.2px;
+}
+.match-reason{
+  background:var(--sage-light); border:1px solid var(--sage-border);
+  border-radius:var(--radius-sm); padding:8px 12px;
+  font-size:12px; color:var(--sage); margin-bottom:10px; line-height:1.6;
+}
+.match-meta{
+  display:flex; gap:16px; font-size:12px; color:var(--navy-muted); margin-bottom:12px;
+}
+.consult-btn{
+  width:100%; border:1px solid var(--navy); color:var(--navy);
+  background:transparent; padding:11px; font-size:13px; font-weight:600;
+  border-radius:var(--radius-sm); font-family:var(--sans); cursor:pointer;
+  transition:all .15s;
+}
+.consult-btn:hover{background:var(--navy); color:var(--white);}
+
+/* 구분선 레이블 */
+.divider-label{
+  display:flex; align-items:center; gap:10px;
+  font-size:10px; letter-spacing:.8px; text-transform:uppercase;
+  color:var(--navy-muted); font-weight:600; margin:1.5rem 0 1rem;
+}
+.divider-label::before,.divider-label::after{
+  content:''; flex:1; height:1px; background:var(--ivory-border);
+}
+
+/* 인트로 히어로 */
+.hero{text-align:center; padding:3rem 0 2.5rem;}
+.hero-badge{
+  display:inline-flex; align-items:center; gap:6px;
+  border:1px solid var(--ivory-border); border-radius:20px;
+  padding:5px 14px; font-size:11px; letter-spacing:.5px;
+  color:var(--navy-muted); margin-bottom:1.5rem; font-weight:500;
+}
+.hero-badge::before{content:''; width:6px; height:6px; border-radius:50%; background:var(--sage); display:inline-block;}
+.hero h1{margin-bottom:1rem; max-width:400px; margin-left:auto; margin-right:auto;}
+.hero .lead{max-width:380px; margin:0 auto 2rem;}
+.hero-stats{
+  display:flex; justify-content:center; gap:2rem; margin-bottom:2rem;
+  padding:1.25rem 0; border-top:1px solid var(--ivory-border); border-bottom:1px solid var(--ivory-border);
+}
+.hero-stat-n{font-family:var(--serif); font-size:22px; font-weight:600; color:var(--navy);}
+.hero-stat-l{font-size:11px; color:var(--navy-muted); margin-top:2px;}
+
+/* 로딩 */
+.loading-wrap{text-align:center; padding:4rem 1rem;}
+.loading-ring{
+  width:48px; height:48px; border:3px solid var(--ivory-border);
+  border-top-color:var(--navy); border-radius:50%;
+  animation:spin .8s linear infinite; margin:0 auto 1.5rem;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* 인쇄 느낌 헤더 */
+.report-header{
+  border:1px solid var(--ivory-border); border-radius:var(--radius-lg);
+  overflow:hidden; margin-bottom:1.25rem;
+}
+.report-header-top{
+  background:var(--navy); color:var(--white);
+  padding:1.25rem 1.5rem;
+}
+.report-header-bottom{
+  background:var(--white); padding:1.25rem 1.5rem;
+  display:grid; grid-template-columns:1fr 1fr; gap:1rem;
+}
+.report-field-label{font-size:10px; letter-spacing:.6px; color:var(--navy-muted); text-transform:uppercase; margin-bottom:3px;}
+.report-field-val{font-size:14px; font-weight:600; color:var(--navy);}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <header id="site-header">
+    <div class="logo" onclick="goHome()" style="cursor:pointer;">Learn<span>Match</span></div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button id="home-btn" onclick="goHome()" style="display:none; font-size:12px; font-weight:500; color:var(--navy-muted); border:1px solid var(--ivory-border); border-radius:20px; padding:4px 12px; background:transparent; cursor:pointer; font-family:var(--sans);">← 처음으로</button>
+      <button onclick="window.open('learning_diagnostic_full.html','_blank')" style="font-size:12px; font-weight:600; color:var(--white); border:1px solid var(--navy); border-radius:20px; padding:4px 12px; background:var(--navy); cursor:pointer; font-family:var(--sans);">🏫 학원 등록</button>
+      <div class="badge-theory">교육심리학 기반</div>
+    </div>
+  </header>
+  <div id="back-bar" style="display:none; align-items:center; justify-content:space-between; padding:.65rem 0; margin-bottom:1.25rem; border-bottom:1px solid var(--ivory-border);">
+    <button onclick="goBack()" style="font-size:13px; color:var(--navy-muted); background:transparent; border:none; cursor:pointer; font-family:var(--sans); display:flex; align-items:center; gap:5px;">← 이전 질문</button>
+    <span id="back-label" style="font-size:12px; color:var(--navy-muted);"></span>
+  </div>
+  <div id="app"></div>
+</div>
+
+<script>
+/* ───── 데이터 ───── */
+var QUESTIONS = [
+  {id:'q1', theory:'ZPD · Vygotsky(1978)', text:'모르는 문제가 나오면 아이는 어떻게 하나요?', opts:[
+    {t:'끝까지 혼자 해보려 해요', v:{autonomy:2,zpd_strain:-1}, kw:['스스로','혼자','직접']},
+    {t:'조금 생각하다 도움을 요청해요', v:{autonomy:1,zpd_strain:0}, kw:['도움']},
+    {t:'바로 모르겠다고 포기해요', v:{autonomy:-1,zpd_strain:1,burnout:1}, kw:['포기']},
+    {t:'짜증 내거나 자리를 피해요', v:{autonomy:-2,zpd_strain:2,burnout:2}, kw:['짜증','힘들어']}
+  ]},
+  {id:'q2', theory:'ZPD · Vygotsky(1978)', text:'지금 수업 수준이 아이에게 어느 정도라고 느끼나요?', opts:[
+    {t:'너무 쉬워해요', v:{zpd_strain:-2}, kw:['빠르게']},
+    {t:'적당한 것 같아요', v:{zpd_strain:0}, kw:[]},
+    {t:'조금 어려워하지만 따라가요', v:{zpd_strain:1}, kw:['차근차근']},
+    {t:'많이 어려워하고 힘들어해요', v:{zpd_strain:2,burnout:1}, kw:['힘들어','천천히']}
+  ]},
+  {id:'q3', theory:'SDT · Deci & Ryan(1985)', text:'공부하기 싫다고 할 때 아이가 주로 하는 말은?', opts:[
+    {t:'이게 왜 필요해요? (이유를 따짐)', v:{autonomy:2}, kw:['스스로','선택']},
+    {t:'어차피 난 못해요 (자신감 부족)', v:{competence:-2,burnout:1}, kw:['천천히','기다려']},
+    {t:'혼자 하기 싫어요 (같이 하고 싶음)', v:{social:2}, kw:['함께','친구','서로']},
+    {t:'말 없이 그냥 안 해요', v:{burnout:2,competence:-1}, kw:['마음','대화','감정']}
+  ]},
+  {id:'q4', theory:'Dweck(2006) · 성장 마인드셋', text:'틀린 문제를 다시 만났을 때 아이의 반응은?', opts:[
+    {t:'다시 해볼게요 하고 시도해요', v:{competence:2}, kw:['스스로']},
+    {t:'속상해하다가 다시 해요', v:{competence:1}, kw:['마음','대화']},
+    {t:'난 역시 못해 라고 해요', v:{competence:-2}, kw:['기다려','반복','천천히']},
+    {t:'그 과목 자체를 피하려 해요', v:{competence:-2,burnout:2}, kw:['부담없이','즐겁게']}
+  ]},
+  {id:'q5', theory:'Burnout · Schaufeli et al.(2002)', text:'학원 다녀온 날 아이 표정은요?', opts:[
+    {t:'에너지 있고 뭔가 이야기해요', v:{burnout:-2}, kw:['즐겁게']},
+    {t:'조용하지만 괜찮아 보여요', v:{burnout:-1}, kw:[]},
+    {t:'피곤해하고 말이 없어요', v:{burnout:1}, kw:['편안','부담없이']},
+    {t:'짜증내거나 예민해요', v:{burnout:2}, kw:['마음','감정','공감']}
+  ]},
+  {id:'q6', theory:'VARK · Fleming(1992)', text:'새로운 것을 배울 때 아이가 가장 좋아하는 방식은?', opts:[
+    {t:'그림, 영상, 도표로 보는 것', v:{style:'visual'}, kw:[]},
+    {t:'설명을 듣고 이야기하는 것', v:{style:'auditory'}, kw:['이야기','대화']},
+    {t:'직접 만들고 해보는 것', v:{style:'kinesthetic'}, kw:['직접','만들']},
+    {t:'읽고 정리하는 것', v:{style:'reading'}, kw:['스스로']}
+  ]},
+  {id:'q7', theory:'SDT 관계성 욕구 · Deci & Ryan(1985)', text:'아이가 공부할 때 선호하는 환경은?', opts:[
+    {t:'조용히 혼자', v:{social:-2}, kw:['혼자','스스로']},
+    {t:'옆에 누군가 있을 때', v:{social:1}, kw:['함께']},
+    {t:'친구와 함께', v:{social:2}, kw:['친구','함께','서로']},
+    {t:'상관없어요', v:{social:0}, kw:[]}
+  ]},
+  {id:'q8', theory:'다중지능 · Gardner(1983)', text:'아이가 깊이 파고드는 편인가요, 폭넓게 하는 편인가요?', opts:[
+    {t:'한 가지에 완전히 빠져요 (깊이형)', v:{focus:'deep'}, kw:['몰입']},
+    {t:'여러 가지를 골고루 좋아해요 (넓이형)', v:{focus:'broad'}, kw:[]},
+    {t:'상황에 따라 달라요', v:{focus:'mixed'}, kw:[]},
+    {t:'아직 잘 모르겠어요', v:{focus:'mixed'}, kw:[]}
+  ]}
+];
+
+var TOPICS = {
+  autonomy:['스스로','혼자','직접','선택','몰입'],
+  social:['함께','친구','서로','이야기','대화'],
+  patience:['천천히','기다려','차근차근','반복','부담없이'],
+  structure:['매일','체크','관리','꼼꼼','테스트'],
+  pressure:['경쟁','등수','성과','빠르게'],
+  emotion:['마음','감정','공감','편안','즐겁게']
+};
+var TOPIC_LABEL={autonomy:'자기주도',social:'함께배움',patience:'느린아이배려',structure:'관리·구조',pressure:'경쟁·결과',emotion:'정서케어'};
+
+var ACADEMIES = [
+  {name:'사고력수학 OO학원',subject:'수학',desc:'스스로 생각하는 힘을 키우는 소그룹 학원',
+   philosophy:'매주 금요일은 아이들끼리 서로 문제를 설명해주는 시간을 가져요.',
+   fit_note:'이야기하면서 답을 찾아가는 걸 좋아하는 아이에게 잘 맞아요.',
+   size:4,price:38,manage:'보통',
+   profile:{autonomy:2,zpd_strain:0,competence:1,burnout:-2,social:1,style:'visual',focus:'deep'},
+   reviews:127,rating:4.8},
+  {name:'마음돌봄 공부방',subject:'전과목',desc:'아이 속도에 맞춰 정서를 먼저 살피는 공부방',
+   philosophy:'아이가 힘들어하면 진도보다 대화를 먼저 해요. 천천히 기다려줘요.',
+   fit_note:'느린 아이도 환영해요. 차근차근 가는 게 우선이에요.',
+   size:2,price:45,manage:'약함',
+   profile:{autonomy:0,zpd_strain:-1,competence:1,burnout:-2,social:-1,style:'auditory',focus:'mixed'},
+   reviews:54,rating:4.9},
+  {name:'1등 전략학원',subject:'수학·영어',desc:'경쟁과 성과 중심, 꼼꼼한 관리형 학원',
+   philosophy:'매일 숙제를 꼼꼼히 체크하고 테스트로 확인합니다.',
+   fit_note:'목표 의식이 뚜렷하고 등수로 동기부여 받는 아이에게 추천해요.',
+   size:15,price:55,manage:'강함',
+   profile:{autonomy:-1,zpd_strain:1,competence:0,burnout:1,social:0,style:'auditory',focus:'broad'},
+   reviews:203,rating:4.3},
+  {name:'탐구형 영어 XX학원',subject:'영어',desc:'직접 말하고 만들며 배우는 활동 중심 영어',
+   philosophy:'직접 만들고 발표하면서 영어를 자연스럽게 익혀요.',
+   fit_note:'친구들과 함께 활동하며 배우는 걸 좋아하는 아이에게 잘 맞아요.',
+   size:5,price:42,manage:'보통',
+   profile:{autonomy:1,zpd_strain:0,competence:1,burnout:-1,social:2,style:'kinesthetic',focus:'broad'},
+   reviews:89,rating:4.6}
+];
+
+/* ───── 상태 ───── */
+var S = {step:0, answers:{}, kwBag:[], wants:[]};
+
+/* ───── 유틸 ───── */
+function el(h){var d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function fmtDate(){var d=new Date();return d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일';}
+
+function topicVec(t){
+  var v={}; Object.keys(TOPICS).forEach(function(k){v[k]=0;});
+  if(!t) return v;
+  Object.keys(TOPICS).forEach(function(k){ TOPICS[k].forEach(function(w){ if(t.indexOf(w)>=0) v[k]+=1; }); });
+  return v;
+}
+function cosine(a,b){
+  var ks=Object.keys(TOPICS),dot=0,na=0,nb=0;
+  ks.forEach(function(k){dot+=a[k]*b[k];na+=a[k]*a[k];nb+=b[k]*b[k];});
+  return (na===0||nb===0)?0:dot/(Math.sqrt(na)*Math.sqrt(nb));
+}
+
+/* ───── 레이더 SVG ───── */
+function radarSVG(scores){
+  var cx=120,cy=120,r=80;
+  var labels=['자율성','유능감','사회성','정서안정','집중력'];
+  var vals=scores;
+  var n=labels.length;
+  function pt(i,mag){
+    var a=(-Math.PI/2)+(2*Math.PI*i/n);
+    return {x:cx+mag*Math.cos(a), y:cy+mag*Math.sin(a)};
+  }
+  var svg='<svg width="240" height="240" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">';
+  /* 격자 */
+  [0.25,0.5,0.75,1].forEach(function(frac){
+    var pts=[];
+    for(var i=0;i<n;i++){var p=pt(i,r*frac);pts.push(p.x+','+p.y);}
+    svg+='<polygon points="'+pts.join(' ')+'" fill="none" stroke="#e2ddd3" stroke-width="1"/>';
+  });
+  /* 축 */
+  for(var i=0;i<n;i++){var p=pt(i,r);svg+='<line x1="'+cx+'" y1="'+cy+'" x2="'+p.x+'" y2="'+p.y+'" stroke="#e2ddd3" stroke-width="1"/>';}
+  /* 데이터 */
+  var dpts=[];
+  for(var i=0;i<n;i++){var p=pt(i,r*vals[i]);dpts.push(p.x+','+p.y);}
+  svg+='<polygon points="'+dpts.join(' ')+'" fill="#1a2e4a" fill-opacity=".12" stroke="#1a2e4a" stroke-width="2"/>';
+  /* 점 */
+  for(var i=0;i<n;i++){var p=pt(i,r*vals[i]);svg+='<circle cx="'+p.x+'" cy="'+p.y+'" r="4" fill="#1a2e4a"/>';}
+  /* 레이블 */
+  for(var i=0;i<n;i++){
+    var p=pt(i,r+18);
+    svg+='<text x="'+p.x+'" y="'+p.y+'" text-anchor="middle" dominant-baseline="middle" font-size="10" font-family="Noto Sans KR, sans-serif" fill="#6b7f97">'+labels[i]+'</text>';
+  }
+  svg+='</svg>';
+  return svg;
+}
+
+/* ───── 매칭 ───── */
+function matchAcad(child, ct, acad){
+  if(child.burnout>=3&&acad.manage==='강함') return {excluded:true};
+  var zd=Math.abs((child.zpd_strain||0)-(acad.profile.zpd_strain||0));
+  var zs=clamp(100-zd*20,0,100);
+  var ad=Math.abs((child.autonomy||0)-(acad.profile.autonomy||0));
+  var as_=clamp(100-ad*18,0,100);
+  var ss=child.style===acad.profile.style?100:55;
+  var szf=100;
+  if(child.social<=-1&&acad.size>8) szf=50;
+  if(child.social>=1&&acad.size>=3&&acad.size<=6) szf=100;
+  var bs=100;
+  if(child.burnout>=1&&acad.manage==='강함') bs=40;
+  else if(child.burnout>=1) bs=88;
+  var q=(zs*0.30+as_*0.25+bs*0.20+ss*0.15+szf*0.10)/100;
+  var cv=topicVec(ct);
+  var av=topicVec(acad.philosophy+' '+acad.fit_note);
+  var ts=cosine(cv,av);
+  var total=q*0.7+ts*0.3;
+  var best=null,bst=-1;
+  Object.keys(TOPICS).forEach(function(k){
+    var s=Math.min(cv[k],av[k]);
+    if(cv[k]>0&&av[k]>0&&s>bst){bst=s;best=k;}
+  });
+  var reasons=[];
+  if(zs>=80) reasons.push('학습 난이도가 딱 맞아요');
+  if(as_>=80&&child.autonomy>0) reasons.push('자기주도 성향과 수업 방식이 맞아요');
+  if(best) reasons.push("'"+TOPIC_LABEL[best]+"' 성향과 학원 소개가 일치해요");
+  if(!reasons.length) reasons.push('전반적으로 무난하게 맞는 편이에요');
+  return {excluded:false,score:Math.round(total*100),q:Math.round(q*100),ts:Math.round(ts*100),reason:reasons[0]};
+}
+
+/* ───── 네비게이션 ───── */
+function goHome(){
+  S={step:0,answers:{},kwBag:[],wants:[]};
+  render();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function goBack(){
+  if(S.step>1){ S.step--; render(); }
+}
+function updateNav(){
+  var hb=document.getElementById("home-btn");
+  var bb=document.getElementById("back-bar");
+  var bl=document.getElementById("back-label");
+  var inProg=S.step>0&&S.step<2+QUESTIONS.length;
+  var inRep=S.step>=2+QUESTIONS.length;
+  if(hb) hb.style.display=(inProg||inRep)?"inline-block":"none";
+  if(bb){
+    var show=S.step>=2&&S.step<2+QUESTIONS.length;
+    bb.style.display=show?"flex":"none";
+    if(bl&&show) bl.textContent="질문 "+(S.step-1)+" / "+QUESTIONS.length;
+  }
+}
+/* ───── 렌더 ───── */
+function render(){
+  var app=document.getElementById('app');
+  app.innerHTML='';
+  if(S.step===0) app.appendChild(renderIntro());
+  else if(S.step===1) app.appendChild(renderNeeds());
+  else if(S.step>=2&&S.step<2+QUESTIONS.length) app.appendChild(renderQ(S.step-2));
+  else if(S.step===2+QUESTIONS.length) app.appendChild(renderLoading());
+  else app.appendChild(renderReport());
+  updateNav();
+}
+
+/* 스텝 인디케이터 */
+function stepIndicator(current){
+  var steps=['기본정보','진단','리포트'];
+  var idx = current===0?0:current===1?0:current<2+QUESTIONS.length?1:2;
+  var html='<div id="step-indicator">';
+  steps.forEach(function(s,i){
+    var cls='step-dot'+(i<idx?' done':i===idx?' active':'');
+    html+='<div class="'+cls+'">'+(i<idx?'✓':(i+1))+'</div>';
+    if(i<steps.length-1) html+='<div class="step-line'+(i<idx?' done':'')+'"></div>';
+  });
+  html+='</div>';
+  return el(html);
+}
+
+/* 인트로 */
+function renderIntro(){
+  var wrap=el('<div></div>');
+  wrap.appendChild(stepIndicator(0));
+  var hero=el('<div class="hero"></div>');
+  hero.innerHTML=
+    '<div class="hero-badge">LearnMatch 진단 시스템</div>' +
+    '<h1>막연히 남 따라가는 학원 말고,<br>우리 아이에게 맞는 학원</h1>' +
+    '<p class="lead">아이마다 배우는 방식이 달라요. 10분 진단으로 아이의 학습 성향을 파악하고, 진짜 맞는 학원을 찾아드려요.</p>' +
+    '<div class="hero-stats">' +
+      '<div><div class="hero-stat-n">8</div><div class="hero-stat-l">진단 문항</div></div>' +
+      '<div><div class="hero-stat-n">4</div><div class="hero-stat-l">측정 차원</div></div>' +
+      '<div><div class="hero-stat-n">10분</div><div class="hero-stat-l">소요 시간</div></div>' +
+    '</div>' +
+    '<button class="btn-primary" id="s-btn" style="max-width:260px;">진단 시작하기</button>';
+  hero.querySelector('#s-btn').onclick=function(){S.step=1;render();};
+  wrap.appendChild(hero);
+
+  /* 서비스 소개 섹션 */
+  var about = el('<div id="about-section"></div>');
+  about.innerHTML =
+    '<div class="divider-label" style="margin-top:2.5rem;">서비스 소개</div>' +
+
+    /* 왜 이 서비스인가 */
+    '<div class="card" style="margin-bottom:1rem;">' +
+      '<div class="eyebrow" style="margin-bottom:.5rem;">왜 LearnMatch인가요?</div>' +
+      '<p style="font-size:14px; line-height:1.85; color:var(--navy-muted);">한국 학부모의 월평균 사교육비는 60만원을 넘지만, 학원을 고르는 기준은 대부분 "주변에서 많이 가는 곳"이에요. 아이마다 배우는 방식, 동기가 생기는 조건, 감당할 수 있는 학습 부하가 다른데도 모두 같은 학원에 보내고 있는 건 아닐까요?<br><br>LearnMatch는 아이의 학습 성향을 진단하고, 그 성향에 맞는 수업 방식을 운영하는 학원을 연결해드려요.</p>' +
+    '</div>' +
+
+    /* 진단 4가지 축 */
+    '<div class="eyebrow" style="margin:.25rem 0 .75rem;">무엇을 진단하나요?</div>' +
+    '<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:1rem;">' +
+      '<div class="card-inner">' +
+        '<div style="font-size:18px; margin-bottom:.4rem;">🧩</div>' +
+        '<h3 style="font-size:13px; margin-bottom:.3rem;">발달 단계</h3>' +
+        '<p style="font-size:12px; color:var(--navy-muted); line-height:1.7;">지금 나이에 어떤 방식의 학습이 맞는지, 추상 사고가 준비됐는지 확인해요.</p>' +
+      '</div>' +
+      '<div class="card-inner">' +
+        '<div style="font-size:18px; margin-bottom:.4rem;">📍</div>' +
+        '<h3 style="font-size:13px; margin-bottom:.3rem;">학습 격차(ZPD)</h3>' +
+        '<p style="font-size:12px; color:var(--navy-muted); line-height:1.7;">지금 수업이 너무 쉬운지, 적당한지, 과부하인지 측정해요.</p>' +
+      '</div>' +
+      '<div class="card-inner">' +
+        '<div style="font-size:18px; margin-bottom:.4rem;">💡</div>' +
+        '<h3 style="font-size:13px; margin-bottom:.3rem;">동기·정서 상태</h3>' +
+        '<p style="font-size:12px; color:var(--navy-muted); line-height:1.7;">자율성·유능감·관계성 중 어디서 동기가 무너지고 있는지 찾아요.</p>' +
+      '</div>' +
+      '<div class="card-inner">' +
+        '<div style="font-size:18px; margin-bottom:.4rem;">🎨</div>' +
+        '<h3 style="font-size:13px; margin-bottom:.3rem;">학습 스타일</h3>' +
+        '<p style="font-size:12px; color:var(--navy-muted); line-height:1.7;">시각형·청각형·체험형 중 어떤 방식일 때 가장 잘 이해하는지 파악해요.</p>' +
+      '</div>' +
+    '</div>' +
+
+    /* 이론적 배경 */
+    '<div class="eyebrow" style="margin:.25rem 0 .75rem;">이론적 배경</div>' +
+    '<div class="card" style="background:var(--navy); border-color:var(--navy); margin-bottom:1rem;">' +
+      '<div style="display:flex; flex-direction:column; gap:1rem;">' +
+        '<div style="display:flex; gap:14px; align-items:flex-start;">' +
+          '<div style="font-size:11px; font-weight:600; letter-spacing:.4px; color:var(--amber); white-space:nowrap; padding-top:2px; min-width:60px;">PIAGET</div>' +
+          '<p style="font-size:13px; color:rgba(255,255,255,.7); line-height:1.75;">아이의 인지 발달은 단계가 있어요. 지금 나이에 맞지 않는 추상적 선행학습은 효과가 없을 수 있어요.</p>' +
+        '</div>' +
+        '<div style="display:flex; gap:14px; align-items:flex-start;">' +
+          '<div style="font-size:11px; font-weight:600; letter-spacing:.4px; color:var(--amber); white-space:nowrap; padding-top:2px; min-width:60px;">VYGOTSKY</div>' +
+          '<p style="font-size:13px; color:rgba(255,255,255,.7); line-height:1.75;">학습은 혼자 할 수 있는 것보다 딱 한 발짝 앞에서 일어나요. 이 구간을 놓치면 낭비, 넘으면 좌절이에요.</p>' +
+        '</div>' +
+        '<div style="display:flex; gap:14px; align-items:flex-start;">' +
+          '<div style="font-size:11px; font-weight:600; letter-spacing:.4px; color:var(--amber); white-space:nowrap; padding-top:2px; min-width:60px;">DECI & RYAN</div>' +
+          '<p style="font-size:13px; color:rgba(255,255,255,.7); line-height:1.75;">자율성·유능감·관계성이 채워질 때 진짜 학습 동기가 생겨요. 억지로 시키는 공부는 장기적으로 동기를 갉아먹어요.</p>' +
+        '</div>' +
+        '<div style="display:flex; gap:14px; align-items:flex-start;">' +
+          '<div style="font-size:11px; font-weight:600; letter-spacing:.4px; color:var(--amber); white-space:nowrap; padding-top:2px; min-width:60px;">DWECK</div>' +
+          '<p style="font-size:13px; color:rgba(255,255,255,.7); line-height:1.75;">지능은 고정된 게 아니에요. 실패를 성장의 기회로 보는 마인드셋이 장기 성취를 결정해요.</p>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+
+    /* CTA 반복 */
+    '<button class="btn-primary" id="s-btn2" style="margin-top:.5rem;">지금 무료로 진단받기</button>';
+
+  about.querySelector('#s-btn2').onclick=function(){S.step=1;render();window.scrollTo({top:0,behavior:'smooth'});};
+  wrap.appendChild(about);
+  return wrap;
+}
+
+/* 학부모 니즈 */
+function renderNeeds(){
+  var wants=['성적을 올리고 싶다','선행을 시키고 싶다','기초를 잡아주면 좋겠다','공부 습관을 만들고 싶다','아이가 즐겁게 다녔으면 한다'];
+  var wrap=el('<div></div>');
+  wrap.appendChild(stepIndicator(1));
+  wrap.appendChild(el('<div class="progress-track"><div class="progress-fill" style="width:8%;"></div></div>'));
+  var card=el('<div class="card"></div>');
+  card.innerHTML=
+    '<div class="eyebrow">사전 질문</div>' +
+    '<h2 style="margin-bottom:.5rem;">지금 가장 원하는 게 뭔가요?</h2>' +
+    '<p class="lead" style="font-size:13px; margin-bottom:1.25rem;">솔직하게 선택해주세요. 복수 선택 가능해요.</p>' +
+    '<div id="wp" style="margin-bottom:1.5rem;"></div>';
+  var box=card.querySelector('#wp');
+  wants.forEach(function(w){
+    var btn=el('<button class="pill">'+w+'</button>');
+    if(S.wants.indexOf(w)>=0) btn.classList.add('on');
+    btn.onclick=function(){
+      var i=S.wants.indexOf(w);
+      if(i>=0){S.wants.splice(i,1);btn.classList.remove('on');}
+      else{S.wants.push(w);btn.classList.add('on');}
+    };
+    box.appendChild(btn);
+  });
+  wrap.appendChild(card);
+  var nb=el('<button class="btn-primary">다음 단계로</button>');
+  nb.onclick=function(){S.step=2;render();};
+  wrap.appendChild(nb);
+  return wrap;
+}
+
+/* 문항 */
+function renderQ(idx){
+  var q=QUESTIONS[idx];
+  var pct=Math.round(((2+idx)/(2+QUESTIONS.length))*100);
+  var wrap=el('<div></div>');
+  wrap.appendChild(stepIndicator(2+idx));
+  wrap.appendChild(el('<div class="progress-track"><div class="progress-fill" style="width:'+pct+'%;"></div></div>'));
+  var card=el('<div class="card"></div>');
+  card.innerHTML=
+    '<div class="eyebrow">질문 '+(idx+1)+' / '+QUESTIONS.length+'</div>' +
+    '<div class="theory-tag">'+q.theory+'</div>' +
+    '<h2 style="margin-bottom:1.25rem;">'+q.text+'</h2>';
+  q.opts.forEach(function(o){
+    var btn=el('<button class="opt">'+o.t+'</button>');
+    btn.onclick=function(){
+      S.answers[q.id]=o.v;
+      S.kwBag=S.kwBag.concat(o.kw||[]);
+      S.step++;render();
+    };
+    card.appendChild(btn);
+  });
+  wrap.appendChild(card);
+  return wrap;
+}
+
+/* 로딩 */
+function renderLoading(){
+  var wrap=el('<div class="loading-wrap"></div>');
+  wrap.innerHTML=
+    '<div class="loading-ring"></div>' +
+    '<div class="eyebrow" style="margin-bottom:.5rem;">분석 중</div>' +
+    '<p class="lead" style="font-size:14px;">학습 성향을 진단하고<br>등록된 학원과 매칭하고 있어요</p>';
+  setTimeout(function(){S.step++;render();},1400);
+  return wrap;
+}
+
+/* 프로필 계산 */
+function computeProfile(){
+  var p={autonomy:0,zpd_strain:0,competence:0,burnout:0,social:0,focus:'mixed',style:'visual'};
+  var sc={},fc={};
+  Object.keys(S.answers).forEach(function(k){
+    var v=S.answers[k];
+    ['autonomy','zpd_strain','competence','burnout','social'].forEach(function(d){if(v[d]!==undefined)p[d]+=v[d];});
+    if(v.style)sc[v.style]=(sc[v.style]||0)+1;
+    if(v.focus)fc[v.focus]=(fc[v.focus]||0)+1;
+  });
+  var bs='visual',bn=-1;Object.keys(sc).forEach(function(s){if(sc[s]>bn){bn=sc[s];bs=s;}});p.style=bs;
+  var bf='mixed',bfn=-1;Object.keys(fc).forEach(function(s){if(fc[s]>bfn){bfn=fc[s];bf=s;}});p.focus=bf;
+  return p;
+}
+
+function styleLabel(s){return {visual:'시각형',auditory:'청각형',kinesthetic:'체험형',reading:'읽기형'}[s]||s;}
+function focusLabel(f){return {deep:'몰입형',broad:'탐색형',mixed:'유연형'}[f]||f;}
+
+/* 리포트 */
+function renderReport(){
+  var p=computeProfile();
+  var ct=S.kwBag.join(' ');
+  var aLv=clamp(Math.round(((p.autonomy+8)/16)*4)+1,1,5);
+  var cLv=clamp(Math.round(((p.competence+6)/12)*4)+1,1,5);
+  var sLv=clamp(Math.round(((p.social+6)/12)*4)+1,1,5);
+  var bLv=clamp(Math.round(((p.burnout+8)/16)*4)+1,1,5);
+  var burnoutFlag=p.burnout>=3;
+  var zpdFlag=p.zpd_strain>=3;
+  var radarVals=[aLv/5, cLv/5, sLv/5, (6-bLv)/5, (p.focus==='deep'?0.85:0.5)];
+  var wrap=el('<div></div>');
+
+  wrap.appendChild(stepIndicator(99));
+  wrap.appendChild(el('<div class="progress-track"><div class="progress-fill" style="width:100%;"></div></div>'));
+
+  /* 리포트 헤더 (검사지 느낌) */
+  var rh=el('<div class="report-header"></div>');
+  rh.innerHTML=
+    '<div class="report-header-top">' +
+      '<div class="eyebrow" style="color:rgba(255,255,255,.5); margin-bottom:.3rem;">LearnMatch 학습 성향 분석 리포트</div>' +
+      '<h2 style="color:#fff; font-size:18px;">'+(p.autonomy>0?'자기주도 탐구형':'협력 학습형')+' · '+styleLabel(p.style)+' · '+focusLabel(p.focus)+'</h2>' +
+    '</div>' +
+    '<div class="report-header-bottom">' +
+      '<div><div class="report-field-label">발급일</div><div class="report-field-val">'+fmtDate()+'</div></div>' +
+      '<div><div class="report-field-label">진단 문항</div><div class="report-field-val">'+QUESTIONS.length+'문항 완료</div></div>' +
+      '<div><div class="report-field-label">진단 기반</div><div class="report-field-val">발달심리학 4개 이론</div></div>' +
+      '<div><div class="report-field-label">매칭 대상</div><div class="report-field-val">'+ACADEMIES.length+'개 학원</div></div>' +
+    '</div>';
+  wrap.appendChild(rh);
+
+  /* 경고 */
+  if(burnoutFlag) wrap.appendChild(el('<div class="alert warn">⚠️ 번아웃 신호 감지 — 학습량 확대보다 정서적 회복이 우선 필요한 상태예요.</div>'));
+  if(S.wants.indexOf('선행을 시키고 싶다')>=0&&zpdFlag) wrap.appendChild(el('<div class="alert info">📌 선행을 원하셨지만, 현재 수준도 다소 버거워하는 상태예요. 지금 개념을 단단히 다지는 게 더 효과적일 수 있어요.</div>'));
+
+  /* 레이더 */
+  var divL1=el('<div class="divider-label">성향 프로파일</div>');
+  wrap.appendChild(divL1);
+  var radarWrap=el('<div id="radar-wrap"></div>');
+  radarWrap.innerHTML=radarSVG(radarVals);
+  wrap.appendChild(radarWrap);
+
+  /* 지표 4개 */
+  var divL2=el('<div class="divider-label">세부 지표</div>');
+  wrap.appendChild(divL2);
+  var grid=el('<div class="metric-grid"></div>');
+  function mBox(label,lv,color){
+    var segs='';
+    for(var i=1;i<=5;i++) segs+='<div class="metric-bar-seg" style="background:'+(i<=lv?color:'var(--ivory-border)')+'"></div>';
+    return el('<div class="metric-box"><div class="metric-label">'+label+'</div><div class="metric-bar-track">'+segs+'</div></div>');
+  }
+  grid.appendChild(mBox('자율성',aLv,'var(--navy)'));
+  grid.appendChild(mBox('자신감 (유능감)',cLv,'var(--navy)'));
+  grid.appendChild(mBox('관계 학습 선호',sLv,'var(--amber)'));
+  grid.appendChild(mBox('정서 안정도',6-bLv,'var(--sage)'));
+  wrap.appendChild(grid);
+
+  /* 요약 */
+  var divL3=el('<div class="divider-label">진단 요약</div>');
+  wrap.appendChild(divL3);
+  var summary=el('<div class="card-inner"></div>');
+  summary.innerHTML='<p style="font-size:14px; line-height:1.8; color:var(--navy);">아이는 <strong>'+(p.autonomy>0?'스스로 생각할 시간이 필요하고':'함께 배울 때 더 잘하고')+'</strong>, <strong>'+styleLabel(p.style)+'</strong> 방식으로 배울 때 가장 잘 이해해요. '+(p.social>=1?'소그룹 토론형 수업이 동기를 높여줄 가능성이 커요.':'조용한 환경에서 집중할 수 있는 수업이 잘 맞아요.')+'</p>';
+  wrap.appendChild(summary);
+
+  /* 맞는 수업 / 피할 수업 */
+  var twoCol=el('<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:.75rem; margin-bottom:1rem;"></div>');
+  var good=el('<div class="card-inner"></div>');
+  good.innerHTML='<div class="eyebrow" style="color:var(--sage); margin-bottom:.5rem;">✓ 잘 맞는 수업</div>' +
+    '<p style="font-size:13px; line-height:1.75; color:var(--navy-muted);">'+(p.social>=1?'소그룹 토론·질문형':'1:1 개별 맞춤형')+'<br>'+(p.autonomy>0?'스스로 풀어보는 시간 多':'단계별로 짚어주는 관리형')+'</p>';
+  var bad=el('<div class="card-inner"></div>');
+  bad.innerHTML='<div class="eyebrow" style="color:var(--amber); margin-bottom:.5rem;">✗ 지금 피할 것</div>' +
+    '<p style="font-size:13px; line-height:1.75; color:var(--navy-muted);">'+(zpdFlag?'현재보다 빠른 선행':'지나치게 느슨한 진도')+'<br>'+(burnoutFlag?'고강도 숙제·관리형':'일방적 강의식 수업')+'</p>';
+  twoCol.appendChild(good);
+  twoCol.appendChild(bad);
+  wrap.appendChild(twoCol);
+
+  /* 매칭 결과 */
+  var divL4=el('<div class="divider-label">학원 매칭 결과</div>');
+  wrap.appendChild(divL4);
+  wrap.appendChild(el('<p class="lead" style="font-size:12px; margin-bottom:1rem;">정량 매칭(70%) + 텍스트 의미 유사도(30%) 결합 산출</p>'));
+
+  var results=ACADEMIES.map(function(a){return{a:a,m:matchAcad(p,ct,a)};})
+    .filter(function(r){return!r.m.excluded;})
+    .sort(function(x,y){return y.m.score-x.m.score;});
+  var excl=ACADEMIES.length-results.length;
+  if(excl>0) wrap.appendChild(el('<p style="font-size:11px; color:var(--warning); margin-bottom:.75rem;">⚠ 번아웃 신호로 인해 고강도 관리 학원 '+excl+'곳은 제외됐어요</p>'));
+
+  var ranks=['1순위','2순위','3순위','4순위'];
+  results.forEach(function(r,idx){
+    var mc=el('<div class="match-card"></div>');
+    mc.innerHTML=
+      '<div class="match-rank">'+ranks[idx]+'</div>' +
+      '<div class="match-body">' +
+        '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">' +
+          '<div>' +
+            '<div class="eyebrow" style="margin-bottom:2px;">'+r.a.subject+'</div>' +
+            '<h3>'+r.a.name+'</h3>' +
+          '</div>' +
+          '<div style="text-align:right;">' +
+            '<div class="match-score">'+r.m.score+'<span> / 100</span></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="score-breakdown">정량 '+r.m.q+' · 텍스트 유사도 '+r.m.ts+'</div>' +
+        '<p style="font-size:13px; color:var(--navy-muted); margin-bottom:10px; line-height:1.6;">'+r.a.desc+'</p>' +
+        '<div class="match-reason">💡 '+r.m.reason+'</div>' +
+        '<div class="match-meta">'+
+          '<span>👥 평균 '+r.a.size+'명</span>'+
+          '<span>💰 월 '+r.a.price+'만원</span>'+
+          '<span>★ '+r.a.rating+' ('+r.a.reviews+')</span>'+
+        '</div>'+
+        '<details style="margin-bottom:12px;"><summary style="font-size:11px; color:var(--navy-muted); cursor:pointer; letter-spacing:.2px;">학원 소개 상세 보기 ▾</summary>' +
+          '<p style="font-size:12px; color:var(--navy-muted); margin-top:8px; line-height:1.7;">'+r.a.philosophy+'</p>' +
+          '<p style="font-size:12px; color:var(--navy-muted); margin-top:4px; line-height:1.7; font-style:italic;">"'+r.a.fit_note+'"</p></details>' +
+        '<button class="consult-btn">상담 신청하기</button>' +
+      '</div>';
+    mc.querySelector('.consult-btn').onclick=function(e){
+      e.target.textContent='✓ 신청 완료 (데모)';
+      e.target.disabled=true; e.target.style.opacity='.4';
+    };
+    wrap.appendChild(mc);
+  });
+
+  /* 재시작 */
+  var restart=el('<button style="display:block; width:100%; background:transparent; border:none; color:var(--navy-muted); font-size:12px; padding:14px; margin-top:.5rem; cursor:pointer;">처음부터 다시 진단하기</button>');
+  restart.onclick=function(){S={step:0,answers:{},kwBag:[],wants:[]};render();};
+  wrap.appendChild(restart);
+
+  return wrap;
+}
+
+render();
+</script>
+</body>
+</html>
