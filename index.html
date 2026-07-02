@@ -786,21 +786,56 @@ function renderAcadPreview(){
   nr.appendChild(bk);
   var sb=el('<button type="button" style="flex:1;background:var(--navy);color:var(--white);border:none;padding:12px;font-size:14px;font-weight:500;border-radius:var(--radius);cursor:pointer;font-family:var(--sans);">등록하고 매칭 풀에 추가하기</button>');
   sb.onclick=function(){
-    ACADEMIES.push({
-      name:acadForm.name||'새 학원', subject:acadForm.subject.join('·')||'전과목', emoji:'🆕',
-      desc:acadForm.one_liner||acadForm.name||'새로 등록된 학원',
-      philosophy:acadForm.philosophy||'', fit_note:acadForm.fit_note||'',
-      gu:acadForm.gu||'', parking:acadForm.parking||'', shuttle:acadForm.shuttle||'',
-      schedule:acadForm.schedule||'', recruit_level:acadForm.recruit_level||'',
-      size:({'1명 (1:1)':1,'2-3명':2,'4-6명':5,'7-10명':8,'11명 이상':15}[acadForm.size])||5,
-      price:Math.round((parseInt(acadForm.price)||400000)/10000),
-      manage:'보통', pace:acadForm.pace||'현행',
-      profile:{autonomy:acadForm.sliders.strict_free>60?1:-1, zpd_strain:acadForm.pace&&acadForm.pace.indexOf('선행')>=0?1:0, competence:1, burnout:-1, social:acadForm.talkratio==='학생이 더 많이 말함'?2:0, style:'visual', focus:'mixed'},
-      reviews:0, rating:0
-    });
-    acadForm={name:'',subject:[],grade:[],price:'',extra:[],one_liner:'',philosophy:'',format_note:'',spectrum_note:'',format:[],size:'',talkratio:'',pace:'',homework:'',test:'',feedback:'',refusal:'',praise:'',emotion_note:'',career:[],direct:'',teacher_note:'',fit_tags:[],fit_note:'',sliders:{lecture_discuss:50,fixed_individual:50,strict_free:50,result_process:50},gu:'',parking:'',shuttle:'',schedule:'',recruit_level:'',step:0};
-    wrap.prepend(el('<div style="background:var(--sage-light,#eaf3ec);color:var(--sage,#3d6b4f);border:1px solid var(--sage-border,#9ec9aa);border-radius:var(--radius);padding:12px 14px;margin-bottom:1rem;">✅ 등록 완료! 학부모 진단 탭에서 매칭되는지 확인해보세요.</div>'));
-    sb.disabled=true; sb.textContent='등록 완료';
+    try {
+      var newAcad = {
+        name: acadForm.name||'새 학원',
+        subject: (acadForm.subject&&acadForm.subject.length?acadForm.subject.join('·'):'전과목'),
+        emoji: '🆕',
+        desc: acadForm.one_liner||acadForm.name||'새로 등록된 학원',
+        philosophy: acadForm.philosophy||'',
+        fit_note: acadForm.fit_note||'',
+        gu: acadForm.gu||'',
+        parking: acadForm.parking||'',
+        shuttle: acadForm.shuttle||'',
+        schedule: acadForm.schedule||'',
+        recruit_level: acadForm.recruit_level||'',
+        size: ({'1명 (1:1)':1,'2-3명':2,'4-6명':5,'7-10명':8,'11명 이상':15}[acadForm.size]) || 5,
+        price: Math.round((parseInt(acadForm.price)||400000)/10000),
+        manage: '보통',
+        pace: acadForm.pace||'현행',
+        profile: {
+          autonomy: (acadForm.sliders&&acadForm.sliders.strict_free>60)?1:-1,
+          zpd_strain: (acadForm.pace&&acadForm.pace.indexOf('선행')>=0)?1:0,
+          competence: 1, burnout: -1,
+          social: (acadForm.talkratio==='학생이 더 많이 말함')?2:0,
+          style: 'visual', focus: 'mixed'
+        },
+        reviews: 0, rating: 0
+      };
+      ACADEMIES.push(newAcad);
+      acadForm = {
+        name:'', subject:[], grade:[], price:'', extra:[],
+        one_liner:'', philosophy:'', format_note:'', spectrum_note:'',
+        format:[], size:'', talkratio:'', pace:'',
+        homework:'', test:'', feedback:'',
+        refusal:'', praise:'', emotion_note:'',
+        career:[], direct:'', teacher_note:'',
+        fit_tags:[], fit_note:'',
+        sliders:{lecture_discuss:50,fixed_individual:50,strict_free:50,result_process:50},
+        gu:'', parking:'', shuttle:'', schedule:'', recruit_level:'',
+        step:0
+      };
+      sb.disabled = true;
+      sb.textContent = '✅ 등록 완료';
+      sb.style.background = 'var(--sage,#3d6b4f)';
+      var msg = document.createElement('div');
+      msg.style.cssText = 'background:#eaf3ec;color:#3d6b4f;border:1px solid #9ec9aa;border-radius:8px;padding:12px 14px;margin-bottom:1rem;font-size:13px;';
+      msg.textContent = '✅ 등록 완료! 학부모 진단 탭에서 매칭되는지 확인해보세요.';
+      var at = document.getElementById('academy-tab');
+      if(at) at.insertBefore(msg, at.firstChild);
+    } catch(e) {
+      alert('등록 중 오류가 발생했어요: ' + e.message);
+    }
   };
   nr.appendChild(sb);
   wrap.appendChild(nr);
