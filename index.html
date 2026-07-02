@@ -745,10 +745,15 @@ function renderNeeds(){
     +'<div id="gu-pills" style="display:flex; flex-wrap:wrap; gap:6px;"></div>';
   var guBox=guCard.querySelector('#gu-pills');
   ['강남구','강동구','강북구','강서구','관악구','광진구','구로구','금천구','노원구','도봉구','동대문구','동작구','마포구','서대문구','서초구','성동구','성북구','송파구','양천구','영등포구','용산구','은평구','종로구','중구','중랑구','경기·인천','기타 지역'].forEach(function(g){
-    var gb=el('<button class="pill" style="font-size:12px; padding:5px 11px;">'+(S.gu===g?'✓ ':'')+g+'</button>');
-    if(S.gu===g) gb.classList.add('on');
-    gb.onclick=function(){ S.gu=(S.gu===g?'':g); renderContent ? renderContent() : render(); };
-    guBox.appendChild(gb);
+    (function(gu){
+      var gb=el('<button class="pill" style="font-size:12px; padding:5px 11px;">'+gu+'</button>');
+      if(S.gu===gu) { gb.classList.add('on'); gb.textContent='✓ '+gu; }
+      gb.onclick=function(){
+        S.gu = (S.gu===gu ? '' : gu);
+        render();
+      };
+      guBox.appendChild(gb);
+    }(g));
   });
   wrap.appendChild(guCard);
   var nb=el('<button class="btn-primary" style="margin-top:.75rem;">다음 단계로</button>');
