@@ -459,7 +459,7 @@ var ACADEMIES = [
 ];
 
 /* ───── 상태 ───── */
-var S = {step:0, answers:{}, kwBag:[], wants:[], subject:'academic'};
+var S = {step:0, answers:{}, kwBag:[], wants:[], subject:'academic', gu:''};
 
 /* ───── 유틸 ───── */
 function el(h){var d=document.createElement('div');d.innerHTML=h.trim();return d.firstChild;}
@@ -546,7 +546,7 @@ function matchAcad(child, ct, acad){
 
 /* ───── 네비게이션 ───── */
 function goHome(){
-  S={step:0,answers:{},kwBag:[],wants:[],subject:'academic'};
+  S={step:0,answers:{},kwBag:[],wants:[],subject:'academic',gu:''};
   render();
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -739,7 +739,19 @@ function renderNeeds(){
     box.appendChild(btn);
   });
   wrap.appendChild(card);
-  var nb=el('<button class="btn-primary">다음 단계로</button>');
+  var guCard=el('<div class="card" style="margin-top:.75rem;"></div>');
+  guCard.innerHTML='<div class="eyebrow" style="margin-bottom:.5rem;">거주 지역 (선택)</div>'
+    +'<p style="font-size:12px; color:var(--navy-muted); margin-bottom:.75rem;">내 주변 학원을 먼저 볼 수 있어요. 선택 안 해도 진단은 가능해요.</p>'
+    +'<div id="gu-pills" style="display:flex; flex-wrap:wrap; gap:6px;"></div>';
+  var guBox=guCard.querySelector('#gu-pills');
+  ['강남구','강동구','강북구','강서구','관악구','광진구','구로구','금천구','노원구','도봉구','동대문구','동작구','마포구','서대문구','서초구','성동구','성북구','송파구','양천구','영등포구','용산구','은평구','종로구','중구','중랑구','경기·인천','기타 지역'].forEach(function(g){
+    var gb=el('<button class="pill" style="font-size:12px; padding:5px 11px;">'+(S.gu===g?'✓ ':'')+g+'</button>');
+    if(S.gu===g) gb.classList.add('on');
+    gb.onclick=function(){ S.gu=(S.gu===g?'':g); renderContent ? renderContent() : render(); };
+    guBox.appendChild(gb);
+  });
+  wrap.appendChild(guCard);
+  var nb=el('<button class="btn-primary" style="margin-top:.75rem;">다음 단계로</button>');
   nb.onclick=function(){S.step=3;render();};
   wrap.appendChild(nb);
   return wrap;
@@ -895,7 +907,25 @@ function renderReport(QS){
   /* 매칭 결과 — 과목별 그룹핑 */
   var divL4=el('<div class="divider-label">학원 매칭 결과</div>');
   wrap.appendChild(divL4);
-  wrap.appendChild(el('<p class="lead" style="font-size:12px; margin-bottom:1rem;">정량 매칭(70%) + 텍스트 의미 유사도(30%) 결합 산출 · 과목별로 분류했어요</p>'));
+  wrap.appendChild(el('<p class="lead" style="font-size:12px; margin-bottom:.75rem;">정량 매칭(70%) + 텍스트 의미 유사도(30%) 결합 산출 · 과목별로 분류했어요</p>'));
+  if(S.gu){
+    var fw=el('<div style="margin-bottom:1rem;"></div>');
+    var fb=el('<button style="font-size:12px; font-weight:600; border:1px solid var(--navy-muted); border-radius:20px; padding:5px 14px; background:transparent; color:var(--navy-muted); cursor:pointer; font-family:var(--sans);">📍 '+S.gu+' 학원 먼저 보기</button>');
+    var fon={v:false};
+    fb.onclick=function(){
+      fon.v=!fon.v;
+      fb.style.background=fon.v?'var(--navy)':'transparent';
+      fb.style.color=fon.v?'var(--white)':'var(--navy-muted)';
+      fb.style.borderColor=fon.v?'var(--navy)':'var(--navy-muted)';
+      var cards=document.querySelectorAll('.match-card');
+      Array.prototype.forEach.call(cards,function(mc){
+        mc.style.display=(!fon.v||(mc.getAttribute('data-gu')===S.gu))?'':'none';
+      });
+    };
+    fw.appendChild(fb);
+    fw.appendChild(el('<span style="font-size:11px; color:var(--navy-muted); margin-left:8px;">지역 무관하면 그냥 두세요</span>'));
+    wrap.appendChild(fw);
+  }
 
   var allResults=ACADS.map(function(a){return{a:a,m:matchAcad(p,ct,a)};})
     .filter(function(r){return!r.m.excluded;})
@@ -927,7 +957,7 @@ function renderReport(QS){
 
     /* 과목 섹션 헤더 */
     var secHeader=el(
-      '<div style="display:flex; align-items:center; gap:8px; margin:1.25rem 0 .75rem;">'+
+      '<div class="subj-header" style="display:flex; align-items:center; gap:8px; margin:1.25rem 0 .75rem;">'+
         '<span style="font-size:18px;">'+emoji+'</span>'+
         '<span style="font-size:14px; font-weight:600; color:var(--navy);">'+subj+'</span>'+
         '<span style="font-size:11px; color:var(--navy-muted); margin-left:auto;">'+grp.length+'개 학원</span>'+
@@ -938,7 +968,7 @@ function renderReport(QS){
     grp.forEach(function(r){
       var rank=globalRank++;
       var rankLabel=rank===1?'종합 1순위':rank+'순위';
-      var mc=el('<div class="match-card"></div>');
+      var mc=el('<div class="match-card" data-gu="'+(r.a.gu||'')+'"></div>');
       mc.innerHTML=
         '<div class="match-rank">'+rankLabel+'</div>' +
         '<div class="match-body">' +
@@ -959,6 +989,16 @@ function renderReport(QS){
             '<span>💰 월 '+r.a.price+'만원</span>'+
             '<span>★ '+r.a.rating+' ('+r.a.reviews+')</span>'+
           '</div>'+
+          (r.a.gu&&r.a.gu===S.gu?'<div style="font-size:11px; color:var(--sage); font-weight:600; margin-bottom:6px;">📍 내 거주 구와 같은 지역이에요</div>':'')+
+          (function(){
+            var bd=[];
+            if(r.a.gu) bd.push('📍 '+r.a.gu);
+            if(r.a.parking&&r.a.parking!=='없음') bd.push('🅿️ '+r.a.parking);
+            if(r.a.shuttle&&r.a.shuttle!=='없음') bd.push('🚌 '+r.a.shuttle);
+            if(r.a.recruit_level) bd.push('📋 '+r.a.recruit_level);
+            return bd.length?('<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">'+bd.map(function(b){return '<span style="font-size:11px;background:var(--ivory);border:1px solid var(--ivory-border);padding:2px 8px;border-radius:10px;color:var(--navy-muted);">'+b+'</span>';}).join('')+'</div>'):''
+          }())+
+          (r.a.schedule?'<div style="font-size:12px;color:var(--navy-muted);margin-bottom:8px;line-height:1.6;">📅 '+r.a.schedule+'</div>':'')+
           '<details style="margin-bottom:12px;"><summary style="font-size:11px; color:var(--navy-muted); cursor:pointer; letter-spacing:.2px;">학원 소개 상세 보기 ▾</summary>' +
             '<p style="font-size:12px; color:var(--navy-muted); margin-top:8px; line-height:1.7;">'+r.a.philosophy+'</p>' +
             '<p style="font-size:12px; color:var(--navy-muted); margin-top:4px; line-height:1.7; font-style:italic;">"'+r.a.fit_note+'"</p></details>' +
