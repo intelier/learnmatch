@@ -892,51 +892,85 @@ function renderReport(QS){
   twoCol.appendChild(bad);
   wrap.appendChild(twoCol);
 
-  /* 매칭 결과 */
+  /* 매칭 결과 — 과목별 그룹핑 */
   var divL4=el('<div class="divider-label">학원 매칭 결과</div>');
   wrap.appendChild(divL4);
-  wrap.appendChild(el('<p class="lead" style="font-size:12px; margin-bottom:1rem;">정량 매칭(70%) + 텍스트 의미 유사도(30%) 결합 산출</p>'));
+  wrap.appendChild(el('<p class="lead" style="font-size:12px; margin-bottom:1rem;">정량 매칭(70%) + 텍스트 의미 유사도(30%) 결합 산출 · 과목별로 분류했어요</p>'));
 
-  var results=ACADS.map(function(a){return{a:a,m:matchAcad(p,ct,a)};})
+  var allResults=ACADS.map(function(a){return{a:a,m:matchAcad(p,ct,a)};})
     .filter(function(r){return!r.m.excluded;})
     .sort(function(x,y){return y.m.score-x.m.score;});
-  var excl=ACADS.length-results.length;
+  var excl=ACADS.length-allResults.length;
   if(excl>0) wrap.appendChild(el('<p style="font-size:11px; color:var(--warning); margin-bottom:.75rem;">⚠ 번아웃 신호로 인해 고강도 관리 학원 '+excl+'곳은 제외됐어요</p>'));
 
-  var ranks=['1순위','2순위','3순위','4순위'];
-  results.forEach(function(r,idx){
-    var mc=el('<div class="match-card"></div>');
-    mc.innerHTML=
-      '<div class="match-rank">'+ranks[idx]+'</div>' +
-      '<div class="match-body">' +
-        '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">' +
-          '<div>' +
-            '<div class="eyebrow" style="margin-bottom:2px;">'+r.a.subject+'</div>' +
-            '<h3>'+r.a.name+'</h3>' +
+  /* 과목별 그룹핑 */
+  var groups={};
+  allResults.forEach(function(r){
+    var subj=r.a.subject;
+    if(!groups[subj]) groups[subj]=[];
+    groups[subj].push(r);
+  });
+  var subjOrder=Object.keys(groups).sort(function(a,b){
+    return groups[b][0].m.score - groups[a][0].m.score;
+  });
+
+  var subjectEmoji={
+    '수학':'📐','영어':'🗣️','국어':'📖','과학':'🔬','코딩':'💻',
+    '전과목':'📚','수학·영어':'📐','미술':'🎨','무용':'💃',
+    '피아노':'🎹','체육':'⚽','음악':'🎵','미술·공예':'🖌️'
+  };
+
+  var globalRank=1;
+  subjOrder.forEach(function(subj){
+    var grp=groups[subj];
+    var emoji=subjectEmoji[subj]||'🏫';
+
+    /* 과목 섹션 헤더 */
+    var secHeader=el(
+      '<div style="display:flex; align-items:center; gap:8px; margin:1.25rem 0 .75rem;">'+
+        '<span style="font-size:18px;">'+emoji+'</span>'+
+        '<span style="font-size:14px; font-weight:600; color:var(--navy);">'+subj+'</span>'+
+        '<span style="font-size:11px; color:var(--navy-muted); margin-left:auto;">'+grp.length+'개 학원</span>'+
+      '</div>'
+    );
+    wrap.appendChild(secHeader);
+
+    grp.forEach(function(r){
+      var rank=globalRank++;
+      var rankLabel=rank===1?'종합 1순위':rank+'순위';
+      var mc=el('<div class="match-card"></div>');
+      mc.innerHTML=
+        '<div class="match-rank">'+rankLabel+'</div>' +
+        '<div class="match-body">' +
+          '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">' +
+            '<div>' +
+              '<div class="eyebrow" style="margin-bottom:2px;">'+r.a.subject+'</div>' +
+              '<h3>'+r.a.name+'</h3>' +
+            '</div>' +
+            '<div style="text-align:right;">' +
+              '<div class="match-score">'+r.m.score+'<span> / 100</span></div>' +
+            '</div>' +
           '</div>' +
-          '<div style="text-align:right;">' +
-            '<div class="match-score">'+r.m.score+'<span> / 100</span></div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="score-breakdown">정량 '+r.m.q+' · 텍스트 유사도 '+r.m.ts+'</div>' +
-        '<p style="font-size:13px; color:var(--navy-muted); margin-bottom:10px; line-height:1.6;">'+r.a.desc+'</p>' +
-        '<div class="match-reason">💡 '+r.m.reason+'</div>' +
-        '<div class="match-meta">'+
-          '<span>👥 평균 '+r.a.size+'명</span>'+
-          '<span>💰 월 '+r.a.price+'만원</span>'+
-          '<span>★ '+r.a.rating+' ('+r.a.reviews+')</span>'+
-        '</div>'+
-        '<details style="margin-bottom:12px;"><summary style="font-size:11px; color:var(--navy-muted); cursor:pointer; letter-spacing:.2px;">학원 소개 상세 보기 ▾</summary>' +
-          '<p style="font-size:12px; color:var(--navy-muted); margin-top:8px; line-height:1.7;">'+r.a.philosophy+'</p>' +
-          '<p style="font-size:12px; color:var(--navy-muted); margin-top:4px; line-height:1.7; font-style:italic;">"'+r.a.fit_note+'"</p></details>' +
-        '<button class="consult-btn">상담 신청하기</button>' +
-      '</div>';
-    mc.querySelector('.consult-btn').onclick=function(e){
-      e.target.textContent='✓ 신청 완료 (데모)';
+          '<div class="score-breakdown">정량 '+r.m.q+' · 텍스트 유사도 '+r.m.ts+'</div>' +
+          '<p style="font-size:13px; color:var(--navy-muted); margin-bottom:10px; line-height:1.6;">'+r.a.desc+'</p>' +
+          '<div class="match-reason">💡 '+r.m.reason+'</div>' +
+          '<div class="match-meta">'+
+            '<span>👥 평균 '+r.a.size+'명</span>'+
+            '<span>💰 월 '+r.a.price+'만원</span>'+
+            '<span>★ '+r.a.rating+' ('+r.a.reviews+')</span>'+
+          '</div>'+
+          '<details style="margin-bottom:12px;"><summary style="font-size:11px; color:var(--navy-muted); cursor:pointer; letter-spacing:.2px;">학원 소개 상세 보기 ▾</summary>' +
+            '<p style="font-size:12px; color:var(--navy-muted); margin-top:8px; line-height:1.7;">'+r.a.philosophy+'</p>' +
+            '<p style="font-size:12px; color:var(--navy-muted); margin-top:4px; line-height:1.7; font-style:italic;">"'+r.a.fit_note+'"</p></details>' +
+          '<button class="consult-btn">상담 신청하기</button>' +
+        '</div>';
+      mc.querySelector('.consult-btn').onclick=function(e){
+        e.target.textContent='✓ 신청 완료 (데모)';
       e.target.disabled=true; e.target.style.opacity='.4';
     };
-    wrap.appendChild(mc);
-  });
+      wrap.appendChild(mc);
+    }); // grp.forEach
+  }); // subjOrder.forEach
 
   /* 재시작 */
   var restart=el('<button style="display:block; width:100%; background:transparent; border:none; color:var(--navy-muted); font-size:12px; padding:14px; margin-top:.5rem; cursor:pointer;">처음부터 다시 진단하기</button>');
