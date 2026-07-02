@@ -212,6 +212,7 @@ var acadForm = {
   career:[], direct:'', teacher_note:'',
   fit_tags:[], fit_note:'',
   sliders:{lecture_discuss:50, fixed_individual:50, strict_free:50, result_process:50},
+  gu:'', parking:'', shuttle:'', schedule:'', recruit_level:'',
   step:0
 };
 var currentTab = 'parent';
@@ -531,6 +532,8 @@ function renderAcadSection(idx){
     body.appendChild(el('<label>월 수강료 (원 단위)</label><input type="number" id="f-price" placeholder="예: 380000" value="'+(acadForm.price||'')+'">'));
     body.appendChild(el('<label>추가 비용</label>'));
     body.appendChild(acadPillGroup(null,['교재비 별도','모의고사비 별도','특강비 별도','추가비용 없음'],true,'extra'));
+    body.appendChild(el('<label style="margin-top:1rem;">위치 (구 선택)</label>'));
+    body.appendChild(acadPillGroup(null,['강남구','강동구','강북구','강서구','관악구','광진구','구로구','금천구','노원구','도봉구','동대문구','동작구','마포구','서대문구','서초구','성동구','성북구','송파구','양천구','영등포구','용산구','은평구','종로구','중구','중랑구','경기·인천','기타 지역'],false,'gu'));
 
   } else if(sec.key==='intro'){
     body.innerHTML = '<label>한 줄 소개</label><input type="text" id="f-liner" placeholder="예: 스스로 생각하는 힘을 키우는 소그룹 수학 학원이에요" value="'+acadForm.one_liner+'">';
@@ -570,6 +573,13 @@ function renderAcadSection(idx){
     body.appendChild(acadPillGroup(null,['월별 시험','수시 쪽지시험','포트폴리오 평가','평가 없음'],false,'test'));
     body.appendChild(el('<label>부모 피드백 방식</label>'));
     body.appendChild(acadPillGroup(null,['앱·문자 알림','월간 상담','수시 연락','알림 없음'],false,'feedback'));
+    body.appendChild(el('<label style="margin-top:1rem;">주차장 여부</label>'));
+    body.appendChild(acadPillGroup(null,['있음','없음','근처 유료주차'],false,'parking'));
+    body.appendChild(el('<label>차량(셔틀) 운영</label>'));
+    body.appendChild(acadPillGroup(null,['없음','학원 셔틀 있음','지역 셔틀 있음'],false,'shuttle'));
+    body.appendChild(el('<label>현재 모집 중인 수준</label>'));
+    body.appendChild(acadPillGroup(null,['기초반','기본반','심화반','수준 무관'],false,'recruit_level'));
+    body.appendChild(el('<label>수업 일정 (자유 서술 — 학부모에게 공개돼요)</label><textarea id="f-sched" placeholder="예: 월·수·금 오후 4-6시, 토 오전 10-12시&#10;시간대는 상담 시 조율 가능해요">'+acadForm.schedule+'</textarea>'));
 
   } else if(sec.key==='emotion'){
     body.appendChild(el('<label>아이가 수업을 거부하거나 힘들어할 때</label>'));
@@ -618,6 +628,7 @@ function saveFields(){
   f=document.getElementById('f-enote'); if(f) acadForm.emotion_note=f.value;
   f=document.getElementById('f-tnote'); if(f) acadForm.teacher_note=f.value;
   f=document.getElementById('f-fnote2'); if(f) acadForm.fit_note=f.value;
+  f=document.getElementById('f-sched'); if(f) acadForm.schedule=f.value;
 }
 
 function completeness(){
@@ -645,6 +656,18 @@ function renderAcadPreview(){
   }
   if(acadForm.fit_note){
     preview.appendChild(el('<div class="alert success"><p style="font-weight:500; font-size:12px; margin-bottom:4px;">이런 아이에게 추천해요</p><p style="font-size:13px;">'+acadForm.fit_note+'</p></div>'));
+  }
+  /* 위치·편의 정보 */
+  var infoRow=[];
+  if(acadForm.gu) infoRow.push('📍 '+acadForm.gu);
+  if(acadForm.parking) infoRow.push('🅿️ '+acadForm.parking);
+  if(acadForm.shuttle) infoRow.push('🚌 '+acadForm.shuttle);
+  if(acadForm.recruit_level) infoRow.push('📋 '+acadForm.recruit_level+' 모집 중');
+  if(infoRow.length){
+    preview.appendChild(el('<div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;">'+infoRow.map(function(t){return '<span style="font-size:11px; background:var(--surface-1); color:var(--text-secondary); padding:3px 8px; border-radius:10px;">'+t+'</span>';}).join('')+'</div>'));
+  }
+  if(acadForm.schedule){
+    preview.appendChild(el('<div style="margin-top:10px; font-size:12px; color:var(--text-secondary); line-height:1.6;">📅 '+acadForm.schedule+'</div>'));
   }
   if(acadForm.fit_tags && acadForm.fit_tags.length){
     var tagBox=el('<div style="margin-top:6px;"></div>');
@@ -678,6 +701,7 @@ function renderAcadPreview(){
       manage:({
         '엄격한 관리':0,'자율에 맡김':100
       })||'보통',
+      gu:acadForm.gu||'', parking:acadForm.parking||'', shuttle:acadForm.shuttle||'', schedule:acadForm.schedule||'', recruit_level:acadForm.recruit_level||'',
       pace:acadForm.pace||'현행',
       profile:{
         autonomy: acadForm.sliders.strict_free>60?1:-1,
@@ -698,6 +722,7 @@ function renderAcadPreview(){
       career:[],direct:'',teacher_note:'',
       fit_tags:[],fit_note:'',
       sliders:{lecture_discuss:50,fixed_individual:50,strict_free:50,result_process:50},
+      gu:'',parking:'',shuttle:'',schedule:'',recruit_level:'',
       step:0
     };
     var msg=el('<div class="alert success" style="margin-bottom:1rem;">✅ 등록 완료! 학부모 진단 탭에서 이 학원이 매칭되는지 확인해보세요.</div>');
