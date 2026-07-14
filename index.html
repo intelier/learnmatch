@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>아이 학습 성향 진단 | LearnMatch</title>
+<title>아이 학습 성향 진단 | ClassFit</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -276,7 +276,7 @@ h3{font-size:15px; font-weight:600;}
 <body>
 <div id="wrap">
   <header id="site-header">
-    <div class="logo" onclick="switchMainTab('parent'); goHome();" style="cursor:pointer;">Learn<span>Match</span></div>
+    <div class="logo" onclick="switchMainTab('parent'); goHome();" style="cursor:pointer;">Class<span>Fit</span></div>
     <div style="display:flex; align-items:center; gap:8px;">
       <button id="home-btn" onclick="goHome()" style="display:none; font-size:12px; font-weight:500; color:var(--navy-muted); border:1px solid var(--ivory-border); border-radius:20px; padding:4px 12px; background:transparent; cursor:pointer; font-family:var(--sans);">← 처음으로</button>
       <div class="badge-theory">교육심리학 기반</div>
@@ -901,7 +901,7 @@ function renderIntro(){
   wrap.appendChild(stepIndicator(0));
   var hero=el('<div class="hero"></div>');
   hero.innerHTML=
-    '<div class="hero-badge">LearnMatch 진단 시스템</div>' +
+    '<div class="hero-badge">ClassFit 진단 시스템</div>' +
     '<h1>막연히 남 따라가는 학원 말고,<br>우리 아이에게 맞는 학원</h1>' +
     '<p class="lead">아이마다 배우는 방식이 달라요. 10분 진단으로 아이의 학습 성향을 파악하고, 진짜 맞는 학원을 찾아드려요.</p>' +
     '<div class="hero-stats">' +
@@ -920,8 +920,8 @@ function renderIntro(){
 
     /* 왜 이 서비스인가 */
     '<div class="card" style="margin-bottom:1rem;">' +
-      '<div class="eyebrow" style="margin-bottom:.5rem;">왜 LearnMatch인가요?</div>' +
-      '<p style="font-size:14px; line-height:1.85; color:var(--navy-muted);">한국 학부모의 월평균 사교육비는 60만원을 넘지만, 학원을 고르는 기준은 대부분 "주변에서 많이 가는 곳"이에요. 아이마다 배우는 방식, 동기가 생기는 조건, 감당할 수 있는 학습 부하가 다른데도 모두 같은 학원에 보내고 있는 건 아닐까요?<br><br>LearnMatch는 아이의 학습 성향을 진단하고, 그 성향에 맞는 수업 방식을 운영하는 학원을 연결해드려요.</p>' +
+      '<div class="eyebrow" style="margin-bottom:.5rem;">왜 ClassFit인가요?</div>' +
+      '<p style="font-size:14px; line-height:1.85; color:var(--navy-muted);">한국 학부모의 월평균 사교육비는 60만원을 넘지만, 학원을 고르는 기준은 대부분 "주변에서 많이 가는 곳"이에요. 아이마다 배우는 방식, 동기가 생기는 조건, 감당할 수 있는 학습 부하가 다른데도 모두 같은 학원에 보내고 있는 건 아닐까요?<br><br>ClassFit은 아이의 학습 성향을 진단하고, 그 성향에 맞는 수업 방식을 운영하는 학원을 연결해드려요.</p>' +
     '</div>' +
 
     /* 진단 4가지 축 */
@@ -978,7 +978,7 @@ function renderIntro(){
   var footer=el('<div style="text-align:center; padding:2rem 0 1rem; border-top:1px solid var(--ivory-border); margin-top:2rem;"></div>');
   footer.innerHTML='<p style="font-size:11px; color:var(--navy-muted); margin-bottom:4px;">학원 등록 문의 · 서비스 제안</p>'
     +'<a href="mailto:sinkita@naver.com" style="font-size:13px; color:var(--amber); font-weight:500; text-decoration:none;">sinkita@naver.com</a>'
-    +'<p style="font-size:10px; color:var(--navy-muted); margin-top:8px;">© 2026 LearnMatch</p>';
+    +'<p style="font-size:10px; color:var(--navy-muted); margin-top:8px;">© 2026 ClassFit</p>';
   wrap.appendChild(about);
   wrap.appendChild(footer);
   return wrap;
@@ -1141,7 +1141,7 @@ function renderReport(QS){
   var rh=el('<div class="report-header"></div>');
   rh.innerHTML=
     '<div class="report-header-top">' +
-      '<div class="eyebrow" style="color:rgba(255,255,255,.5); margin-bottom:.3rem;">LearnMatch 학습 성향 분석 리포트</div>' +
+      '<div class="eyebrow" style="color:rgba(255,255,255,.5); margin-bottom:.3rem;">ClassFit 학습 성향 분석 리포트</div>' +
       '<h2 style="color:#fff; font-size:18px;">'+(S.subject==='arts'?'예체능 · ':'')+(p.autonomy>0?'자기주도 탐구형':'협력 학습형')+' · '+styleLabel(p.style)+' · '+focusLabel(p.focus)+'</h2>' +
     '</div>' +
     '<div class="report-header-bottom">' +
