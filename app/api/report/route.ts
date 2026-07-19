@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { saveDiagnosis } from '@/lib/db';
 import { generateReport } from '@/lib/llm';
 import { scoreAnswers, type Answers } from '@/lib/scoring';
 
@@ -25,9 +26,20 @@ export async function POST(request: Request) {
   }
 
   const report = await generateReport({ answers, scores });
+
+  // T-09: 진단·리포트 저장 (DB 미설정/실패 시 null — 무상태 동작 유지)
+  const saved = await saveDiagnosis({
+    answers,
+    scores,
+    markdown: report.markdown,
+    model: report.model,
+    promptVersion: report.promptVersion,
+  });
+
   return NextResponse.json({
     markdown: report.markdown,
     model: report.model,
     promptVersion: report.promptVersion,
+    shareToken: saved?.shareToken ?? null,
   });
 }

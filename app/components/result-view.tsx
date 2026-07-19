@@ -19,18 +19,23 @@ export default function ResultView({
   isSharedView = false,
   initialReport,
   hideShare = false,
+  initialShareToken,
 }: {
   answers: Answers;
   isSharedView?: boolean;
   /** 고정 리포트(예시 페이지 등) — 전달 시 API 호출 없이 바로 표시 */
   initialReport?: string;
   hideShare?: boolean;
+  /** 이미 발급된 share_token (공유 페이지에서 재공유 시 동일 URL 유지) */
+  initialShareToken?: string;
 }) {
   const scores = useMemo(() => scoreAnswers(answers), [answers]);
   const [report, setReport] = useState<ReportState>(
     initialReport ? { status: 'done', markdown: initialReport } : { status: 'loading' }
   );
   const [share, setShare] = useState<ShareState>('idle');
+  // DB 저장 시 짧은 share_token, 아니면 legacy 무상태 코드 (T-09)
+  const [shareToken, setShareToken] = useState<string | null>(initialShareToken ?? null);
   const shareCode = useMemo(() => encodeAnswers(answers), [answers]);
 
   useEffect(() => {
@@ -44,7 +49,10 @@ export default function ResultView({
     })
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`${res.status}`))))
       .then((data) => {
-        if (!cancelled) setReport({ status: 'done', markdown: data.markdown });
+        if (!cancelled) {
+          setReport({ status: 'done', markdown: data.markdown });
+          if (data.shareToken) setShareToken(data.shareToken);
+        }
       })
       .catch(() => {
         if (!cancelled) setReport({ status: 'error' });
@@ -54,8 +62,9 @@ export default function ResultView({
     };
   }, [answers, initialReport]);
 
-  const shareUrl = shareCode
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/r/${shareCode}`
+  const sharePath = shareToken ?? shareCode;
+  const shareUrl = sharePath
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/r/${sharePath}`
     : null;
 
   async function copyShareUrl() {

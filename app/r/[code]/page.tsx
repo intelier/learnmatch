@@ -1,18 +1,34 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import ResultView from '@/app/components/result-view';
-import { scoreAnswers } from '@/lib/scoring';
+import { findByShareToken } from '@/lib/db';
+import { scoreAnswers, type Answers } from '@/lib/scoring';
 import { decodeAnswers } from '@/lib/share';
 
 interface Props {
   params: Promise<{ code: string }>;
 }
 
+interface Resolved {
+  answers: Answers;
+  /** DB에 저장된 리포트 (있으면 LLM 재호출 없이 표시) */
+  storedReport: string | null;
+}
+
+/** share_token(DB) 우선, 실패 시 legacy 무상태 코드 디코딩 (T-06) */
+async function resolve(code: string): Promise<Resolved | null> {
+  const stored = await findByShareToken(code);
+  if (stored) return { answers: stored.answers, storedReport: stored.markdown };
+  const answers = decodeAnswers(code);
+  if (answers) return { answers, storedReport: null };
+  return null;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { code } = await params;
-  const answers = decodeAnswers(code);
-  if (!answers) return { title: '클래스 핏 — 아이 학습 성향 진단' };
-  const scores = scoreAnswers(answers);
+  const resolved = await resolve(code);
+  if (!resolved) return { title: '클래스 핏 — 아이 학습 성향 진단' };
+  const scores = scoreAnswers(resolved.answers);
   return {
     title: `${scores.headline} | 클래스 핏`,
     description: '우리 아이 학습 성향 진단 리포트를 확인해 보세요.',
@@ -21,9 +37,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function SharedReportPage({ params }: Props) {
   const { code } = await params;
-  const answers = decodeAnswers(code);
+  const resolved = await resolve(code);
 
-  if (!answers) {
+  if (!resolved) {
     return (
       <main style={{ textAlign: 'center', padding: '3rem 0' }}>
         <p style={{ marginBottom: '1.5rem', color: 'var(--navy-muted)' }}>
@@ -36,5 +52,12 @@ export default async function SharedReportPage({ params }: Props) {
     );
   }
 
-  return <ResultView answers={answers} isSharedView />;
+  return (
+    <ResultView
+      answers={resolved.answers}
+      isSharedView
+      initialReport={resolved.storedReport ?? undefined}
+      initialShareToken={resolved.storedReport ? code : undefined}
+    />
+  );
 }
