@@ -1,0 +1,178 @@
+:root {
+  /* 색상 시스템 — legacy 프로토타입과 동일 */
+  --navy:        #1a2e4a;
+  --navy-light:  #243d61;
+  --navy-muted:  #6b7f97;
+  --ivory:       #faf8f4;
+  --ivory-dark:  #f0ece3;
+  --ivory-border:#e2ddd3;
+  --amber:       #c8860a;
+  --amber-light: #fdf3e0;
+  --amber-border:#e8c57a;
+  --sage:        #3d6b4f;
+  --sage-light:  #eaf3ec;
+  --sage-border: #9ec9aa;
+  --white:       #ffffff;
+
+  --serif: 'Noto Serif KR', Georgia, serif;
+  --sans:  'Noto Sans KR', -apple-system, sans-serif;
+
+  --radius-sm: 4px;
+  --radius:    10px;
+  --radius-lg: 16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ivory);
+  color: var(--navy);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  max-width: 580px;
+  margin: 0 auto;
+  padding: 0 1.25rem 5rem;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--ivory-border);
+  margin-bottom: 2rem;
+}
+
+.logo {
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--navy);
+  letter-spacing: -0.3px;
+}
+
+.logo span { color: var(--amber); }
+
+.badge-theory {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--navy-muted);
+  border: 1px solid var(--ivory-border);
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--amber);
+  margin-bottom: 0.6rem;
+}
+
+.btn-primary {
+  display: block;
+  width: 100%;
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--sans);
+  text-align: center;
+  text-decoration: none;
+}
+
+.btn-primary:hover { background: var(--navy-light); }
+
+.btn-secondary {
+  display: block;
+  width: 100%;
+  background: transparent;
+  color: var(--navy-muted);
+  border: 1px solid var(--ivory-border);
+  padding: 13px;
+  font-size: 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--sans);
+  text-align: center;
+  text-decoration: none;
+}
+
+.btn-secondary:hover { border-color: var(--navy-muted); }
+
+/* ── 설문 ── */
+.progress-track {
+  height: 3px;
+  background: var(--ivory-border);
+  border-radius: 2px;
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--amber);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.option-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--white);
+  border: 1px solid var(--ivory-border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  font-size: 14px;
+  font-family: var(--sans);
+  color: var(--navy);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.option-btn:hover { border-color: var(--navy-muted); }
+
+.option-btn.selected {
+  border-color: var(--navy);
+  background: var(--ivory-dark);
+  font-weight: 500;
+}
+
+/* ── 결과 축 바 ── */
+.axis-row { margin-bottom: 0.9rem; }
+
+.axis-track {
+  height: 6px;
+  background: var(--ivory-dark);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.axis-fill {
+  height: 100%;
+  background: var(--amber);
+  border-radius: 3px;
+}
+
+.card {
+  background: var(--white);
+  border: 1px solid var(--ivory-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+}
