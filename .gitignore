@@ -5,3 +5,9 @@ out/
 .vercel
 *.tsbuildinfo
 next-env.d.ts
+
+# 임시 테스트 산출물
+prod-*.json
+gate*.json
+v3.json
+example-gen.json
