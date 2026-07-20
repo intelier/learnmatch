@@ -3,6 +3,11 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { AXIS_META, FOCUS_LABEL, STYLE_LABEL, type AxisId } from '@/lib/questions';
+import {
+  buildCheckoutUrl,
+  GROBLE_SINGLE_URL,
+  isPaymentReady,
+} from '@/lib/groble';
 import { scoreAnswers, type Answers } from '@/lib/scoring';
 import { encodeAnswers } from '@/lib/share';
 import RadarChart from './radar-chart';
@@ -50,6 +55,7 @@ export default function ResultView({
   // DB 저장 시 짧은 share_token, 아니면 legacy 무상태 코드 (T-09)
   const [shareToken, setShareToken] = useState<string | null>(initialShareToken ?? null);
   const shareCode = useMemo(() => encodeAnswers(answers), [answers]);
+  const paymentReady = isPaymentReady();
 
   useEffect(() => {
     if (initialReport) return;
@@ -225,12 +231,25 @@ export default function ResultView({
           <p style={{ fontSize: 12, color: 'var(--navy-muted)', marginBottom: 12 }}>
             잠긴 내용: {report.lockedSections.join(' · ')}
           </p>
-          <button type="button" className="btn-primary">
-            990원으로 전체 리포트 열기
-          </button>
-          <p style={{ fontSize: 11, color: 'var(--navy-muted)', marginTop: 8 }}>
-            결제 기능 오픈 준비 중이에요.
-          </p>
+          {paymentReady ? (
+            <a
+              className="btn-primary"
+              href={buildCheckoutUrl(GROBLE_SINGLE_URL, shareToken)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              990원으로 전체 리포트 열기
+            </a>
+          ) : (
+            <>
+              <button type="button" className="btn-primary" disabled style={{ opacity: 0.6, cursor: 'default' }}>
+                990원으로 전체 리포트 열기
+              </button>
+              <p style={{ fontSize: 11, color: 'var(--navy-muted)', marginTop: 8 }}>
+                결제 기능 오픈 준비 중이에요.
+              </p>
+            </>
+          )}
         </div>
       )}
 
