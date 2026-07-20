@@ -71,6 +71,59 @@ export async function saveDiagnosis(params: {
   }
 }
 
+export type ProductId = 'single_990' | 'pack10_8000';
+
+export interface UnlockResult {
+  ok: boolean;
+  reason?: 'db_unavailable' | 'not_found' | 'already_unlocked' | 'error';
+}
+
+/**
+ * 결제 확인된 진단을 언락하고 구매 기록을 남긴다 (T-12).
+ * 호출 전에 반드시 결제 사실이 검증되어야 한다 (관리자 인증 또는 웹훅 서명).
+ */
+export async function unlockByShareToken(params: {
+  shareToken: string;
+  product: ProductId;
+  grobleRef?: string;
+  note?: string;
+}): Promise<UnlockResult> {
+  const db = getDb();
+  if (!db) return { ok: false, reason: 'db_unavailable' };
+  try {
+    const { data: diagnosis, error: findErr } = await db
+      .from('diagnoses')
+      .select('id, unlocked')
+      .eq('share_token', params.shareToken)
+      .limit(1)
+      .maybeSingle();
+    if (findErr) throw findErr;
+    if (!diagnosis) return { ok: false, reason: 'not_found' };
+    if (diagnosis.unlocked) return { ok: true, reason: 'already_unlocked' };
+
+    const { error: updErr } = await db
+      .from('diagnoses')
+      .update({ unlocked: true })
+      .eq('id', diagnosis.id);
+    if (updErr) throw updErr;
+
+    // 구매 기록은 실패해도 언락 자체는 유지 (사용자 경험 우선)
+    const { error: purErr } = await db.from('purchases').insert({
+      diagnosis_id: diagnosis.id,
+      product: params.product,
+      status: 'confirmed',
+      groble_ref: params.grobleRef ?? null,
+      note: params.note ?? null,
+    });
+    if (purErr) console.error('구매 기록 저장 실패 (언락은 완료됨):', purErr);
+
+    return { ok: true };
+  } catch (error) {
+    console.error('언락 처리 실패:', error);
+    return { ok: false, reason: 'error' };
+  }
+}
+
 export interface SharedDiagnosis {
   answers: Answers;
   markdown: string;
