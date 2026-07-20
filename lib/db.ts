@@ -73,6 +73,8 @@ export async function saveDiagnosis(params: {
 export interface SharedDiagnosis {
   answers: Answers;
   markdown: string;
+  /** 결제 언락 여부 (T-10) */
+  unlocked: boolean;
 }
 
 /** share_token으로 저장된 진단+리포트 조회. 없거나 DB 미설정이면 null. */
@@ -82,14 +84,18 @@ export async function findByShareToken(token: string): Promise<SharedDiagnosis |
   try {
     const { data, error } = await db
       .from('diagnoses')
-      .select('answers, reports(content_md)')
+      .select('answers, unlocked, reports(content_md)')
       .eq('share_token', token)
       .limit(1)
       .maybeSingle();
     if (error || !data) return null;
     const report = Array.isArray(data.reports) ? data.reports[0] : data.reports;
     if (!report?.content_md) return null;
-    return { answers: data.answers as Answers, markdown: report.content_md };
+    return {
+      answers: data.answers as Answers,
+      markdown: report.content_md,
+      unlocked: Boolean(data.unlocked),
+    };
   } catch (error) {
     console.error('Supabase 조회 실패:', error);
     return null;

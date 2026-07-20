@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import ResultView from '@/app/components/result-view';
 import { findByShareToken } from '@/lib/db';
+import { splitReport } from '@/lib/report-gate';
 import { scoreAnswers, type Answers } from '@/lib/scoring';
 import { decodeAnswers } from '@/lib/share';
 
@@ -13,14 +14,34 @@ interface Resolved {
   answers: Answers;
   /** DB에 저장된 리포트 (있으면 LLM 재호출 없이 표시) */
   storedReport: string | null;
+  /** 결제 언락 여부 — 미결제면 storedReport는 무료 구간만 담긴다 (T-10) */
+  locked: boolean;
+  lockedSections: string[];
 }
 
 /** share_token(DB) 우선, 실패 시 legacy 무상태 코드 디코딩 (T-06) */
 async function resolve(code: string): Promise<Resolved | null> {
   const stored = await findByShareToken(code);
-  if (stored) return { answers: stored.answers, storedReport: stored.markdown };
+  if (stored) {
+    if (stored.unlocked) {
+      return {
+        answers: stored.answers,
+        storedReport: stored.markdown,
+        locked: false,
+        lockedSections: [],
+      };
+    }
+    // 미결제: 잠금 구간은 서버에서 제거 (D-07)
+    const gated = splitReport(stored.markdown);
+    return {
+      answers: stored.answers,
+      storedReport: gated.locked !== null ? gated.free : stored.markdown,
+      locked: gated.locked !== null,
+      lockedSections: gated.lockedSections,
+    };
+  }
   const answers = decodeAnswers(code);
-  if (answers) return { answers, storedReport: null };
+  if (answers) return { answers, storedReport: null, locked: false, lockedSections: [] };
   return null;
 }
 
@@ -58,6 +79,8 @@ export default async function SharedReportPage({ params }: Props) {
       isSharedView
       initialReport={resolved.storedReport ?? undefined}
       initialShareToken={resolved.storedReport ? code : undefined}
+      initialLocked={resolved.locked}
+      initialLockedSections={resolved.lockedSections}
     />
   );
 }

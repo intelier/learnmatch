@@ -10,7 +10,7 @@ import ReportView from './report-view';
 
 type ReportState =
   | { status: 'loading' }
-  | { status: 'done'; markdown: string }
+  | { status: 'done'; markdown: string; locked: boolean; lockedSections: string[] }
   | { status: 'error' };
 
 type ShareState = 'idle' | 'copied' | 'manual';
@@ -21,6 +21,8 @@ export default function ResultView({
   initialReport,
   hideShare = false,
   initialShareToken,
+  initialLocked = false,
+  initialLockedSections = [],
 }: {
   answers: Answers;
   isSharedView?: boolean;
@@ -29,10 +31,20 @@ export default function ResultView({
   hideShare?: boolean;
   /** 이미 발급된 share_token (공유 페이지에서 재공유 시 동일 URL 유지) */
   initialShareToken?: string;
+  /** initialReport가 무료 구간만일 때 (T-10 게이팅) */
+  initialLocked?: boolean;
+  initialLockedSections?: string[];
 }) {
   const scores = useMemo(() => scoreAnswers(answers), [answers]);
   const [report, setReport] = useState<ReportState>(
-    initialReport ? { status: 'done', markdown: initialReport } : { status: 'loading' }
+    initialReport
+      ? {
+          status: 'done',
+          markdown: initialReport,
+          locked: initialLocked,
+          lockedSections: initialLockedSections,
+        }
+      : { status: 'loading' }
   );
   const [share, setShare] = useState<ShareState>('idle');
   // DB 저장 시 짧은 share_token, 아니면 legacy 무상태 코드 (T-09)
@@ -51,7 +63,12 @@ export default function ResultView({
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`${res.status}`))))
       .then((data) => {
         if (!cancelled) {
-          setReport({ status: 'done', markdown: data.markdown });
+          setReport({
+            status: 'done',
+            markdown: data.markdown,
+            locked: Boolean(data.locked),
+            lockedSections: data.lockedSections ?? [],
+          });
           if (data.shareToken) setShareToken(data.shareToken);
         }
       })
@@ -168,6 +185,52 @@ export default function ResultView({
         <div className="card" style={{ marginBottom: '1.5rem' }}>
           <div className="eyebrow">맞춤 리포트</div>
           <ReportView markdown={report.markdown} />
+          {report.locked && (
+            <div className="locked-teaser">
+              {report.lockedSections.map((title) => (
+                <div key={title} style={{ marginBottom: '1.1rem' }}>
+                  <h2
+                    style={{
+                      fontFamily: 'var(--serif)',
+                      fontSize: 17,
+                      margin: '0 0 0.55rem',
+                    }}
+                  >
+                    🔒 {title}
+                  </h2>
+                  <div className="blur-line" style={{ width: '96%' }} />
+                  <div className="blur-line" style={{ width: '88%' }} />
+                  <div className="blur-line" style={{ width: '62%' }} />
+                </div>
+              ))}
+              <div className="locked-overlay" />
+            </div>
+          )}
+        </div>
+      )}
+      {report.status === 'done' && report.locked && (
+        <div
+          className="card"
+          style={{
+            borderColor: 'var(--amber-border)',
+            background: 'var(--amber-light)',
+            textAlign: 'center',
+            marginBottom: '1.5rem',
+          }}
+        >
+          <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+            우리 아이의 의외의 모습, 축별 자세한 해석과 실천 조언이 준비되어
+            있어요.
+          </p>
+          <p style={{ fontSize: 12, color: 'var(--navy-muted)', marginBottom: 12 }}>
+            잠긴 내용: {report.lockedSections.join(' · ')}
+          </p>
+          <button type="button" className="btn-primary">
+            990원으로 전체 리포트 열기
+          </button>
+          <p style={{ fontSize: 11, color: 'var(--navy-muted)', marginTop: 8 }}>
+            결제 기능 오픈 준비 중이에요.
+          </p>
         </div>
       )}
 

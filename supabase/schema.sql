@@ -6,6 +6,7 @@ create table if not exists diagnoses (
   answers jsonb not null,
   scores jsonb not null,
   share_token text unique not null,
+  unlocked boolean not null default false, -- 결제 언락 여부 (T-10)
   created_at timestamptz not null default now()
 );
 

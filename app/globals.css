@@ -204,6 +204,35 @@ body {
 
 .theory-body p + p { margin-top: 8px; }
 
+/* ── 잠금 티저 (T-10) ── */
+.locked-teaser {
+  position: relative;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--amber-border);
+  overflow: hidden;
+}
+
+.blur-line {
+  height: 11px;
+  border-radius: 6px;
+  background: var(--ivory-dark);
+  margin-bottom: 7px;
+  filter: blur(1.5px);
+}
+
+.locked-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(250, 248, 244, 0.55) 55%,
+    var(--ivory) 100%
+  );
+  pointer-events: none;
+}
+
 /* ── 결과 축 바 ── */
 .axis-row { margin-bottom: 0.9rem; }
 

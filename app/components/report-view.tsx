@@ -54,6 +54,8 @@ export default function ReportView({ markdown }: { markdown: string }) {
     flushList();
     if (!trimmed) continue;
     if (trimmed.startsWith('## ')) {
+      // 구버전 프롬프트가 헤딩에 붙인 지시문(— 이후) 제거
+      const heading = trimmed.slice(3).split(/\s+[—–-]\s+|\s*:\s+/)[0].trim();
       blocks.push(
         <h2
           key={key++}
@@ -63,7 +65,7 @@ export default function ReportView({ markdown }: { markdown: string }) {
             margin: '1.5rem 0 0.6rem',
           }}
         >
-          {trimmed.slice(3)}
+          {heading}
         </h2>
       );
     } else if (trimmed === '---') {

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { saveDiagnosis } from '@/lib/db';
 import { generateReport } from '@/lib/llm';
+import { splitReport } from '@/lib/report-gate';
 import { scoreAnswers, type Answers } from '@/lib/scoring';
 
 export async function POST(request: Request) {
@@ -36,8 +37,13 @@ export async function POST(request: Request) {
     promptVersion: report.promptVersion,
   });
 
+  // T-10: 신규 진단은 미결제 상태 — 잠금 구간은 응답에서 제거 (D-07 경계)
+  const gated = splitReport(report.markdown);
+  const locked = gated.locked !== null;
   return NextResponse.json({
-    markdown: report.markdown,
+    markdown: locked ? gated.free : report.markdown,
+    locked,
+    lockedSections: gated.lockedSections,
     model: report.model,
     promptVersion: report.promptVersion,
     shareToken: saved?.shareToken ?? null,
