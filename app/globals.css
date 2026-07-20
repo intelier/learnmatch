@@ -154,6 +154,56 @@ body {
   font-weight: 500;
 }
 
+/* ── 이론 아코디언 ── */
+.theory-item {
+  background: var(--white);
+  border: 1px solid var(--ivory-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.theory-item summary {
+  cursor: pointer;
+  padding: 13px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  list-style: none;
+  position: relative;
+  padding-right: 36px;
+}
+
+.theory-item summary::-webkit-details-marker { display: none; }
+
+.theory-item summary::after {
+  content: '+';
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--amber);
+  font-size: 17px;
+  font-weight: 400;
+}
+
+.theory-item[open] summary::after { content: '−'; }
+
+.theory-item[open] summary {
+  border-bottom: 1px solid var(--ivory-border);
+  background: var(--ivory-dark);
+}
+
+.theory-body {
+  padding: 12px 16px 14px;
+}
+
+.theory-body p {
+  font-size: 13px;
+  color: var(--navy-light);
+  line-height: 1.7;
+}
+
+.theory-body p + p { margin-top: 8px; }
+
 /* ── 결과 축 바 ── */
 .axis-row { margin-bottom: 0.9rem; }
 

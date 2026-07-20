@@ -1,3 +1,5 @@
+import TheorySection from '@/app/components/theory-section';
+
 export default function Home() {
   return (
     <main>
@@ -16,9 +18,10 @@ export default function Home() {
           가장 빛날까요?
         </h1>
         <p style={{ color: 'var(--navy-muted)', marginBottom: '2rem' }}>
-          5분 설문으로 아이의 학습 성향을 진단하고,
+          아이를 가장 가까이에서 지켜본 부모님의 관찰만으로 —
           <br />
-          우리 아이 얘기 같은 맞춤 리포트를 받아보세요.
+          자녀 검사 없이 5분 만에, 우리 아이 얘기 같은 맞춤 리포트를
+          받아보세요.
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <a className="btn-primary" href="/survey">
@@ -34,7 +37,8 @@ export default function Home() {
         <div className="card">
           <div className="eyebrow">01 · 설문</div>
           <p style={{ fontSize: 14 }}>
-            아이의 평소 모습을 떠올리며 답해요. 정답은 없어요.
+            아이의 평소 모습을 떠올리며 부모님이 답해요. 아이가 검사받을
+            필요 없이, 정답도 없어요.
           </p>
         </div>
         <div className="card">
@@ -50,6 +54,8 @@ export default function Home() {
           </p>
         </div>
       </section>
+
+      <TheorySection />
 
       <footer
         style={{

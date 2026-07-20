@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AXIS_META, FOCUS_LABEL, STYLE_LABEL, type AxisId } from '@/lib/questions';
 import { scoreAnswers, type Answers } from '@/lib/scoring';
 import { encodeAnswers } from '@/lib/share';
+import RadarChart from './radar-chart';
 import ReportView from './report-view';
 
 type ReportState =
@@ -92,6 +93,13 @@ export default function ResultView({
       </div>
 
       <div className="card" style={{ marginBottom: '1.25rem' }}>
+        <RadarChart scores={scores} />
+        <div
+          style={{
+            borderTop: '1px solid var(--ivory-border)',
+            margin: '1.1rem 0',
+          }}
+        />
         {(Object.keys(AXIS_META) as AxisId[]).map((axis) => {
           const meta = AXIS_META[axis];
           const s = scores.axes[axis];
