@@ -57,9 +57,16 @@ export async function POST(request: Request) {
 
   const parsed = parsePaymentCompleted(event);
   if (!parsed.shareToken) {
+    // ⚠️ 임시: questionAnswers 실제 필드 구조를 문서만으로 확정할 수 없어,
+    // 첫 실결제 웹훅에서 파싱이 실패하면 원인을 바로 알 수 있도록 원본을 기록한다.
+    // (결제 금액·상품명 등 비민감 정보만 포함 — 카드 정보 없음)
     console.error(
       '웹훅에서 share_token을 찾지 못함 — "구매 시 질문" 설정을 확인하세요.',
-      { merchantUid: parsed.merchantUid, productTitle: parsed.productTitle }
+      {
+        merchantUid: parsed.merchantUid,
+        productTitle: parsed.productTitle,
+        rawQuestionAnswers: JSON.stringify(event.data?.object?.questionAnswers ?? null),
+      }
     );
     // 재시도해도 못 찾을 오류이므로 200으로 확인만 하고 운영자가 로그로 인지
     return NextResponse.json({ ok: false, error: 'share_token_not_found' });
