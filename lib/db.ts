@@ -11,8 +11,9 @@ let cached: SupabaseClient | null | undefined;
 
 export function getDb(): SupabaseClient | null {
   if (cached !== undefined) return cached;
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  // 대시보드에서 값을 붙여넣을 때 딸려오는 공백/줄바꿈 방어
+  const url = process.env.SUPABASE_URL?.trim();
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
   cached = url && key ? createClient(url, key, { auth: { persistSession: false } }) : null;
   return cached;
 }
