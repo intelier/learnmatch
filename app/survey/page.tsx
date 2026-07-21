@@ -89,19 +89,6 @@ export default function SurveyPage() {
       <p style={{ marginTop: '2rem', fontSize: 12, color: 'var(--navy-muted)' }}>
         정답은 없어요. 아이의 평소 모습에 가장 가까운 것을 골라주세요.
       </p>
-
-      <footer
-        style={{
-          marginTop: '1.25rem',
-          paddingTop: '1.25rem',
-          borderTop: '1px solid var(--ivory-border)',
-          fontSize: 12,
-          color: 'var(--navy-muted)',
-        }}
-      >
-        본 진단은 자녀 이해를 돕기 위한 참고 자료이며, 의학적·심리학적 진단을
-        대신하지 않습니다.
-      </footer>
     </main>
   );
 }

@@ -278,19 +278,6 @@ export default function ResultView({
           {isSharedView ? '나도 우리 아이 진단해보기' : '다시 진단하기'}
         </Link>
       </div>
-
-      <footer
-        style={{
-          marginTop: '2.5rem',
-          paddingTop: '1.25rem',
-          borderTop: '1px solid var(--ivory-border)',
-          fontSize: 12,
-          color: 'var(--navy-muted)',
-        }}
-      >
-        본 진단은 자녀 이해를 돕기 위한 참고 자료이며, 의학적·심리학적 진단을
-        대신하지 않습니다.
-      </footer>
     </main>
   );
 }

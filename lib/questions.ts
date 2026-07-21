@@ -38,30 +38,31 @@ export const AXIS_META: Record<
   AxisId,
   { label: string; positive: string; negative: string }
 > = {
+  // positive = 점수 높을 때, negative = 낮을 때 — 양쪽 모두 강점의 언어로 재해석 (반전 프레이밍)
   autonomy: {
     label: '자기주도성',
-    positive: '스스로 계획하고 파고드는 힘이 있어요',
-    negative: '옆에서 함께 끌어줄 때 더 잘해요',
+    positive: '스스로 방향을 정하고 파고드는, 주체적인 아이예요',
+    negative: '혼자보다 함께일 때 힘을 내는, 신뢰 속에서 배우는 아이예요',
   },
   zpd_strain: {
     label: '수준 부담',
-    positive: '지금 학습 수준이 아이에게 버거워요',
-    negative: '지금 수준을 여유 있게 소화하고 있어요',
+    positive: '쉬운 길에 안주하지 않고 높은 벽에 부딪쳐보는 중이에요 — 조금 낮춰주면 도전이 성취로 바뀌어요',
+    negative: '지금 수준을 여유롭게 넘어서는, 더 큰 도전이 준비된 아이예요',
   },
   burnout: {
     label: '소진 신호',
-    positive: '지쳐 있다는 신호가 보여요',
-    negative: '배움에 에너지가 있어요',
+    positive: '무리하기보다 쉬어갈 때를 아는 아이예요 — 회복의 시간을 주면 다시 몰입해요',
+    negative: '배움에 에너지가 살아 있는, 지금이 몰입하기 좋은 때예요',
   },
   competence: {
     label: '유능감',
-    positive: '해낼 수 있다는 믿음이 단단해요',
-    negative: '자신감을 회복할 경험이 필요해요',
+    positive: '해낼 수 있다는 믿음이 단단한 아이예요',
+    negative: '쉽게 자만하지 않고 자신을 냉정히 보는 아이예요 — 작은 성공을 쌓으면 단단한 자신감이 돼요',
   },
   social: {
     label: '사회성',
-    positive: '함께 배울 때 힘이 나요',
-    negative: '혼자 몰입할 때 편안해요',
+    positive: '함께 배울 때 힘이 나는, 관계 속에서 자라는 아이예요',
+    negative: '혼자만의 몰입에서 깊이를 만드는, 자기 세계가 뚜렷한 아이예요',
   },
 };
 
