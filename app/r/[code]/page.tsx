@@ -50,9 +50,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolved = await resolve(code);
   if (!resolved) return { title: '클래스 핏 — 아이 학습 성향 진단' };
   const scores = scoreAnswers(resolved.answers);
+  const title = `우리 아이는 ${scores.headline} | 클래스 핏`;
+  const description = '우리 아이 학습 성향 진단 리포트를 확인해 보세요.';
+  // og:image는 같은 폴더의 opengraph-image.tsx가 자동 주입한다.
   return {
-    title: `${scores.headline} | 클래스 핏`,
-    description: '우리 아이 학습 성향 진단 리포트를 확인해 보세요.',
+    title,
+    description,
+    openGraph: { title, description, type: 'article' },
+    twitter: { card: 'summary_large_image', title, description },
   };
 }
 

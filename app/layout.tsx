@@ -1,10 +1,21 @@
 import type { Metadata } from 'next';
 import './globals.css';
 
+const SITE_TITLE = '클래스 핏 — 아이 학습 성향 진단';
+const SITE_DESC =
+  '부모님의 관찰만으로 5분 만에, 우리 아이 얘기 같은 학습 성향 리포트를 받아보세요.';
+
 export const metadata: Metadata = {
-  title: '클래스 핏 — 아이 학습 성향 진단',
-  description:
-    '자녀 성향진단으로 자녀 이해를 돕고, 나아가 학원 선택을 돕는 서비스',
+  metadataBase: new URL('https://learnmatch-zeta.vercel.app'),
+  title: SITE_TITLE,
+  description: SITE_DESC,
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESC,
+    type: 'website',
+    locale: 'ko_KR',
+  },
+  twitter: { card: 'summary_large_image', title: SITE_TITLE, description: SITE_DESC },
 };
 
 export default function RootLayout({
@@ -27,7 +38,6 @@ export default function RootLayout({
             <div className="logo">
               클래스 <span>핏</span>
             </div>
-            <div className="badge-theory">교육심리학 기반</div>
           </header>
           {children}
         </div>
