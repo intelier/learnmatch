@@ -12,6 +12,7 @@ interface Props {
 
 interface Resolved {
   answers: Answers;
+  childName: string | null;
   /** DB에 저장된 리포트 (있으면 LLM 재호출 없이 표시) */
   storedReport: string | null;
   /** 결제 언락 여부 — 미결제면 storedReport는 무료 구간만 담긴다 (T-10) */
@@ -26,6 +27,7 @@ async function resolve(code: string): Promise<Resolved | null> {
     if (stored.unlocked) {
       return {
         answers: stored.answers,
+        childName: stored.childName,
         storedReport: stored.markdown,
         locked: false,
         lockedSections: [],
@@ -35,13 +37,15 @@ async function resolve(code: string): Promise<Resolved | null> {
     const gated = splitReport(stored.markdown);
     return {
       answers: stored.answers,
+      childName: stored.childName,
       storedReport: gated.locked !== null ? gated.free : stored.markdown,
       locked: gated.locked !== null,
       lockedSections: gated.lockedSections,
     };
   }
   const answers = decodeAnswers(code);
-  if (answers) return { answers, storedReport: null, locked: false, lockedSections: [] };
+  if (answers)
+    return { answers, childName: null, storedReport: null, locked: false, lockedSections: [] };
   return null;
 }
 
@@ -50,8 +54,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolved = await resolve(code);
   if (!resolved) return { title: '클래스 핏 — 아이 학습 성향 진단' };
   const scores = scoreAnswers(resolved.answers);
-  const title = `우리 아이는 ${scores.headline} | 클래스 핏`;
-  const description = '우리 아이 학습 성향 진단 리포트를 확인해 보세요.';
+  const who = resolved.childName ? `${resolved.childName}는` : '우리 아이는';
+  const title = `${who} ${scores.headline} | 클래스 핏`;
+  const description = '아이 학습 성향 진단 리포트를 확인해 보세요.';
   // og:image는 같은 폴더의 opengraph-image.tsx가 자동 주입한다.
   return {
     title,
@@ -81,6 +86,7 @@ export default async function SharedReportPage({ params }: Props) {
   return (
     <ResultView
       answers={resolved.answers}
+      childName={resolved.childName ?? undefined}
       isSharedView
       initialReport={resolved.storedReport ?? undefined}
       initialShareToken={resolved.storedReport ? code : undefined}

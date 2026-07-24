@@ -117,9 +117,10 @@ export function generateMockReport(input: ReportInput): string {
   if (surprises.length === 0)
     surprises.push(`부모님 보시기에는 ${AXIS_META[strongest[strongest.length - 1]].label}이 걱정되실 수 있지만, 실제로는 ${AXIS_META[strongest[0]].label} 쪽의 힘이 그 모습을 받쳐주고 있어요. 약점보다 강점을 지렛대로 삼아 주세요.`);
 
+  const who = input.childName?.trim() || '우리 아이';
   return [
     '## 한눈에 보기',
-    `${scores.headline}인 우리 아이. ${STYLE_LABEL[scores.style]} 방식으로 배울 때 이해가 가장 잘 되고, ${FOCUS_LABEL[scores.focus]} 성향이에요. 지금 아이에게 가장 두드러지는 축은 **${AXIS_META[strongest[0]].label}**이에요. ${AXIS_NARRATIVE[strongest[0]][band(scores.axes[strongest[0]].normalized)]}`,
+    `${scores.headline}인 ${who}. ${STYLE_LABEL[scores.style]} 방식으로 배울 때 이해가 가장 잘 되고, ${FOCUS_LABEL[scores.focus]} 성향이에요. 지금 ${who}에게 가장 두드러지는 축은 **${AXIS_META[strongest[0]].label}**이에요. ${AXIS_NARRATIVE[strongest[0]][band(scores.axes[strongest[0]].normalized)]}`,
     '',
     '## 이런 모습, 익숙하시죠?',
     ...(scenes.length

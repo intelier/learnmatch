@@ -6,9 +6,15 @@ import { scoreAnswers, type Answers } from '@/lib/scoring';
 
 export async function POST(request: Request) {
   let answers: Answers;
+  let childName: string | undefined;
   try {
     const body = await request.json();
     answers = body?.answers;
+    // 이름은 선택. 과도한 길이/공백 방어.
+    if (typeof body?.childName === 'string') {
+      const trimmed = body.childName.trim().slice(0, 20);
+      if (trimmed) childName = trimmed;
+    }
   } catch {
     return NextResponse.json({ error: 'invalid JSON' }, { status: 400 });
   }
@@ -26,12 +32,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'no valid answers' }, { status: 400 });
   }
 
-  const report = await generateReport({ answers, scores });
+  const report = await generateReport({ answers, scores, childName });
 
   // T-09: 진단·리포트 저장 (DB 미설정/실패 시 null — 무상태 동작 유지)
   const saved = await saveDiagnosis({
     answers,
     scores,
+    childName,
     markdown: report.markdown,
     model: report.model,
     promptVersion: report.promptVersion,

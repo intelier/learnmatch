@@ -18,6 +18,7 @@ export type Answers = Record<string, number>;
 
 /** 설문 → 결과 화면 전달용 sessionStorage 키 */
 export const ANSWERS_STORAGE_KEY = 'classfit.answers';
+export const CHILD_NAME_STORAGE_KEY = 'classfit.childName';
 
 export interface AxisScore {
   raw: number;

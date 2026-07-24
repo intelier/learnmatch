@@ -5,6 +5,7 @@ create table if not exists diagnoses (
   id uuid primary key default gen_random_uuid(),
   answers jsonb not null,
   scores jsonb not null,
+  child_name text,                          -- 아이 이름/애칭 (선택) — 리포트 개인화
   share_token text unique not null,
   unlocked boolean not null default false, -- 결제 언락 여부 (T-10)
   created_at timestamptz not null default now()

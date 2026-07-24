@@ -5,11 +5,13 @@
 import { QUESTIONS } from './questions.ts';
 import { describeScores, type Answers, type Scores } from './scoring.ts';
 
-export const PROMPT_VERSION = 'v4';
+export const PROMPT_VERSION = 'v5';
 
 export interface ReportInput {
   answers: Answers;
   scores: Scores;
+  /** 아이 이름/애칭 (선택) — 있으면 리포트를 "OO이는~"으로 개인화 */
+  childName?: string;
 }
 
 export function buildSystemPrompt(): string {
@@ -18,6 +20,7 @@ export function buildSystemPrompt(): string {
     '',
     '지켜야 할 것:',
     '- 대상 독자는 학부모. 따뜻한 존댓말로, 아이를 평가하지 말고 이해를 돕는 톤으로 쓴다.',
+    '- 아이 이름이 주어지면 "우리 아이" 대신 그 이름을 자연스럽게 부른다. 예: "지호는 ~한 편이에요", "지호가 ~할 때". 한국어 호격 조사를 자연스럽게 (받침 있으면 "지호는/지호가", 애칭이면 그대로). 매 문장 억지로 넣지 말고, 부모가 이름을 부르듯 자연스러운 빈도로.',
     '- 부모가 설문에서 고른 실제 행동을 인용해 "우리 아이 얘기 같다"고 느끼게 쓴다.',
     '- 단정 대신 경향으로 말한다. ("~한 편이에요", "~일 수 있어요")',
     '- 의학적·심리학적 진단 표현(진단명, 장애, 치료 등)은 절대 쓰지 않는다.',
@@ -51,8 +54,11 @@ export function buildUserPrompt(input: ReportInput): string {
     return opt ? `- ${q.text} → "${opt.label}"` : null;
   }).filter(Boolean);
 
+  const name = input.childName?.trim();
   return [
     '다음 진단 결과로 아이 학습 성향 리포트를 작성해 줘.',
+    '',
+    name ? `[아이 이름] ${name} — 리포트에서 이 이름으로 부른다.` : '[아이 이름] 미입력 — "우리 아이"로 부른다.',
     '',
     `[성향 요약] ${input.scores.headline}`,
     '',

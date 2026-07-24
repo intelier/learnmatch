@@ -3,10 +3,15 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import ResultView from '@/app/components/result-view';
-import { ANSWERS_STORAGE_KEY, type Answers } from '@/lib/scoring';
+import {
+  ANSWERS_STORAGE_KEY,
+  CHILD_NAME_STORAGE_KEY,
+  type Answers,
+} from '@/lib/scoring';
 
 export default function ResultPage() {
   const [answers, setAnswers] = useState<Answers | null>(null);
+  const [childName, setChildName] = useState<string>('');
   const [missing, setMissing] = useState(false);
 
   useEffect(() => {
@@ -17,6 +22,7 @@ export default function ResultPage() {
     }
     try {
       setAnswers(JSON.parse(raw));
+      setChildName(sessionStorage.getItem(CHILD_NAME_STORAGE_KEY)?.trim() ?? '');
     } catch {
       setMissing(true);
     }
@@ -37,5 +43,5 @@ export default function ResultPage() {
 
   if (!answers) return null;
 
-  return <ResultView answers={answers} />;
+  return <ResultView answers={answers} childName={childName || undefined} />;
 }
