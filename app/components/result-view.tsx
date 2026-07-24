@@ -11,6 +11,7 @@ import {
 import { scoreAnswers, type Answers } from '@/lib/scoring';
 import { encodeAnswers } from '@/lib/share';
 import RadarChart from './radar-chart';
+import ReportLoading from './report-loading';
 import ReportView from './report-view';
 
 type ReportState =
@@ -158,20 +159,7 @@ export default function ResultView({
         })}
       </div>
 
-      {report.status === 'loading' && (
-        <div
-          className="card"
-          style={{
-            background: 'var(--amber-light)',
-            borderColor: 'var(--amber-border)',
-            marginBottom: '1.5rem',
-          }}
-        >
-          <p style={{ fontSize: 13 }}>
-            아이 맞춤 리포트를 정리하고 있어요. 잠시만 기다려 주세요…
-          </p>
-        </div>
-      )}
+      {report.status === 'loading' && <ReportLoading scores={scores} />}
       {report.status === 'error' && (
         <div className="card" style={{ marginBottom: '1.5rem' }}>
           <p style={{ fontSize: 13, marginBottom: 10 }}>

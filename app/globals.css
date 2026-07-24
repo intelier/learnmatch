@@ -204,6 +204,46 @@ body {
 
 .theory-body p + p { margin-top: 8px; }
 
+/* ── 리포트 로딩 (기다림을 콘텐츠로) ── */
+.loading-dots::after {
+  content: '';
+  animation: loading-dots 1.4s steps(4, end) infinite;
+}
+
+@keyframes loading-dots {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+  100% { content: ''; }
+}
+
+.teaser-fade {
+  animation: teaser-fade 0.5s ease;
+}
+
+@keyframes teaser-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 로딩 진행 바에만 은은한 흐름 효과 (설문 진행바에는 미적용) */
+.progress-fill.loading-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--amber) 0%,
+    var(--amber-border) 50%,
+    var(--amber) 100%
+  );
+  background-size: 200% 100%;
+  animation: progress-shimmer 1.8s linear infinite;
+}
+
+@keyframes progress-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: 0 0; }
+}
+
 /* ── 잠금 티저 (T-10) ── */
 .locked-teaser {
   position: relative;
