@@ -218,9 +218,15 @@ export default function ResultView({
             marginBottom: '1.5rem',
           }}
         >
-          <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
-            우리 아이의 의외의 모습, 축별 자세한 해석과 실천 조언이 준비되어
-            있어요.
+          <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 6 }}>
+            {childName ? `${childName}의` : '우리 아이의'} 의외의 모습, 이제
+            펼쳐볼까요?
+          </p>
+          <p style={{ fontSize: 13, color: 'var(--navy-light)', marginBottom: 10, lineHeight: 1.6 }}>
+            교육심리학 이론으로 읽어낸 <b>강점 재해석</b>과, 오늘 바로 써먹는{' '}
+            <b>맞춤 조언·학원 고르는 법</b>까지 —
+            <br />
+            잔소리 대신 아이에게 맞는 방법을 찾는 지도가 돼요.
           </p>
           <p style={{ fontSize: 12, color: 'var(--navy-muted)', marginBottom: 12 }}>
             잠긴 내용: {report.lockedSections.join(' · ')}

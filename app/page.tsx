@@ -17,10 +17,25 @@ export default function Home() {
           <br />
           가장 빛날까요?
         </h1>
-        <p style={{ color: 'var(--navy-muted)', marginBottom: '2rem' }}>
+        <p style={{ color: 'var(--navy-muted)', marginBottom: '1.25rem' }}>
           아이를 가장 가까이에서 지켜본 부모님의 관찰을 바탕으로 —
           <br />
           5분 만에, 우리 아이 얘기 같은 맞춤 리포트를 받아보세요.
+        </p>
+        <p
+          style={{
+            fontSize: 13,
+            color: 'var(--sage)',
+            background: 'var(--sage-light)',
+            border: '1px solid var(--sage-border)',
+            borderRadius: 'var(--radius)',
+            padding: '10px 14px',
+            marginBottom: '1.75rem',
+            lineHeight: 1.6,
+          }}
+        >
+          자기결정성이론(SDT)·근접발달영역(ZPD)·학업 소진 연구 등 검증된
+          교육심리학 이론을 근거로 아이의 성향을 5개 축으로 분석해요.
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <a className="btn-primary" href="/survey">
@@ -29,6 +44,48 @@ export default function Home() {
           <a className="btn-secondary" href="/report/example">
             예시 리포트 보기
           </a>
+        </div>
+      </section>
+
+      <section style={{ marginTop: '2.5rem' }}>
+        <div className="eyebrow">우리 아이 학습 유형을 알면</div>
+        <div style={{ display: 'grid', gap: 12, marginTop: '0.9rem' }}>
+          <div className="card" style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+            <span style={{ fontSize: 20 }}>🗣️</span>
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>
+                잔소리가 줄어요
+              </p>
+              <p style={{ fontSize: 13, color: 'var(--navy-muted)', lineHeight: 1.6 }}>
+                아이에게 안 맞는 방식으로 밀어붙이지 않게 되니, 매일의 실랑이가
+                줄어들어요.
+              </p>
+            </div>
+          </div>
+          <div className="card" style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+            <span style={{ fontSize: 20 }}>🎯</span>
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>
+                시행착오를 아껴요
+              </p>
+              <p style={{ fontSize: 13, color: 'var(--navy-muted)', lineHeight: 1.6 }}>
+                성향에 맞는 공부법·학원을 고르면, 안 맞는 곳을 전전하며 쓰는
+                돈과 시간을 아낄 수 있어요.
+              </p>
+            </div>
+          </div>
+          <div className="card" style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+            <span style={{ fontSize: 20 }}>💛</span>
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>
+                아이를 다시 보게 돼요
+              </p>
+              <p style={{ fontSize: 13, color: 'var(--navy-muted)', lineHeight: 1.6 }}>
+                문제라고 여겼던 행동이 강점으로 읽히면, 아이를 대하는 마음과
+                관계가 달라져요.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
