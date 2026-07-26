@@ -1,12 +1,12 @@
 /**
- * 리포트 생성 프롬프트 v6 (D-13: 연령대 발달 단계 반영)
+ * 리포트 생성 프롬프트 v7 (D-13: 연령대 발달 단계 반영, D-14: 선택지 인용 방식 개선)
  * 실제 Claude/Gemini 호출과 mock이 같은 입력을 공유한다.
  */
 import { AGE_BAND_LABEL, type AgeBand } from './age-bands.ts';
 import { QUESTIONS } from './questions.ts';
 import { describeScores, type Answers, type Scores } from './scoring.ts';
 
-export const PROMPT_VERSION = 'v6';
+export const PROMPT_VERSION = 'v7';
 
 export interface ReportInput {
   answers: Answers;
@@ -26,6 +26,7 @@ export function buildSystemPrompt(): string {
     '- 아이 이름이 주어지면 "우리 아이" 대신 그 이름을 자연스럽게 부른다. 예: "지호는 ~한 편이에요", "지호가 ~할 때". 한국어 호격 조사를 자연스럽게 (받침 있으면 "지호는/지호가", 애칭이면 그대로). 매 문장 억지로 넣지 말고, 부모가 이름을 부르듯 자연스러운 빈도로.',
     '- ★ 연령대가 주어지면 반드시 발달 단계를 고려해 해석한다. 미취학·초등 저학년(1~2학년)은 자기주도성·유능감이 아직 형성되는 시기이므로 낮은 수치를 "문제"로 말하지 말고 이 나이대의 자연스러운 발달 단계로 설명한다. 초등 중·고학년은 자기효능감과 또래관계가 급격히 중요해지는 전환기이니 사회성·유능감 해석에 이를 반영한다. 중학생은 자아정체성 형성과 정서 기복이 커지는 시기이니 소진 신호를 가볍게 넘기지 않되 "사춘기라 그렇다"로 뭉뚱그리지 않고 구체적으로 짚는다. 고등학생은 실제 입시 부담·정서적 소진이 심각할 수 있는 시기이니 안일하게 다루지 않는다. 나이에 맞지 않는 기대치(예: 미취학 아이에게 "스스로 계획을 세워야 한다"는 기준)를 들이대지 않는다.',
     '- 부모가 설문에서 고른 실제 행동을 인용해 "우리 아이 얘기 같다"고 느끼게 쓴다.',
+    '- ★ 단, 선택지 문구를 통째로 따옴표에 넣어 옮기지 않는다. 선택지는 부모가 본 장면의 요약일 뿐이니, 그 장면을 자연스러운 서술로 풀어 쓴다. 나쁜 예: 좋은 점수를 받아도 「"이번엔 문제가 쉬웠어"라고 해요」라고 하셨죠. 좋은 예: 좋은 점수를 받아온 날에도 "이번엔 문제가 쉬웠어"라며 자기 공으로 돌리지 않는다고 하셨어요. 아이가 실제로 한 말만 따옴표로 인용하고, 부모의 관찰 서술("~해요", "~하는 편이에요")은 따옴표 없이 문장에 녹인다.',
     '- 단정 대신 경향으로 말한다. ("~한 편이에요", "~일 수 있어요")',
     '- 의학적·심리학적 진단 표현(진단명, 장애, 치료 등)은 절대 쓰지 않는다.',
     '- 아이의 부족한 면은 반드시 "어떻게 도와줄 수 있는지"와 함께 말한다.',
@@ -55,7 +56,8 @@ export function buildUserPrompt(input: ReportInput): string {
   const answerLines = QUESTIONS.map((q) => {
     const idx = input.answers[q.id];
     const opt = idx !== undefined ? q.options[idx] : undefined;
-    return opt ? `- ${q.text} → "${opt.label}"` : null;
+    // 선택지 안에 큰따옴표가 들어 있어 「」로 감싼다 (따옴표 중첩 방지)
+    return opt ? `- ${q.text} → 「${opt.label}」` : null;
   }).filter(Boolean);
 
   const name = input.childName?.trim();

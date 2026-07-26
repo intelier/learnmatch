@@ -1,5 +1,10 @@
 /**
- * 클래스 핏 — 진단 문항 정의 (D-02: legacy 8문항의 채점 축 유지 + 확장, D-11: 18→25문항 정밀도 강화)
+ * 클래스 핏 — 진단 문항 정의
+ * (D-02: legacy 8문항의 채점 축 유지 + 확장, D-11: 18→25문항 정밀도 강화,
+ *  D-13/D-14: "구체적 상황에서의 행동"을 묻는 시나리오 문항으로 재작성)
+ *
+ * ★ 문항 재작성 규칙: 옵션의 순서와 effects 값은 그대로 두고 text/label만 바꾼다.
+ *   채점 축 의미와 scripts/check-scoring.ts 검증 케이스가 그대로 유지된다.
  *
  * 채점 축 (legacy/learning_diagnostic_full.html 기원):
  *  - autonomy    자기주도성  (+: 스스로 탐구 / -: 함께 끌어줄 때 잘함)
@@ -93,32 +98,32 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 'q2',
-    text: '지금 수업 수준이 아이에게 어느 정도라고 느끼나요?',
+    text: '아이가 문제를 풀다 말고 연필을 놓은 채 가만히 있는 모습, 얼마나 자주 보이나요?',
     options: [
-      { label: '너무 쉬워해요', effects: { zpd_strain: -2 } },
-      { label: '적당한 것 같아요', effects: {} },
-      { label: '조금 어려워하지만 따라가요', effects: { zpd_strain: 1 } },
-      { label: '많이 어려워하고 힘들어해요', effects: { zpd_strain: 2, burnout: 1 } },
+      { label: '거의 못 봤어요 — 막히면 바로 다음 문제로 넘어가요', effects: { zpd_strain: -2 } },
+      { label: '가끔 그럴 때가 있어요', effects: {} },
+      { label: '한 문제에서 한참 멈춰 있는 일이 잦아요', effects: { zpd_strain: 1 } },
+      { label: '멈춰 있다가 한숨을 쉬거나 딴짓으로 새요', effects: { zpd_strain: 2, burnout: 1 } },
     ],
   },
   {
     id: 'q3',
     text: '공부하기 싫다고 할 때 아이가 주로 하는 말은?',
     options: [
-      { label: '이게 왜 필요해요? (이유를 따짐)', effects: { autonomy: 2 } },
-      { label: '어차피 난 못해요 (자신감 부족)', effects: { competence: -2, burnout: 1 } },
-      { label: '혼자 하기 싫어요 (같이 하고 싶음)', effects: { social: 2 } },
-      { label: '말 없이 그냥 안 해요', effects: { burnout: 2, competence: -1 } },
+      { label: '이걸 왜 해야 하냐며 이유를 따져요', effects: { autonomy: 2 } },
+      { label: '어차피 난 못한다고 해요', effects: { competence: -2, burnout: 1 } },
+      { label: '혼자 하기 싫으니 같이 하자고 해요', effects: { social: 2 } },
+      { label: '아무 말 없이 그냥 안 해요', effects: { burnout: 2, competence: -1 } },
     ],
   },
   {
     id: 'q4',
-    text: '틀린 문제를 다시 만났을 때 아이의 반응은?',
+    text: '빨간 색연필로 틀린 표시가 그어진 시험지를 아이에게 건넸을 때, 아이의 첫 행동은?',
     options: [
-      { label: '다시 해볼게요 하고 시도해요', effects: { competence: 2 } },
-      { label: '속상해하다가 다시 해요', effects: { competence: 1 } },
-      { label: '난 역시 못해 라고 해요', effects: { competence: -2 } },
-      { label: '그 과목 자체를 피하려 해요', effects: { competence: -2, burnout: 2 } },
+      { label: '어디서 틀렸는지부터 찾아봐요', effects: { competence: 2 } },
+      { label: '잠깐 시무룩하다가 다시 들여다봐요', effects: { competence: 1 } },
+      { label: '점수만 확인하고 덮어버려요', effects: { competence: -2 } },
+      { label: '안 보이는 곳에 치우거나 구겨버려요', effects: { competence: -2, burnout: 2 } },
     ],
   },
   {
@@ -133,12 +138,12 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 'q6',
-    text: '새로운 것을 배울 때 아이가 가장 좋아하는 방식은?',
+    text: '조립 설명서가 든 장난감이나 가구를 아이와 함께 만든다면, 아이는 먼저 무엇을 하나요?',
     options: [
-      { label: '그림, 영상, 도표로 보는 것', style: 'visual' },
-      { label: '설명을 듣고 이야기하는 것', style: 'auditory' },
-      { label: '직접 만들고 해보는 것', style: 'kinesthetic' },
-      { label: '읽고 정리하는 것', style: 'reading' },
+      { label: '그림 설명서를 뚫어져라 들여다봐요', style: 'visual' },
+      { label: '"이거 어떻게 하는 거야?" 하고 물어보며 해요', style: 'auditory' },
+      { label: '설명서는 제쳐두고 일단 손으로 맞춰봐요', style: 'kinesthetic' },
+      { label: '글로 된 설명을 처음부터 차근차근 읽어요', style: 'reading' },
     ],
   },
   {
@@ -153,84 +158,84 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 'q8',
-    text: '아이가 깊이 파고드는 편인가요, 폭넓게 하는 편인가요?',
+    text: '아이 방을 한번 둘러본다면, 아이의 물건들은 어떤 모습인가요?',
     options: [
-      { label: '한 가지에 완전히 빠져요 (깊이형)', focus: 'deep' },
-      { label: '여러 가지를 골고루 좋아해요 (넓이형)', focus: 'broad' },
-      { label: '상황에 따라 달라요', focus: 'mixed' },
-      { label: '아직 잘 모르겠어요', focus: 'mixed' },
+      { label: '한 가지 주제(공룡·아이돌·자동차 등) 물건이 잔뜩 모여 있어요', focus: 'deep' },
+      { label: '여러 분야 물건이 조금씩 골고루 있어요', focus: 'broad' },
+      { label: '시기마다 빠지는 게 확 바뀌어 흔적이 층층이 쌓여 있어요', focus: 'mixed' },
+      { label: '딱히 눈에 띄는 패턴은 없어요', focus: 'mixed' },
     ],
   },
 
   /* ── 확장 10문항 (축별 문항 수 보강) ── */
   {
     id: 'q9',
-    text: '숙제나 공부 계획은 주로 누가 세우나요?',
+    text: '주말 아침, 아무도 공부하라고 하지 않았을 때 아이는 무엇부터 하나요?',
     options: [
-      { label: '아이가 스스로 정해요', effects: { autonomy: 2 } },
-      { label: '같이 의논해서 정해요', effects: { autonomy: 1 } },
-      { label: '부모가 정해줘야 해요', effects: { autonomy: -1 } },
-      { label: '정해줘도 잘 안 지켜져요', effects: { autonomy: -1, burnout: 1 } },
+      { label: '스스로 할 일을 정해서 시작해요', effects: { autonomy: 2 } },
+      { label: '뭐부터 할지 같이 정해달라고 해요', effects: { autonomy: 1 } },
+      { label: '말해주기 전까지는 시작하지 않아요', effects: { autonomy: -1 } },
+      { label: '말해줘도 미루다가 하루가 그냥 지나가요', effects: { autonomy: -1, burnout: 1 } },
     ],
   },
   {
     id: 'q10',
-    text: '아이에게 궁금한 것이 생기면 어떻게 하나요?',
+    text: 'TV나 책에서 아이가 모르는 단어가 나왔을 때, 아이는 어떻게 하나요?',
     options: [
-      { label: '책이나 영상을 스스로 찾아봐요', effects: { autonomy: 2 } },
-      { label: '부모나 선생님에게 이것저것 물어봐요', effects: { autonomy: 1, social: 1 } },
-      { label: '궁금해하다가 금방 잊어요', effects: {} },
-      { label: '궁금한 게 잘 안 생기는 편이에요', effects: { autonomy: -1, burnout: 1 } },
+      { label: '스스로 찾아보거나 검색해봐요', effects: { autonomy: 2 } },
+      { label: '바로 "그게 무슨 뜻이야?" 하고 물어봐요', effects: { autonomy: 1, social: 1 } },
+      { label: '궁금해하다가 금방 잊어버려요', effects: {} },
+      { label: '모르는 게 나와도 별 관심을 안 보여요', effects: { autonomy: -1, burnout: 1 } },
     ],
   },
   {
     id: 'q11',
-    text: '새로운 단원이나 과목을 시작할 때 아이는?',
+    text: '새 학기 첫날, 처음 받아온 교과서를 아이가 어떻게 하나요?',
     options: [
-      { label: '재밌겠다며 기대해요', effects: { competence: 2 } },
-      { label: '조금 긴장하지만 시작해요', effects: { competence: 1 } },
-      { label: '어려울 것 같다고 걱정부터 해요', effects: { competence: -1, zpd_strain: 1 } },
-      { label: '시작 자체를 미루거나 피해요', effects: { competence: -2, burnout: 1 } },
+      { label: '먼저 넘겨보며 뭘 배우는지 궁금해해요', effects: { competence: 2 } },
+      { label: '슬쩍 보긴 하는데 별말은 없어요', effects: { competence: 1 } },
+      { label: '두께나 어려워 보이는 부분을 보고 걱정부터 해요', effects: { competence: -1, zpd_strain: 1 } },
+      { label: '가방에서 꺼내지도 않아요', effects: { competence: -2, burnout: 1 } },
     ],
   },
   {
     id: 'q12',
-    text: '잘했다고 칭찬을 들었을 때 아이는?',
+    text: '아이가 유난히 좋은 점수를 받아온 날, 아이가 가장 먼저 하는 말은?',
     options: [
-      { label: '더 어려운 것에 도전하려 해요', effects: { competence: 2, autonomy: 1 } },
-      { label: '기분 좋아하고 즐거워해요', effects: { competence: 1 } },
-      { label: '운이 좋았다며 잘 안 믿어요', effects: { competence: -1 } },
-      { label: '칭찬을 부담스러워해요', effects: { competence: -1, burnout: 1 } },
+      { label: '"다음엔 더 어려운 것도 해볼래"', effects: { competence: 2, autonomy: 1 } },
+      { label: '"나 잘했지?" 하며 자랑해요', effects: { competence: 1 } },
+      { label: '"이번엔 문제가 쉬웠어"라고 해요', effects: { competence: -1 } },
+      { label: '"다음에도 이만큼 해야 되는 거야?"라며 부담스러워해요', effects: { competence: -1, burnout: 1 } },
     ],
   },
   {
     id: 'q13',
-    text: '모둠 활동이나 그룹 수업에서 아이는?',
+    text: '아는 아이가 거의 없는 생일파티나 캠프에 갔을 때, 처음 30분 동안 아이는?',
     options: [
-      { label: '주도하면서 신나 해요', effects: { social: 2 } },
-      { label: '어울리지만 앞에 나서진 않아요', effects: { social: 1 } },
-      { label: '혼자 하는 걸 더 편해해요', effects: { social: -2 } },
-      { label: '멤버나 상황에 따라 달라요', effects: {} },
+      { label: '먼저 다가가 말을 걸어요', effects: { social: 2 } },
+      { label: '조금 지켜보다 자연스럽게 섞여요', effects: { social: 1 } },
+      { label: '끝까지 혼자 있거나 부모 옆에 붙어 있어요', effects: { social: -2 } },
+      { label: '그날 분위기나 모인 아이들에 따라 달라요', effects: {} },
     ],
   },
   {
     id: 'q14',
-    text: '요즘 공부나 학원 얘기를 꺼내면 아이는?',
+    text: '차 안이나 저녁 식탁에서 학원 이야기가 나왔을 때, 아이의 반응은?',
     options: [
-      { label: '자연스럽게 자기 얘기를 해요', effects: { burnout: -2 } },
+      { label: '선생님이나 친구 얘기를 먼저 꺼내요', effects: { burnout: -2 } },
       { label: '물어보면 대답하는 정도예요', effects: {} },
-      { label: '하기 싫다는 말을 자주 해요', effects: { burnout: 1 } },
-      { label: '얘기 자체를 피하거나 예민해져요', effects: { burnout: 2 } },
+      { label: '"그 얘기 좀 그만해"라고 해요', effects: { burnout: 1 } },
+      { label: '표정이 굳거나 슬그머니 자리를 피해요', effects: { burnout: 2 } },
     ],
   },
   {
     id: 'q15',
-    text: '학교·학원 숙제를 할 때 아이는?',
+    text: '아이가 문제집 한 페이지를 풀 때, 지우개를 쓰는 정도는 어떤가요?',
     options: [
-      { label: '금방 끝내고 시간이 남아요', effects: { zpd_strain: -2 } },
-      { label: '제 시간에 무리 없이 끝내요', effects: {} },
-      { label: '오래 걸리지만 어떻게든 끝내요', effects: { zpd_strain: 1 } },
-      { label: '붙잡고 있어도 못 끝낼 때가 많아요', effects: { zpd_strain: 2, burnout: 1 } },
+      { label: '거의 안 써요 — 쓱쓱 풀어나가요', effects: { zpd_strain: -2 } },
+      { label: '가끔 고쳐 쓰는 정도예요', effects: {} },
+      { label: '자주 지우고 다시 쓰느라 페이지가 지저분해져요', effects: { zpd_strain: 1 } },
+      { label: '지우다가 종이가 헤지거나 찢어질 정도예요', effects: { zpd_strain: 2, burnout: 1 } },
     ],
   },
   {
@@ -255,12 +260,12 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 'q18',
-    text: '시험이나 평가를 앞두면 아이는?',
+    text: '시험 전날 밤, 아이의 모습은 어떤가요?',
     options: [
-      { label: '담담하게 준비해요', effects: { competence: 1 } },
-      { label: '긴장하지만 스스로 준비해요', effects: { competence: 1, autonomy: 1 } },
-      { label: '불안해하며 예민해져요', effects: { competence: -1, burnout: 1 } },
-      { label: '아예 신경 쓰지 않으려 해요', effects: { autonomy: -1, burnout: 1 } },
+      { label: '평소와 다르지 않게 자요', effects: { competence: 1 } },
+      { label: '조금 더 보고 자겠다며 스스로 챙겨요', effects: { competence: 1, autonomy: 1 } },
+      { label: '잠을 설치거나 배가 아프다고 해요', effects: { competence: -1, burnout: 1 } },
+      { label: '시험 얘기를 꺼내지도 못하게 해요', effects: { autonomy: -1, burnout: 1 } },
     ],
   },
 
@@ -317,12 +322,12 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 'q24',
-    text: '아이는 학교에서 있었던 일을 집에 와서 이야기하는 편인가요?',
+    text: '하교 후 "오늘 학교 어땠어?"라고 물었을 때, 아이의 대답은?',
     options: [
-      { label: '시키지 않아도 조잘조잘 이야기해요', effects: { social: 2 } },
-      { label: '물어보면 이야기해줘요', effects: { social: 1 } },
-      { label: '물어봐도 단답으로 끝내요', effects: { social: -1 } },
-      { label: '거의 이야기하지 않아요', effects: { social: -2 } },
+      { label: '묻기도 전에 먼저 쏟아내요', effects: { social: 2 } },
+      { label: '"재밌었어" 하며 몇 가지 얘기해줘요', effects: { social: 1 } },
+      { label: '"그냥 뭐" 하고 끝나요', effects: { social: -1 } },
+      { label: '"몰라" 하고 방으로 들어가요', effects: { social: -2 } },
     ],
   },
   {
