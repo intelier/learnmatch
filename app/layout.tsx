@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import './globals.css';
 
 const SITE_TITLE = '클래스 핏 — 아이 학습 성향 진단';
@@ -35,9 +36,9 @@ export default function RootLayout({
       <body>
         <div className="wrap">
           <header className="site-header">
-            <div className="logo">
+            <Link href="/" className="logo" aria-label="클래스 핏 홈으로 이동">
               클래스 <span>핏</span>
-            </div>
+            </Link>
           </header>
           {children}
         </div>
