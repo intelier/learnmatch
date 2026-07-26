@@ -3,20 +3,31 @@
  * 무료: 헤드라인·레이더·"한눈에 보기"·"이런 모습, 익숙하시죠?"
  * 잠금: "어쩌면 의외의 모습"부터 끝까지.
  * 잠긴 내용은 서버에서 잘라내고 클라이언트로 보내지 않는다.
+ *
+ * D-12: 초기 배포는 전체 무료 공개. PAYWALL_ENABLED=true로 설정하면
+ * 코드 변경 없이 게이팅이 다시 켜진다 (환경변수만 바꾸고 재배포).
  */
 
 const LOCK_START = '## 어쩌면 의외의 모습';
 
+/** 결제 게이팅 활성화 여부. 기본값(미설정)은 false = 전체 무료 공개. */
+export function isPaywallEnabled(): boolean {
+  return process.env.PAYWALL_ENABLED === 'true';
+}
+
 export interface GatedReport {
   /** 무료 구간 마크다운 */
   free: string;
-  /** 잠금 구간 마크다운 (없으면 null — v1 리포트 등) */
+  /** 잠금 구간 마크다운 (없으면 null — v1 리포트 등, 또는 무료 배포 기간) */
   locked: string | null;
   /** 잠긴 섹션 제목 목록 (티저 표시용) */
   lockedSections: string[];
 }
 
 export function splitReport(markdown: string): GatedReport {
+  if (!isPaywallEnabled()) {
+    return { free: markdown, locked: null, lockedSections: [] };
+  }
   const idx = markdown.indexOf(LOCK_START);
   if (idx === -1) {
     // v1 리포트 등 잠금 지점이 없으면: "축별로 읽어보기"부터 잠금 시도
