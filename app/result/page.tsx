@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import ResultView from '@/app/components/result-view';
+import { CHILD_AGE_BAND_STORAGE_KEY, isAgeBand, type AgeBand } from '@/lib/age-bands';
 import {
   ANSWERS_STORAGE_KEY,
   CHILD_NAME_STORAGE_KEY,
@@ -12,6 +13,7 @@ import {
 export default function ResultPage() {
   const [answers, setAnswers] = useState<Answers | null>(null);
   const [childName, setChildName] = useState<string>('');
+  const [childAgeBand, setChildAgeBand] = useState<AgeBand | undefined>(undefined);
   const [missing, setMissing] = useState(false);
 
   useEffect(() => {
@@ -23,6 +25,8 @@ export default function ResultPage() {
     try {
       setAnswers(JSON.parse(raw));
       setChildName(sessionStorage.getItem(CHILD_NAME_STORAGE_KEY)?.trim() ?? '');
+      const rawAgeBand = sessionStorage.getItem(CHILD_AGE_BAND_STORAGE_KEY);
+      if (isAgeBand(rawAgeBand)) setChildAgeBand(rawAgeBand);
     } catch {
       setMissing(true);
     }
@@ -43,5 +47,7 @@ export default function ResultPage() {
 
   if (!answers) return null;
 
-  return <ResultView answers={answers} childName={childName || undefined} />;
+  return (
+    <ResultView answers={answers} childName={childName || undefined} childAgeBand={childAgeBand} />
+  );
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { isAgeBand, type AgeBand } from '@/lib/age-bands';
 import { saveDiagnosis } from '@/lib/db';
 import { generateReport } from '@/lib/llm';
 import { splitReport } from '@/lib/report-gate';
@@ -7,6 +8,7 @@ import { scoreAnswers, type Answers } from '@/lib/scoring';
 export async function POST(request: Request) {
   let answers: Answers;
   let childName: string | undefined;
+  let childAgeBand: AgeBand | undefined;
   try {
     const body = await request.json();
     answers = body?.answers;
@@ -15,6 +17,7 @@ export async function POST(request: Request) {
       const trimmed = body.childName.trim().slice(0, 20);
       if (trimmed) childName = trimmed;
     }
+    if (isAgeBand(body?.childAgeBand)) childAgeBand = body.childAgeBand;
   } catch {
     return NextResponse.json({ error: 'invalid JSON' }, { status: 400 });
   }
@@ -32,13 +35,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'no valid answers' }, { status: 400 });
   }
 
-  const report = await generateReport({ answers, scores, childName });
+  const report = await generateReport({ answers, scores, childName, childAgeBand });
 
   // T-09: 진단·리포트 저장 (DB 미설정/실패 시 null — 무상태 동작 유지)
   const saved = await saveDiagnosis({
     answers,
     scores,
     childName,
+    childAgeBand,
     markdown: report.markdown,
     model: report.model,
     promptVersion: report.promptVersion,

@@ -2,6 +2,7 @@
  * mock 리포트 어댑터 — API 키 없이 동작.
  * 실제 LLM과 같은 입력(ReportInput)을 받아 채점 결과 기반 서술형 리포트를 조립한다.
  */
+import { AGE_BAND_LABEL } from './age-bands.ts';
 import { AXIS_META, FOCUS_LABEL, QUESTIONS, STYLE_LABEL, type AxisId } from './questions.ts';
 import type { ReportInput } from './prompt.ts';
 
@@ -118,9 +119,12 @@ export function generateMockReport(input: ReportInput): string {
     surprises.push(`부모님 보시기에는 ${AXIS_META[strongest[strongest.length - 1]].label}이 걱정되실 수 있지만, 실제로는 ${AXIS_META[strongest[0]].label} 쪽의 힘이 그 모습을 받쳐주고 있어요. 약점보다 강점을 지렛대로 삼아 주세요.`);
 
   const who = input.childName?.trim() || '우리 아이';
+  const ageNote = input.childAgeBand
+    ? ` (${AGE_BAND_LABEL[input.childAgeBand]} 시기의 발달 단계를 함께 고려했어요.)`
+    : '';
   return [
     '## 한눈에 보기',
-    `${scores.headline}인 ${who}. ${STYLE_LABEL[scores.style]} 방식으로 배울 때 이해가 가장 잘 되고, ${FOCUS_LABEL[scores.focus]} 성향이에요. 지금 ${who}에게 가장 두드러지는 축은 **${AXIS_META[strongest[0]].label}**이에요. ${AXIS_NARRATIVE[strongest[0]][band(scores.axes[strongest[0]].normalized)]}`,
+    `${scores.headline}인 ${who}.${ageNote} ${STYLE_LABEL[scores.style]} 방식으로 배울 때 이해가 가장 잘 되고, ${FOCUS_LABEL[scores.focus]} 성향이에요. 지금 ${who}에게 가장 두드러지는 축은 **${AXIS_META[strongest[0]].label}**이에요. ${AXIS_NARRATIVE[strongest[0]][band(scores.axes[strongest[0]].normalized)]}`,
     '',
     '## 이런 모습, 익숙하시죠?',
     ...(scenes.length

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { AGE_BANDS, CHILD_AGE_BAND_STORAGE_KEY, type AgeBand } from '@/lib/age-bands';
 import { QUESTIONS } from '@/lib/questions';
 import {
   ANSWERS_STORAGE_KEY,
@@ -11,17 +12,20 @@ import {
 
 export default function SurveyPage() {
   const router = useRouter();
-  const [phase, setPhase] = useState<'name' | 'questions'>('name');
+  const [phase, setPhase] = useState<'intake' | 'questions'>('intake');
   const [childName, setChildName] = useState('');
+  const [ageBand, setAgeBand] = useState<AgeBand | null>(null);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
 
   function startQuestions() {
+    if (!ageBand) return;
     sessionStorage.setItem(CHILD_NAME_STORAGE_KEY, childName.trim().slice(0, 20));
+    sessionStorage.setItem(CHILD_AGE_BAND_STORAGE_KEY, ageBand);
     setPhase('questions');
   }
 
-  if (phase === 'name') {
+  if (phase === 'intake') {
     return (
       <main>
         <div className="eyebrow">진단을 시작하기 전에</div>
@@ -35,19 +39,15 @@ export default function SurveyPage() {
         >
           아이를 어떻게 불러드릴까요?
         </h2>
-        <p style={{ fontSize: 13, color: 'var(--navy-muted)', marginBottom: '1.5rem' }}>
-          이름이나 애칭을 알려주시면, 리포트를 그 이름으로 써드려요.
-          <br />
-          입력하지 않아도 진단은 그대로 받아보실 수 있어요.
+        <p style={{ fontSize: 13, color: 'var(--navy-muted)', marginBottom: '1.25rem' }}>
+          이름이나 애칭을 알려주시면, 리포트를 그 이름으로 써드려요. 입력하지
+          않아도 괜찮아요.
         </p>
 
         <input
           type="text"
           value={childName}
           onChange={(e) => setChildName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') startQuestions();
-          }}
           placeholder="예: 지호, 우리 첫째, 콩이"
           maxLength={20}
           autoFocus
@@ -60,24 +60,43 @@ export default function SurveyPage() {
             borderRadius: 'var(--radius)',
             fontFamily: 'var(--sans)',
             background: 'var(--white)',
-            marginBottom: '1.25rem',
+            marginBottom: '1.75rem',
           }}
         />
 
-        <button type="button" className="btn-primary" onClick={startQuestions}>
-          {childName.trim() ? `${childName.trim()} 진단 시작하기` : '진단 시작하기'}
-        </button>
+        <p style={{ fontSize: 13, color: 'var(--navy-muted)', marginBottom: '0.9rem' }}>
+          아이 나이대를 알려주시면, 지금 발달 시기에 맞게 해석해서
+          써드려요.
+        </p>
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: '1.75rem' }}>
+          {AGE_BANDS.map((band) => (
+            <button
+              key={band.id}
+              type="button"
+              className={`option-btn${ageBand === band.id ? ' selected' : ''}`}
+              style={{ width: 'auto', flex: '1 1 auto', textAlign: 'center' }}
+              onClick={() => setAgeBand(band.id)}
+            >
+              {band.label}
+            </button>
+          ))}
+        </div>
+
         <button
           type="button"
-          className="btn-secondary"
-          style={{ marginTop: 10 }}
-          onClick={() => {
-            setChildName('');
-            startQuestions();
-          }}
+          className="btn-primary"
+          disabled={!ageBand}
+          style={!ageBand ? { opacity: 0.5, cursor: 'default' } : undefined}
+          onClick={startQuestions}
         >
-          이름 없이 시작
+          {childName.trim() ? `${childName.trim()} 진단 시작하기` : '진단 시작하기'}
         </button>
+        {!ageBand && (
+          <p style={{ fontSize: 11, color: 'var(--navy-muted)', marginTop: 8 }}>
+            나이대를 선택하면 시작할 수 있어요.
+          </p>
+        )}
       </main>
     );
   }

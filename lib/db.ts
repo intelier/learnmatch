@@ -5,6 +5,7 @@
  */
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { randomBytes } from 'crypto';
+import type { AgeBand } from './age-bands.ts';
 import type { Answers, Scores } from './scoring.ts';
 
 let cached: SupabaseClient | null | undefined;
@@ -37,6 +38,7 @@ export async function saveDiagnosis(params: {
   answers: Answers;
   scores: Scores;
   childName?: string;
+  childAgeBand?: AgeBand;
   markdown: string;
   model: string;
   promptVersion: string;
@@ -51,6 +53,7 @@ export async function saveDiagnosis(params: {
         answers: params.answers,
         scores: params.scores,
         child_name: params.childName ?? null,
+        child_age_band: params.childAgeBand ?? null,
         share_token: shareToken,
       })
       .select('id')
@@ -133,6 +136,8 @@ export interface SharedDiagnosis {
   unlocked: boolean;
   /** 아이 이름 (선택) */
   childName: string | null;
+  /** 아이 연령대 (선택, D-13) */
+  childAgeBand: AgeBand | null;
 }
 
 /** share_token으로 저장된 진단+리포트 조회. 없거나 DB 미설정이면 null. */
@@ -142,7 +147,7 @@ export async function findByShareToken(token: string): Promise<SharedDiagnosis |
   try {
     const { data, error } = await db
       .from('diagnoses')
-      .select('answers, unlocked, child_name, reports(content_md)')
+      .select('answers, unlocked, child_name, child_age_band, reports(content_md)')
       .eq('share_token', token)
       .limit(1)
       .maybeSingle();
@@ -154,6 +159,7 @@ export async function findByShareToken(token: string): Promise<SharedDiagnosis |
       markdown: report.content_md,
       unlocked: Boolean(data.unlocked),
       childName: (data.child_name as string | null) ?? null,
+      childAgeBand: (data.child_age_band as AgeBand | null) ?? null,
     };
   } catch (error) {
     console.error('Supabase 조회 실패:', error);

@@ -143,12 +143,12 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 'q7',
-    text: '아이가 공부할 때 선호하는 환경은?',
+    text: '아이가 어려운 문제를 붙잡고 있을 때, 정답을 몰라도 그냥 "옆에 있어주는 사람"만으로 힘을 내나요?',
     options: [
-      { label: '조용히 혼자', effects: { social: -2 } },
-      { label: '옆에 누군가 있을 때', effects: { social: 1 } },
-      { label: '친구와 함께', effects: { social: 2 } },
-      { label: '상관없어요', effects: {} },
+      { label: '아니요, 혼자 조용히 풀 때 오히려 더 집중해요', effects: { social: -2 } },
+      { label: '옆에 누군가 있으면 조금 더 편안해해요', effects: { social: 1 } },
+      { label: '네, 정답을 몰라도 같이 있어주면 훨씬 힘을 내요', effects: { social: 2 } },
+      { label: '누가 있든 없든 크게 상관없어해요', effects: {} },
     ],
   },
   {
@@ -267,22 +267,22 @@ export const QUESTIONS: Question[] = [
   /* ── 추가 확장 7문항 (18→25, D-11: 축별 정밀도 강화) ── */
   {
     id: 'q19',
-    text: '새로운 개념을 처음 배울 때 아이의 이해 속도는?',
+    text: '아이가 좋아하는 게임이나 유튜브의 새로운 규칙·기능을 배울 때와, 공부할 때 습득 속도를 비교하면?',
     options: [
-      { label: '금방 이해하고 다음으로 넘어가고 싶어해요', effects: { zpd_strain: -2 } },
-      { label: '한 번 설명 들으면 이해해요', effects: {} },
-      { label: '여러 번 설명을 들어야 이해해요', effects: { zpd_strain: 1 } },
-      { label: '설명을 들어도 어려워하는 경우가 많아요', effects: { zpd_strain: 2, burnout: 1 } },
+      { label: '게임이든 공부든 비슷하게 빠르게 배워요', effects: { zpd_strain: -2 } },
+      { label: '그럭저럭 비슷해요', effects: {} },
+      { label: '공부할 때 유독 오래 걸려요', effects: { zpd_strain: 1 } },
+      { label: '게임은 금방 배우는데 공부는 유독 힘들어해요', effects: { zpd_strain: 2, burnout: 1 } },
     ],
   },
   {
     id: 'q20',
-    text: '문제집이나 교재의 난이도에 대해 아이는 주로 어떻게 말하나요?',
+    text: '아이가 "이건 나한테 너무 어려운 것 같아" 같은 말을 실제로 입 밖에 낸 적이 있나요?',
     options: [
-      { label: '"너무 쉬워요"라고 자주 말해요', effects: { zpd_strain: -2 } },
-      { label: '딱 적당하다고 해요', effects: {} },
-      { label: '가끔 어렵다고 해요', effects: { zpd_strain: 1 } },
-      { label: '자주 너무 어렵다고 해요', effects: { zpd_strain: 2, burnout: 1 } },
+      { label: '그런 말을 하는 걸 거의 들어본 적이 없어요', effects: { zpd_strain: -2 } },
+      { label: '아주 가끔, 정말 어려운 것 앞에서만요', effects: {} },
+      { label: '종종 그런 말을 해요', effects: { zpd_strain: 1 } },
+      { label: '자주 그렇게 말하며 힘들어해요', effects: { zpd_strain: 2, burnout: 1 } },
     ],
   },
   {
@@ -297,22 +297,22 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 'q22',
-    text: '최근 한 달 사이 아이의 전반적인 기분·컨디션은?',
+    text: '속상하거나 안 좋은 일이 있었던 날, 아이가 기분을 회복하는 데 걸리는 시간은 보통 어느 정도인가요?',
     options: [
-      { label: '대체로 밝고 활기차요', effects: { burnout: -2 } },
-      { label: '평소와 비슷해요', effects: {} },
-      { label: '평소보다 예민하거나 지쳐 보여요', effects: { burnout: 1 } },
-      { label: '눈에 띄게 무기력하거나 짜증이 늘었어요', effects: { burnout: 2 } },
+      { label: '그날 안에 금방 훌훌 털어내요', effects: { burnout: -2 } },
+      { label: '하루 정도 지나면 괜찮아져요', effects: {} },
+      { label: '며칠은 기분이 가라앉아 있어요', effects: { burnout: 1 } },
+      { label: '한번 가라앉으면 꽤 오래가요', effects: { burnout: 2 } },
     ],
   },
   {
     id: 'q23',
-    text: '아이가 새 학원이나 새로운 반에 가면?',
+    text: '아이가 새로 배운 걸 가장 신나서 이야기하는 대상은 누구인가요?',
     options: [
-      { label: '금방 친구를 사귀고 적응해요', effects: { social: 2 } },
-      { label: '시간이 좀 걸리지만 결국 적응해요', effects: { social: 1 } },
-      { label: '익숙해지는 데 오래 걸려요', effects: { social: -1 } },
-      { label: '혼자서도 별로 신경 쓰지 않아요', effects: { social: -2 } },
+      { label: '친구들에게 신나서 알려줘요', effects: { social: 2 } },
+      { label: '부모님께 이야기해요', effects: { social: 1 } },
+      { label: '누구에게도 딱히 설명하고 싶어하지 않아요', effects: { social: -1 } },
+      { label: '인형이나 혼잣말로 중얼거리며 스스로 정리해요', effects: { social: -2 } },
     ],
   },
   {

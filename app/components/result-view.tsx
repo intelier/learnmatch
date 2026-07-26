@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import type { AgeBand } from '@/lib/age-bands';
 import { AXIS_META, FOCUS_LABEL, STYLE_LABEL, type AxisId } from '@/lib/questions';
 import {
   buildCheckoutUrl,
@@ -24,6 +25,7 @@ type ShareState = 'idle' | 'copied' | 'manual';
 export default function ResultView({
   answers,
   childName,
+  childAgeBand,
   isSharedView = false,
   initialReport,
   hideShare = false,
@@ -34,6 +36,8 @@ export default function ResultView({
   answers: Answers;
   /** 아이 이름 (선택) — 헤드라인 개인화 + API 전달 */
   childName?: string;
+  /** 아이 연령대 (선택, D-13) — 발달 단계 반영 + API 전달 */
+  childAgeBand?: AgeBand;
   isSharedView?: boolean;
   /** 고정 리포트(예시 페이지 등) — 전달 시 API 호출 없이 바로 표시 */
   initialReport?: string;
@@ -68,7 +72,7 @@ export default function ResultView({
     fetch('/api/report', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ answers, childName }),
+      body: JSON.stringify({ answers, childName, childAgeBand }),
     })
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`${res.status}`))))
       .then((data) => {
@@ -88,7 +92,7 @@ export default function ResultView({
     return () => {
       cancelled = true;
     };
-  }, [answers, childName, initialReport]);
+  }, [answers, childName, childAgeBand, initialReport]);
 
   const sharePath = shareToken ?? shareCode;
   const shareUrl = sharePath

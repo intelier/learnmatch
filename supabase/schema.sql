@@ -6,6 +6,7 @@ create table if not exists diagnoses (
   answers jsonb not null,
   scores jsonb not null,
   child_name text,                          -- 아이 이름/애칭 (선택) — 리포트 개인화
+  child_age_band text,                      -- 아이 연령대 (선택, D-13) — 발달 단계 반영
   share_token text unique not null,
   unlocked boolean not null default false, -- 결제 언락 여부 (T-10)
   created_at timestamptz not null default now()

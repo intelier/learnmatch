@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import ResultView from '@/app/components/result-view';
+import type { AgeBand } from '@/lib/age-bands';
 import { findByShareToken } from '@/lib/db';
 import { splitReport } from '@/lib/report-gate';
 import { scoreAnswers, type Answers } from '@/lib/scoring';
@@ -13,6 +14,7 @@ interface Props {
 interface Resolved {
   answers: Answers;
   childName: string | null;
+  childAgeBand: AgeBand | null;
   /** DB에 저장된 리포트 (있으면 LLM 재호출 없이 표시) */
   storedReport: string | null;
   /** 결제 언락 여부 — 미결제면 storedReport는 무료 구간만 담긴다 (T-10) */
@@ -28,6 +30,7 @@ async function resolve(code: string): Promise<Resolved | null> {
       return {
         answers: stored.answers,
         childName: stored.childName,
+        childAgeBand: stored.childAgeBand,
         storedReport: stored.markdown,
         locked: false,
         lockedSections: [],
@@ -38,6 +41,7 @@ async function resolve(code: string): Promise<Resolved | null> {
     return {
       answers: stored.answers,
       childName: stored.childName,
+      childAgeBand: stored.childAgeBand,
       storedReport: gated.locked !== null ? gated.free : stored.markdown,
       locked: gated.locked !== null,
       lockedSections: gated.lockedSections,
@@ -45,7 +49,14 @@ async function resolve(code: string): Promise<Resolved | null> {
   }
   const answers = decodeAnswers(code);
   if (answers)
-    return { answers, childName: null, storedReport: null, locked: false, lockedSections: [] };
+    return {
+      answers,
+      childName: null,
+      childAgeBand: null,
+      storedReport: null,
+      locked: false,
+      lockedSections: [],
+    };
   return null;
 }
 
@@ -87,6 +98,7 @@ export default async function SharedReportPage({ params }: Props) {
     <ResultView
       answers={resolved.answers}
       childName={resolved.childName ?? undefined}
+      childAgeBand={resolved.childAgeBand ?? undefined}
       isSharedView
       initialReport={resolved.storedReport ?? undefined}
       initialShareToken={resolved.storedReport ? code : undefined}
