@@ -1,9 +1,18 @@
 import TheorySection from '@/app/components/theory-section';
+import { isPaywallEnabled } from '@/lib/report-gate';
 
 export default function Home() {
+  const isFree = !isPaywallEnabled();
+
   return (
     <main>
       <section style={{ padding: '2.5rem 0 2rem' }}>
+        {isFree && (
+          <div className="free-badge">
+            <span className="free-badge-dot" />
+            지금은 무료 진단 서비스 중
+          </div>
+        )}
         <div className="eyebrow">아이 학습 성향 진단</div>
         <h1
           style={{
