@@ -1,5 +1,5 @@
 /**
- * 클래스 핏 — 진단 문항 정의 (D-02: legacy 8문항의 채점 축 유지 + 10문항 확장)
+ * 클래스 핏 — 진단 문항 정의 (D-02: legacy 8문항의 채점 축 유지 + 확장, D-11: 18→25문항 정밀도 강화)
  *
  * 채점 축 (legacy/learning_diagnostic_full.html 기원):
  *  - autonomy    자기주도성  (+: 스스로 탐구 / -: 함께 끌어줄 때 잘함)
@@ -261,6 +261,78 @@ export const QUESTIONS: Question[] = [
       { label: '긴장하지만 스스로 준비해요', effects: { competence: 1, autonomy: 1 } },
       { label: '불안해하며 예민해져요', effects: { competence: -1, burnout: 1 } },
       { label: '아예 신경 쓰지 않으려 해요', effects: { autonomy: -1, burnout: 1 } },
+    ],
+  },
+
+  /* ── 추가 확장 7문항 (18→25, D-11: 축별 정밀도 강화) ── */
+  {
+    id: 'q19',
+    text: '새로운 개념을 처음 배울 때 아이의 이해 속도는?',
+    options: [
+      { label: '금방 이해하고 다음으로 넘어가고 싶어해요', effects: { zpd_strain: -2 } },
+      { label: '한 번 설명 들으면 이해해요', effects: {} },
+      { label: '여러 번 설명을 들어야 이해해요', effects: { zpd_strain: 1 } },
+      { label: '설명을 들어도 어려워하는 경우가 많아요', effects: { zpd_strain: 2, burnout: 1 } },
+    ],
+  },
+  {
+    id: 'q20',
+    text: '문제집이나 교재의 난이도에 대해 아이는 주로 어떻게 말하나요?',
+    options: [
+      { label: '"너무 쉬워요"라고 자주 말해요', effects: { zpd_strain: -2 } },
+      { label: '딱 적당하다고 해요', effects: {} },
+      { label: '가끔 어렵다고 해요', effects: { zpd_strain: 1 } },
+      { label: '자주 너무 어렵다고 해요', effects: { zpd_strain: 2, burnout: 1 } },
+    ],
+  },
+  {
+    id: 'q21',
+    text: '요즘 아이가 몸이 안 좋다는 이유로 공부나 학원을 피하려는 적이 있나요?',
+    options: [
+      { label: '전혀 없어요', effects: { burnout: -2 } },
+      { label: '가끔 피곤하다고는 해요', effects: { burnout: -1 } },
+      { label: '몸이 안 좋다며 미루는 일이 종종 있어요', effects: { burnout: 1 } },
+      { label: '자주 아프다고 하며 공부를 피해요', effects: { burnout: 2 } },
+    ],
+  },
+  {
+    id: 'q22',
+    text: '최근 한 달 사이 아이의 전반적인 기분·컨디션은?',
+    options: [
+      { label: '대체로 밝고 활기차요', effects: { burnout: -2 } },
+      { label: '평소와 비슷해요', effects: {} },
+      { label: '평소보다 예민하거나 지쳐 보여요', effects: { burnout: 1 } },
+      { label: '눈에 띄게 무기력하거나 짜증이 늘었어요', effects: { burnout: 2 } },
+    ],
+  },
+  {
+    id: 'q23',
+    text: '아이가 새 학원이나 새로운 반에 가면?',
+    options: [
+      { label: '금방 친구를 사귀고 적응해요', effects: { social: 2 } },
+      { label: '시간이 좀 걸리지만 결국 적응해요', effects: { social: 1 } },
+      { label: '익숙해지는 데 오래 걸려요', effects: { social: -1 } },
+      { label: '혼자서도 별로 신경 쓰지 않아요', effects: { social: -2 } },
+    ],
+  },
+  {
+    id: 'q24',
+    text: '아이는 학교에서 있었던 일을 집에 와서 이야기하는 편인가요?',
+    options: [
+      { label: '시키지 않아도 조잘조잘 이야기해요', effects: { social: 2 } },
+      { label: '물어보면 이야기해줘요', effects: { social: 1 } },
+      { label: '물어봐도 단답으로 끝내요', effects: { social: -1 } },
+      { label: '거의 이야기하지 않아요', effects: { social: -2 } },
+    ],
+  },
+  {
+    id: 'q25',
+    text: '어려운 과제를 앞두고 아이가 스스로에 대해 하는 말은?',
+    options: [
+      { label: '"나 이거 할 수 있을 것 같아"', effects: { competence: 2 } },
+      { label: '별 말 없이 일단 시도해요', effects: { competence: 1 } },
+      { label: '"나 이런 거 잘 못하는데"', effects: { competence: -1 } },
+      { label: '"나는 원래 이런 거 못해"라며 미리 선을 그어요', effects: { competence: -2 } },
     ],
   },
 ];

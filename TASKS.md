@@ -5,7 +5,7 @@
 
 ## M1 — 핵심 가설 검증 (설문 → 리포트 → 공유)
 - [x] T-01 Next.js 프로젝트 스캐폴드 — 완료 기준: `npm run dev` 후 localhost:3000에 클래스 핏 랜딩 페이지가 뜬다 (기존 HTML은 `legacy/`로 이동, D-03)
-- [x] T-02 진단 문항·채점 체계 정의 (D-02: 기존 8문항 → 18문항 확장) — 완료 기준: `lib/questions.ts`에 문항 전체, 채점 함수가 샘플 응답으로 올바른 scores 산출 (`node scripts/check-scoring.ts` 21건 통과)
+- [x] T-02 진단 문항·채점 체계 정의 (D-02: 8→18문항 → D-11: 18→25문항 재확장) — 완료 기준: `lib/questions.ts`에 문항 전체, 채점 함수가 샘플 응답으로 올바른 scores 산출 (`node scripts/check-scoring.ts` 21건 통과)
 - [x] T-03 설문 UI (스텝 진행 + 진행바) — 완료 기준: 브라우저에서 전 문항 응답 완료 → 응답·채점 결과가 결과 대기 화면(`/result`)으로 전달됨 (18문항 클릭 검증 완료)
 - [x] T-04 리포트 생성 mock 어댑터 + 프롬프트 v1 — 완료 기준: 설문 완료 시 서술형 리포트가 화면에 표시(mock). LLM 교체 지점은 `lib/llm.ts` 하나로 분리 (5개 섹션 리포트 브라우저 검증 완료)
 - [x] T-05 LLM API 실연동 (D-05: Gemini 1순위) — 완료 기준: 실제 LLM이 생성한 리포트 표시, 실패 시 폴백 (`gemini-2.5-flash` 리포트 생성·렌더링 검증 완료. 폴백 체인: Gemini → Claude → mock. Claude는 크레딧 충전 시 자동 복귀)

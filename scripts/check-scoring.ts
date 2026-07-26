@@ -15,7 +15,7 @@ function check(name: string, cond: boolean, detail = '') {
 }
 
 console.log(`문항 수: ${QUESTIONS.length}`);
-check('문항 수 15~20개', QUESTIONS.length >= 15 && QUESTIONS.length <= 20);
+check('문항 수 20~30개 (D-11: 25문항)', QUESTIONS.length >= 20 && QUESTIONS.length <= 30);
 check(
   '모든 문항에 선택지 2~4개',
   QUESTIONS.every((q) => q.options.length >= 2 && q.options.length <= 4)
@@ -36,6 +36,7 @@ for (const [axis, r] of Object.entries(ranges)) {
 const positive: Answers = {
   q1: 0, q2: 1, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0, q8: 0,
   q9: 0, q10: 0, q11: 0, q12: 0, q13: 2, q14: 0, q15: 1, q16: 0, q17: 0, q18: 1,
+  q19: 0, q20: 0, q21: 0, q22: 0, q23: 3, q24: 3, q25: 0,
 };
 const p = scoreAnswers(positive);
 console.log('\n[케이스 1: 자기주도형]', p.headline);
@@ -52,6 +53,7 @@ check('헤드라인에 "스스로 탐구하는" 포함', p.headline.includes('�
 const strained: Answers = {
   q1: 3, q2: 3, q3: 3, q4: 3, q5: 3, q6: 2, q7: 1, q8: 2,
   q9: 3, q10: 3, q11: 3, q12: 3, q13: 3, q14: 3, q15: 3, q16: 2, q17: 2, q18: 2,
+  q19: 3, q20: 3, q21: 3, q22: 3, q23: 1, q24: 1, q25: 3,
 };
 const s = scoreAnswers(strained);
 console.log('\n[케이스 2: 소진형]', s.headline);
