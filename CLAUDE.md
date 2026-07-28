@@ -56,6 +56,8 @@ node scripts/test-groble-webhook.js <share_token> # 웹훅 서명·언락 흐름
 
 문항을 고를 때 두 가지를 더 확인한다 (D-15): ① **일부 아이에게만 해당하는 상황을 전제하지 않는다** — 예를 들어 "학원 다녀온 날"은 학원에 안 다니는 아이(미취학·초등 저학년 포함)의 부모는 답할 근거가 없어 아무거나 찍게 되고, 그 노이즈가 해당 채점 축에 그대로 섞인다. ② **다른 문항과 소재·방향이 겹치지 않게 한다** — 같은 축을 재는 문항끼리도 서로 다른 장면이어야 다각도 측정의 의미가 있다.
 
+문항 자체를 일부 나이대에서 못 쓸 때는 `variants`를 쓴다 (D-17). `Question.variants[ageBand]`로 text/option label만 나이대별로 교체하고 **effects·순서·개수는 base와 완전히 동일하게 유지**한다 — 그래야 `axisRanges()`·`check-scoring.ts`·공유 코드가 영향받지 않는다. 지금은 미취학(`preschool`) 6문항(q4·q11·q12·q15·q18·q24 — 교과서·시험지·성적·시험 전날 같은, 미취학 아동에게 없는 개념)에만 적용돼 있다. 문항을 표시하거나 LLM에 전달할 때는 정적 `QUESTIONS` 대신 `getQuestionsForAgeBand(ageBand)`를 쓴다(`app/survey/page.tsx`, `lib/prompt.ts`, `lib/llm-mock.ts`가 이렇게 한다). 반면 채점·공유코드(`lib/scoring.ts`, `lib/share.ts`, `scripts/check-scoring.ts`)는 옵션 순서·effects·id만 쓰므로 base `QUESTIONS`를 그대로 쓰면 된다.
+
 ### 리포트 톤 (D-10, D-13, D-16)
 
 - **반전 프레이밍**이 핵심. 부모가 "문제"로 여기던 행동을 강점의 언어로 재해석하되, 미화가 아니라 실천 힌트를 함께 준다. `AXIS_META`의 `positive`/`negative`가 **양극단 모두 강점 언어**로 쓰여 있는 이유다.

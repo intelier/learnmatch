@@ -3,7 +3,7 @@
  * 실제 LLM과 같은 입력(ReportInput)을 받아 채점 결과 기반 서술형 리포트를 조립한다.
  */
 import { AGE_BAND_LABEL } from './age-bands.ts';
-import { AXIS_META, FOCUS_LABEL, QUESTIONS, STYLE_LABEL, type AxisId } from './questions.ts';
+import { AXIS_META, FOCUS_LABEL, getQuestionsForAgeBand, STYLE_LABEL, type AxisId } from './questions.ts';
 import type { ReportInput } from './prompt.ts';
 
 type Band = 'high' | 'mid' | 'low';
@@ -55,7 +55,7 @@ const AXIS_THEORY: Record<AxisId, string> = {
 /** 설문에서 고른 실제 행동을 장면으로 인용 (우리 아이 얘기 같게) */
 function pickScenes(input: ReportInput, count: number): string[] {
   const scenes: string[] = [];
-  for (const q of QUESTIONS) {
+  for (const q of getQuestionsForAgeBand(input.childAgeBand)) {
     const idx = input.answers[q.id];
     const opt = idx !== undefined ? q.options[idx] : undefined;
     if (!opt || !opt.effects) continue;

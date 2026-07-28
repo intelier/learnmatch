@@ -3,7 +3,7 @@
  * 실제 Claude/Gemini 호출과 mock이 같은 입력을 공유한다.
  */
 import { AGE_BAND_LABEL, type AgeBand } from './age-bands.ts';
-import { QUESTIONS } from './questions.ts';
+import { getQuestionsForAgeBand } from './questions.ts';
 import { describeScores, type Answers, type Scores } from './scoring.ts';
 
 export const PROMPT_VERSION = 'v8';
@@ -54,7 +54,8 @@ export function buildSystemPrompt(): string {
 }
 
 export function buildUserPrompt(input: ReportInput): string {
-  const answerLines = QUESTIONS.map((q) => {
+  const questions = getQuestionsForAgeBand(input.childAgeBand);
+  const answerLines = questions.map((q) => {
     const idx = input.answers[q.id];
     const opt = idx !== undefined ? q.options[idx] : undefined;
     // 선택지 안에 큰따옴표가 들어 있어 「」로 감싼다 (따옴표 중첩 방지)

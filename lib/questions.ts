@@ -1,10 +1,12 @@
 /**
  * 클래스 핏 — 진단 문항 정의
  * (D-02: legacy 8문항의 채점 축 유지 + 확장, D-11: 18→25문항 정밀도 강화,
- *  D-13/D-14: "구체적 상황에서의 행동"을 묻는 시나리오 문항으로 재작성)
+ *  D-13/D-14: "구체적 상황에서의 행동"을 묻는 시나리오 문항으로 재작성,
+ *  D-17: 미취학 아동에게 맞지 않는 문항에 나이대별 장면 변형 추가)
  *
  * ★ 문항 재작성 규칙: 옵션의 순서와 effects 값은 그대로 두고 text/label만 바꾼다.
  *   채점 축 의미와 scripts/check-scoring.ts 검증 케이스가 그대로 유지된다.
+ *   나이대 변형(`variants`)도 동일 규칙 — 장면만 바뀌고 effects/순서/개수는 base와 같다.
  *
  * 채점 축 (legacy/learning_diagnostic_full.html 기원):
  *  - autonomy    자기주도성  (+: 스스로 탐구 / -: 함께 끌어줄 때 잘함)
@@ -15,6 +17,8 @@
  *  - style       학습스타일  visual | auditory | kinesthetic | reading (최빈값)
  *  - focus       깊이/넓이   deep | broad | mixed (최빈값)
  */
+
+import type { AgeBand } from './age-bands.ts';
 
 export type AxisId =
   | 'autonomy'
@@ -33,10 +37,18 @@ export interface QuestionOption {
   focus?: Focus;
 }
 
+/** 나이대별 장면 변형 — text/option label만 교체. effects/순서/개수는 base와 동일해야 한다 (D-17). */
+export interface QuestionVariant {
+  text: string;
+  /** base options와 같은 순서·길이. 라벨 문구만 담는다. */
+  options: string[];
+}
+
 export interface Question {
   id: string;
   text: string;
   options: QuestionOption[];
+  variants?: Partial<Record<AgeBand, QuestionVariant>>;
 }
 
 export const AXIS_META: Record<
@@ -77,6 +89,23 @@ export const STYLE_LABEL: Record<Style, string> = {
   kinesthetic: '직접 해보며 배우는',
   reading: '읽고 정리하며 배우는',
 };
+
+/**
+ * 나이대에 맞는 문항 목록을 반환한다 (D-17). `variants`가 없는 문항·나이대는 base 그대로.
+ * effects/순서/개수는 base와 항상 동일하므로 채점(scoring.ts)·공유코드(share.ts)는 영향받지 않는다.
+ */
+export function getQuestionsForAgeBand(ageBand?: AgeBand | null): Question[] {
+  if (!ageBand) return QUESTIONS;
+  return QUESTIONS.map((q) => {
+    const v = q.variants?.[ageBand];
+    if (!v) return q;
+    return {
+      ...q,
+      text: v.text,
+      options: q.options.map((opt, i) => ({ ...opt, label: v.options[i] ?? opt.label })),
+    };
+  });
+}
 
 export const FOCUS_LABEL: Record<Focus, string> = {
   deep: '몰입형',
@@ -125,6 +154,17 @@ export const QUESTIONS: Question[] = [
       { label: '점수만 확인하고 덮어버려요', effects: { competence: -2 } },
       { label: '안 보이는 곳에 치우거나 구겨버려요', effects: { competence: -2, burnout: 2 } },
     ],
+    variants: {
+      preschool: {
+        text: '블록이나 퍼즐을 잘못 끼워서 다시 해야 한다고 알려줬을 때, 아이의 첫 행동은?',
+        options: [
+          '어디가 잘못됐는지부터 다시 살펴봐요',
+          '잠깐 시무룩하다가 다시 만져봐요',
+          '"그냥 이대로 할래" 하며 넘어가려 해요',
+          '화내며 던지거나 안 하겠다고 해요',
+        ],
+      },
+    },
   },
   {
     id: 'q5',
@@ -197,6 +237,17 @@ export const QUESTIONS: Question[] = [
       { label: '두께나 어려워 보이는 부분을 보고 걱정부터 해요', effects: { competence: -1, zpd_strain: 1 } },
       { label: '가방에서 꺼내지도 않아요', effects: { competence: -2, burnout: 1 } },
     ],
+    variants: {
+      preschool: {
+        text: '새 학기 첫날, 유치원(어린이집)에서 처음 받아온 새 책이나 활동 꾸러미를 아이가 어떻게 하나요?',
+        options: [
+          '먼저 펼쳐보며 뭐가 들었는지 궁금해해요',
+          '슬쩍 보긴 하는데 별말은 없어요',
+          '낯선 활동을 보고 걱정부터 해요',
+          '가방에서 꺼내지도 않으려 해요',
+        ],
+      },
+    },
   },
   {
     id: 'q12',
@@ -207,6 +258,17 @@ export const QUESTIONS: Question[] = [
       { label: '"이번엔 문제가 쉬웠어"라고 해요', effects: { competence: -1 } },
       { label: '"다음에도 이만큼 해야 되는 거야?"라며 부담스러워해요', effects: { competence: -1, burnout: 1 } },
     ],
+    variants: {
+      preschool: {
+        text: '유치원(어린이집) 선생님께 칭찬 스티커를 유난히 많이 받아온 날, 아이가 가장 먼저 하는 말은?',
+        options: [
+          '"다음엔 더 어려운 것도 해볼래"',
+          '"나 잘했지?" 하며 자랑해요',
+          '"이번엔 쉬웠어"라고 해요',
+          '"다음에도 이만큼 잘해야 되는 거야?"라며 부담스러워해요',
+        ],
+      },
+    },
   },
   {
     id: 'q13',
@@ -237,6 +299,17 @@ export const QUESTIONS: Question[] = [
       { label: '자주 지우고 다시 쓰느라 페이지가 지저분해져요', effects: { zpd_strain: 1 } },
       { label: '지우다가 종이가 헤지거나 찢어질 정도예요', effects: { zpd_strain: 2, burnout: 1 } },
     ],
+    variants: {
+      preschool: {
+        text: '선 따라 그리기나 색칠 놀이를 할 때, 아이가 다시 하거나 그만두려는 정도는 어떤가요?',
+        options: [
+          '거의 안 그래요 — 쓱쓱 그려나가요',
+          '가끔 다시 그리는 정도예요',
+          '자주 다시 그리느라 시간이 오래 걸려요',
+          '마음에 안 든다며 종이를 구기거나 울 정도예요',
+        ],
+      },
+    },
   },
   {
     id: 'q16',
@@ -267,6 +340,17 @@ export const QUESTIONS: Question[] = [
       { label: '잠을 설치거나 배가 아프다고 해요', effects: { competence: -1, burnout: 1 } },
       { label: '시험 얘기를 꺼내지도 못하게 해요', effects: { autonomy: -1, burnout: 1 } },
     ],
+    variants: {
+      preschool: {
+        text: '어린이집·유치원 재롱잔치나 발표 활동을 앞둔 전날 밤, 아이의 모습은 어떤가요?',
+        options: [
+          '평소와 다르지 않게 자요',
+          '내일 뭘 할지 스스로 챙기며 준비해요',
+          '잠을 설치거나 배가 아프다고 해요',
+          '그 얘기를 꺼내지도 못하게 해요',
+        ],
+      },
+    },
   },
 
   /* ── 추가 확장 7문항 (18→25, D-11: 축별 정밀도 강화) ── */
@@ -329,6 +413,17 @@ export const QUESTIONS: Question[] = [
       { label: '"그냥 뭐" 하고 끝나요', effects: { social: -1 } },
       { label: '"몰라" 하고 방으로 들어가요', effects: { social: -2 } },
     ],
+    variants: {
+      preschool: {
+        text: '하원 후 "오늘 유치원(어린이집)에서 뭐 했어?"라고 물었을 때, 아이의 대답은?',
+        options: [
+          '묻기도 전에 먼저 쏟아내요',
+          '"재밌었어" 하며 몇 가지 얘기해줘요',
+          '"그냥 뭐" 하고 끝나요',
+          '"몰라" 하고 방으로 들어가요',
+        ],
+      },
+    },
   },
   {
     id: 'q25',

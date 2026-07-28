@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { AGE_BANDS, CHILD_AGE_BAND_STORAGE_KEY, type AgeBand } from '@/lib/age-bands';
-import { QUESTIONS } from '@/lib/questions';
+import { getQuestionsForAgeBand } from '@/lib/questions';
 import {
   ANSWERS_STORAGE_KEY,
   CHILD_NAME_STORAGE_KEY,
@@ -101,8 +101,9 @@ export default function SurveyPage() {
     );
   }
 
-  const q = QUESTIONS[step];
-  const total = QUESTIONS.length;
+  const questions = getQuestionsForAgeBand(ageBand);
+  const q = questions[step];
+  const total = questions.length;
   const selected = answers[q.id];
   const nameLabel = childName.trim();
 
