@@ -43,6 +43,15 @@ const AXIS_NARRATIVE: Record<AxisId, Record<Band, string>> = {
   },
 };
 
+// 신뢰도를 위한 축별 이론 연결 (D-16). 축마다 딱 한 문장.
+const AXIS_THEORY: Record<AxisId, string> = {
+  autonomy: '자기결정성이론(SDT)에서 말하는 자율성 욕구와 맞닿아 있어요.',
+  zpd_strain: '근접발달영역(ZPD) 개념으로 설명되는 지점이에요.',
+  burnout: '학업 소진 연구에서 조기 신호로 보는 부분이에요.',
+  competence: '자기결정성이론(SDT)의 유능감 욕구와 관련이 있어요.',
+  social: '자기결정성이론(SDT)의 관계성 욕구가 여기서 드러나요.',
+};
+
 /** 설문에서 고른 실제 행동을 장면으로 인용 (우리 아이 얘기 같게) */
 function pickScenes(input: ReportInput, count: number): string[] {
   const scenes: string[] = [];
@@ -136,7 +145,7 @@ export function generateMockReport(input: ReportInput): string {
     '',
     '## 축별로 읽어보기',
     ...axisIds.flatMap((axis) => [
-      `**${AXIS_META[axis].label} (레벨 ${scores.axes[axis].level}/5)** — ${AXIS_NARRATIVE[axis][band(scores.axes[axis].normalized)]}`,
+      `**${AXIS_META[axis].label} (레벨 ${scores.axes[axis].level}/5)** — ${AXIS_NARRATIVE[axis][band(scores.axes[axis].normalized)]} ${AXIS_THEORY[axis]}`,
       '',
     ]),
     '## 이렇게 도와주세요',
