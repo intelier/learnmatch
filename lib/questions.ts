@@ -128,12 +128,12 @@ export const QUESTIONS: Question[] = [
   },
   {
     id: 'q5',
-    text: '학원 다녀온 날 아이 표정은요?',
+    text: '평일 아침, 아이를 깨울 때의 모습은 어떤가요?',
     options: [
-      { label: '에너지 있고 뭔가 이야기해요', effects: { burnout: -2 } },
-      { label: '조용하지만 괜찮아 보여요', effects: { burnout: -1 } },
-      { label: '피곤해하고 말이 없어요', effects: { burnout: 1 } },
-      { label: '짜증내거나 예민해요', effects: { burnout: 2 } },
+      { label: '부르면 금방 일어나 스스로 준비를 시작해요', effects: { burnout: -2 } },
+      { label: '몇 번 부르면 일어나 무리 없이 준비해요', effects: { burnout: -1 } },
+      { label: '이불 속에서 한참 못 일어나 늘 시간에 쫓겨요', effects: { burnout: 1 } },
+      { label: '"오늘 안 가면 안 돼?"라며 이불을 뒤집어써요', effects: { burnout: 2 } },
     ],
   },
   {
