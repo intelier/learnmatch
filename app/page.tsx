@@ -29,7 +29,8 @@ export default function Home() {
         <p style={{ color: 'var(--navy-muted)', marginBottom: '1.25rem' }}>
           아이를 가장 가까이에서 지켜본 부모님의 관찰을 바탕으로 —
           <br />
-          5분 만에, 우리 아이 얘기 같은 맞춤 리포트를 받아보세요.
+          5분 만에, 부모님도 몰랐던 <b style={{ color: 'var(--navy)' }}>의외의 모습</b>까지
+          담은 맞춤 리포트를 받아보세요.
         </p>
         <p
           style={{
@@ -56,7 +57,32 @@ export default function Home() {
         </div>
       </section>
 
-      <section style={{ marginTop: '2.5rem' }}>
+      <section style={{ marginTop: '2rem' }}>
+        <div
+          className="card"
+          style={{ borderColor: 'var(--amber-border)', background: 'var(--amber-light)' }}
+        >
+          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--amber)', marginBottom: 10 }}>
+            어쩌면, 전혀 다른 이야기일 수 있어요
+          </p>
+          <div style={{ display: 'grid', gap: 10 }}>
+            <p style={{ fontSize: 14, lineHeight: 1.6 }}>
+              "집중을 잘 못해요" → 자극이 부족할 때 다른 걸 찾는{' '}
+              <b>호기심</b>일 수 있어요
+            </p>
+            <p style={{ fontSize: 14, lineHeight: 1.6 }}>
+              "말을 잘 안 들어요" → 자기 방향을 스스로 정하려는{' '}
+              <b>주체적인 아이</b>일 수 있어요
+            </p>
+          </div>
+          <p style={{ fontSize: 12, color: 'var(--navy-muted)', marginTop: 12 }}>
+            걱정하시던 모습 뒤에 숨어 있던 이야기를, 리포트의 "어쩌면
+            의외의 모습" 섹션에서 우리 아이만의 조합으로 확인하세요.
+          </p>
+        </div>
+      </section>
+
+      <section style={{ marginTop: '2rem' }}>
         <div className="eyebrow">우리 아이 학습 유형을 알면</div>
         <div style={{ display: 'grid', gap: 12, marginTop: '0.9rem' }}>
           <div className="card" style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
@@ -91,7 +117,8 @@ export default function Home() {
               </p>
               <p style={{ fontSize: 13, color: 'var(--navy-muted)', lineHeight: 1.6 }}>
                 문제라고 여겼던 행동이 강점으로 읽히면, 아이를 대하는 마음과
-                관계가 달라져요.
+                관계가 달라져요. 리포트의 "어쩌면 의외의 모습" 섹션이 그
+                반전을 보여드려요.
               </p>
             </div>
           </div>
