@@ -54,9 +54,11 @@ node scripts/test-groble-webhook.js <share_token> # 웹훅 서명·언락 흐름
 
 문항 톤의 방향: 부모가 스스로 범주화하는 추상적 질문("아이가 깊이 파고드는 편인가요?")이 아니라, **특정 장면에서의 행동**을 묻는다("아이 방을 둘러본다면 물건들은 어떤 모습인가요?"). 부모가 관찰을 그대로 떠올리게 되어 정확도와 의외성이 함께 올라간다.
 
+장면은 아무 장면이 아니라 **부모가 즉시 알아보는 대표적 갈등 순간**을 고른다 (D-19) — "이따 할게" 무한 반복, 받아쓰기 공책의 빨간펜, 게임은 금방 배우면서 공부는 힘들어하는 모습. 단 **문항 문구 자체는 중립 관찰형을 유지**한다: 감정 실린 표현("속 터지게 미룰 때")은 부정 응답을 유도해 채점을 왜곡하므로, 공감 포인트는 장면 선택과 선택지 속 아이의 말에 싣는다.
+
 문항을 고를 때 두 가지를 더 확인한다 (D-15): ① **일부 아이에게만 해당하는 상황을 전제하지 않는다** — 예를 들어 "학원 다녀온 날"은 학원에 안 다니는 아이(미취학·초등 저학년 포함)의 부모는 답할 근거가 없어 아무거나 찍게 되고, 그 노이즈가 해당 채점 축에 그대로 섞인다. ② **다른 문항과 소재·방향이 겹치지 않게 한다** — 같은 축을 재는 문항끼리도 서로 다른 장면이어야 다각도 측정의 의미가 있다.
 
-문항 자체를 일부 나이대에서 못 쓸 때는 `variants`를 쓴다 (D-17). `Question.variants[ageBand]`로 text/option label만 나이대별로 교체하고 **effects·순서·개수는 base와 완전히 동일하게 유지**한다 — 그래야 `axisRanges()`·`check-scoring.ts`·공유 코드가 영향받지 않는다. 지금은 미취학(`preschool`) 6문항(q4·q11·q12·q15·q18·q24 — 교과서·시험지·성적·시험 전날 같은, 미취학 아동에게 없는 개념)에만 적용돼 있다. 문항을 표시하거나 LLM에 전달할 때는 정적 `QUESTIONS` 대신 `getQuestionsForAgeBand(ageBand)`를 쓴다(`app/survey/page.tsx`, `lib/prompt.ts`, `lib/llm-mock.ts`가 이렇게 한다). 반면 채점·공유코드(`lib/scoring.ts`, `lib/share.ts`, `scripts/check-scoring.ts`)는 옵션 순서·effects·id만 쓰므로 base `QUESTIONS`를 그대로 쓰면 된다.
+문항 자체를 일부 나이대에서 못 쓸 때는 `variants`를 쓴다 (D-17). `Question.variants[ageBand]`로 text/option label만 나이대별로 교체하고 **effects·순서·개수는 base와 완전히 동일하게 유지**한다 — 그래야 `axisRanges()`·`check-scoring.ts`·공유 코드가 영향받지 않는다. 현재 커버리지(D-17·D-19): q4·q18(preschool+elem_low), q11·q12·q15·q24(preschool), q13(middle+high). 문항을 표시하거나 LLM에 전달할 때는 정적 `QUESTIONS` 대신 `getQuestionsForAgeBand(ageBand)`를 쓴다(`app/survey/page.tsx`, `lib/prompt.ts`, `lib/llm-mock.ts`가 이렇게 한다). 반면 채점·공유코드(`lib/scoring.ts`, `lib/share.ts`, `scripts/check-scoring.ts`)는 옵션 순서·effects·id만 쓰므로 base `QUESTIONS`를 그대로 쓰면 된다.
 
 ### 리포트 톤 (D-10, D-13, D-16)
 
