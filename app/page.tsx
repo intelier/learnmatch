@@ -132,6 +132,8 @@ export default function Home() {
       >
         본 진단은 자녀 이해를 돕기 위한 참고 자료이며, 의학적·심리학적 진단을
         대신하지 않습니다.
+        <br />
+        문의: <a href="mailto:sinkita@naver.com">sinkita@naver.com</a>
       </footer>
     </main>
   );
