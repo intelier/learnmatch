@@ -116,7 +116,7 @@ export function generateMockReport(input: ReportInput): string {
   );
   academyTips.push(`- ${STYLE_LABEL[scores.style]} 활동(수업 방식)이 있는지 확인해 보세요.`);
 
-  const scenes = pickScenes(input, 3);
+  const scenes = pickScenes(input, 4);
 
   /* "부모님 보시기에는 ~하지만, 실제로는 ~" 의외성 문장 (축 조합 기반, v2) */
   const surprises: string[] = [];

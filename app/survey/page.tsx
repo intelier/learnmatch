@@ -165,11 +165,10 @@ export default function SurveyPage() {
           style={{ borderColor: 'var(--amber-border)', background: 'var(--amber-light)' }}
         >
           <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--amber)', marginBottom: 10 }}>
-            {interludeAt} / {total} 완료
+            {interludeAt} / {total} 완료{meta ? ` · ${meta.label}` : ''}
           </p>
           <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 8, lineHeight: 1.6 }}>
-            지금까지의 응답에서 {meta ? meta.label : '아이의'} 성향이 보이기
-            시작했어요
+            지금까지의 응답에서 이런 모습이 보이기 시작했어요
           </p>
           {meta && (
             <p style={{ fontSize: 13, color: 'var(--navy-light)', lineHeight: 1.6 }}>
