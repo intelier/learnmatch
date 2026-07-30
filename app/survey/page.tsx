@@ -278,8 +278,9 @@ export default function SurveyPage() {
         )}
       </div>
 
-      <p style={{ marginTop: '2rem', fontSize: 12, color: 'var(--navy-muted)' }}>
-        정답은 없어요. 아이의 평소 모습에 가장 가까운 것을 골라주세요.
+      <p style={{ marginTop: '2rem', fontSize: 15, fontWeight: 600, color: 'var(--amber)' }}>
+        정답은 없어요. 우리 아이에게 해당되는 게 없다면, 우리 아이라면 이럴 것
+        같다고 보여지는 것을 골라주세요.
       </p>
     </main>
   );
