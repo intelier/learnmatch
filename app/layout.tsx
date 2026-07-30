@@ -36,9 +36,23 @@ export default function RootLayout({
       <body>
         <div className="wrap">
           <header className="site-header">
-            <Link href="/" className="logo" aria-label="클래스 핏 홈으로 이동">
-              클래스 <span>핏</span>
-            </Link>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Link href="/" className="logo" aria-label="클래스 핏 홈으로 이동">
+                클래스 <span>핏</span>
+              </Link>
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: 'var(--navy-muted)',
+                  border: '1px solid var(--ivory-border)',
+                  borderRadius: 999,
+                  padding: '2px 7px',
+                }}
+              >
+                베타2
+              </span>
+            </div>
           </header>
           {children}
         </div>

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import type { AgeBand } from '@/lib/age-bands';
+import type { HagwonStatus } from '@/lib/hagwon-status';
 import { AXIS_META, FOCUS_LABEL, STYLE_LABEL, type AxisId } from '@/lib/questions';
 import {
   buildCheckoutUrl,
@@ -26,6 +27,7 @@ export default function ResultView({
   answers,
   childName,
   childAgeBand,
+  childHagwonStatus,
   isSharedView = false,
   initialReport,
   hideShare = false,
@@ -38,6 +40,8 @@ export default function ResultView({
   childName?: string;
   /** 아이 연령대 (선택, D-13) — 발달 단계 반영 + API 전달 */
   childAgeBand?: AgeBand;
+  /** 학원·과외 여부 (선택, D-21) — "학원을 고른다면" 섹션 톤 분기 + API 전달 */
+  childHagwonStatus?: HagwonStatus;
   isSharedView?: boolean;
   /** 고정 리포트(예시 페이지 등) — 전달 시 API 호출 없이 바로 표시 */
   initialReport?: string;
@@ -72,7 +76,7 @@ export default function ResultView({
     fetch('/api/report', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ answers, childName, childAgeBand }),
+      body: JSON.stringify({ answers, childName, childAgeBand, hagwonStatus: childHagwonStatus }),
     })
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`${res.status}`))))
       .then((data) => {
@@ -92,7 +96,7 @@ export default function ResultView({
     return () => {
       cancelled = true;
     };
-  }, [answers, childName, childAgeBand, initialReport]);
+  }, [answers, childName, childAgeBand, childHagwonStatus, initialReport]);
 
   const sharePath = shareToken ?? shareCode;
   const shareUrl = sharePath
@@ -242,18 +246,21 @@ export default function ResultView({
               target="_blank"
               rel="noopener noreferrer"
             >
-              990원으로 전체 리포트 열기
+              런칭 기념 990원으로 전체 리포트 열기
             </a>
           ) : (
             <>
               <button type="button" className="btn-primary" disabled style={{ opacity: 0.6, cursor: 'default' }}>
-                990원으로 전체 리포트 열기
+                런칭 기념 990원으로 전체 리포트 열기
               </button>
               <p style={{ fontSize: 11, color: 'var(--navy-muted)', marginTop: 8 }}>
                 결제 기능 오픈 준비 중이에요.
               </p>
             </>
           )}
+          <p style={{ fontSize: 11, color: 'var(--navy-muted)', marginTop: 8 }}>
+            정가 8,000원 예정 · 지금은 런칭 기념가로 열람할 수 있어요.
+          </p>
         </div>
       )}
 

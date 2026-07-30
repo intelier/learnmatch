@@ -3,7 +3,7 @@
  * 실제 LLM과 같은 입력(ReportInput)을 받아 채점 결과 기반 서술형 리포트를 조립한다.
  */
 import { AGE_BAND_LABEL } from './age-bands.ts';
-import { AXIS_META, FOCUS_LABEL, getQuestionsForAgeBand, STYLE_LABEL, type AxisId } from './questions.ts';
+import { AXIS_META, FOCUS_LABEL, getQuestions, STYLE_LABEL, type AxisId } from './questions.ts';
 import type { ReportInput } from './prompt.ts';
 
 type Band = 'high' | 'mid' | 'low';
@@ -55,7 +55,7 @@ const AXIS_THEORY: Record<AxisId, string> = {
 /** 설문에서 고른 실제 행동을 장면으로 인용 (우리 아이 얘기 같게) */
 function pickScenes(input: ReportInput, count: number): string[] {
   const scenes: string[] = [];
-  for (const q of getQuestionsForAgeBand(input.childAgeBand)) {
+  for (const q of getQuestions(input.childAgeBand, input.hagwonStatus)) {
     const idx = input.answers[q.id];
     const opt = idx !== undefined ? q.options[idx] : undefined;
     if (!opt || !opt.effects) continue;
@@ -96,13 +96,18 @@ export function generateMockReport(input: ReportInput): string {
   }
 
   const academyTips: string[] = [];
+  academyTips.push(
+    input.hagwonStatus === 'none'
+      ? '- 처음 학원을 고른다면, 아래 기준을 상담 때 그대로 물어보세요.'
+      : '- 지금 다니는 곳이 이 성향과 잘 맞는지, 아래 기준으로 점검해 보세요.'
+  );
   const social = band(scores.axes.social.normalized);
   academyTips.push(
     social === 'high'
-      ? '- 또래와 상호작용이 많은 **소그룹 수업**이 잘 맞아요.'
+      ? '- 또래와 상호작용이 많은 **협동 활동 중심 소그룹 수업**이 잘 맞아요.'
       : social === 'low'
-        ? '- 대형 강의보다 **개별 진도·소규모 환경**을 우선 살펴보세요.'
-        : '- 그룹과 개별 학습이 **혼합된 형태**가 무난하게 잘 맞아요.'
+        ? '- 경쟁·비교보다 **개별 진도·소규모 환경**을 우선 살펴보세요.'
+        : '- 협동 활동과 개별 학습이 **혼합된 형태**가 무난하게 잘 맞아요.'
   );
   academyTips.push(
     band(scores.axes.burnout.normalized) === 'high'
@@ -145,7 +150,7 @@ export function generateMockReport(input: ReportInput): string {
     '',
     '## 축별로 읽어보기',
     ...axisIds.flatMap((axis) => [
-      `**${AXIS_META[axis].label} (레벨 ${scores.axes[axis].level}/5)** — ${AXIS_NARRATIVE[axis][band(scores.axes[axis].normalized)]} ${AXIS_THEORY[axis]}`,
+      `**${AXIS_META[axis].label} (레벨 ${scores.axes[axis].level}/5)** — ${AXIS_NARRATIVE[axis][band(scores.axes[axis].normalized)]} ${AXIS_THEORY[axis]} (문항 5개 응답 종합)`,
       '',
     ]),
     '## 이렇게 도와주세요',

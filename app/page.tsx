@@ -135,7 +135,7 @@ export default function Home() {
         <div className="card">
           <div className="eyebrow">02 · 진단 리포트</div>
           <p style={{ fontSize: 14 }}>
-            자기주도성·유능감·학습스타일 등 6가지 축으로 아이를 읽어드려요.
+            자율성·동기·유능감·학습스타일 등 6가지 영역으로 아이를 읽어드려요.
           </p>
         </div>
         <div className="card">

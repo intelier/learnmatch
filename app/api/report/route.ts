@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { isAgeBand, type AgeBand } from '@/lib/age-bands';
 import { saveDiagnosis } from '@/lib/db';
+import { isHagwonStatus, type HagwonStatus } from '@/lib/hagwon-status';
 import { generateReport } from '@/lib/llm';
 import { splitReport } from '@/lib/report-gate';
 import { scoreAnswers, type Answers } from '@/lib/scoring';
@@ -9,6 +10,7 @@ export async function POST(request: Request) {
   let answers: Answers;
   let childName: string | undefined;
   let childAgeBand: AgeBand | undefined;
+  let hagwonStatus: HagwonStatus | undefined;
   try {
     const body = await request.json();
     answers = body?.answers;
@@ -18,6 +20,9 @@ export async function POST(request: Request) {
       if (trimmed) childName = trimmed;
     }
     if (isAgeBand(body?.childAgeBand)) childAgeBand = body.childAgeBand;
+    // D-21: hagwonStatus는 프롬프트 톤 분기에만 쓰고 DB에는 저장하지 않는다
+    // (마이그레이션 없이 바로 반영하기 위해 — CLAUDE.md "마이그레이션 순서" 참고).
+    if (isHagwonStatus(body?.hagwonStatus)) hagwonStatus = body.hagwonStatus;
   } catch {
     return NextResponse.json({ error: 'invalid JSON' }, { status: 400 });
   }
@@ -35,7 +40,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'no valid answers' }, { status: 400 });
   }
 
-  const report = await generateReport({ answers, scores, childName, childAgeBand });
+  const report = await generateReport({ answers, scores, childName, childAgeBand, hagwonStatus });
 
   // T-09: 진단·리포트 저장 (DB 미설정/실패 시 null — 무상태 동작 유지)
   const saved = await saveDiagnosis({

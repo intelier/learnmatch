@@ -19,7 +19,7 @@ UI 문구·주석·커밋 메시지는 한국어로 쓴다.
 npm run dev          # 개발 서버 (localhost:3000)
 npm run build        # 프로덕션 빌드
 npx tsc --noEmit     # 타입 체크 — 테스트 러너가 없으므로 이게 1차 검증
-node scripts/check-scoring.ts   # 채점 로직 검증 (21건). 문항·채점 수정 시 필수
+node scripts/check-scoring.ts   # 채점 로직 검증 (문항 수·카테고리별 5개·범위 등). 문항·채점 수정 시 필수
 ```
 
 테스트 프레임워크는 없다. 검증은 `check-scoring.ts` + `tsc` + 브라우저 확인 조합으로 한다.
@@ -37,13 +37,13 @@ node scripts/test-groble-webhook.js <share_token> # 웹훅 서명·언락 흐름
 ## 아키텍처
 
 ### 흐름
-`/survey` (이름·연령대 입력 → 25문항) → sessionStorage → `/result` → `POST /api/report` → 채점 + LLM 생성 + DB 저장 → 리포트 렌더 → 공유 링크 `/r/[code]`
+`/survey` (이름·연령대·학원 유무 입력 → 30문항) → sessionStorage → `/result` → `POST /api/report` → 채점 + LLM 생성 + DB 저장 → 리포트 렌더 → 공유 링크 `/r/[code]`
 
 ### 핵심 데이터 흐름 (`lib/`)
 
 **`questions.ts` → `scoring.ts` → `prompt.ts` → `llm.ts`** 가 중심축이다.
 
-- `questions.ts` — 25문항. 각 선택지는 `effects: Partial<Record<AxisId, number>>`로 5개 축(`autonomy`/`zpd_strain`/`burnout`/`competence`/`social`)에 가중치를 준다. `style`/`focus`는 범주형(최빈값).
+- `questions.ts` — 30문항, 6개 카테고리(`QuestionCategory`) × 5문항 (D-21). 각 선택지는 `effects: Partial<Record<AxisId, number>>`로 5개 **채점** 축(`autonomy`/`zpd_strain`/`burnout`/`competence`/`social`)에 가중치를 준다. `style`/`focus`는 범주형(최빈값)이라 점수화되지 않고, 이 둘을 묶은 `style_strength`가 UI 표시용 6번째 카테고리다 — `category` 필드는 채점과 무관, 문항 상단 라벨·인터루드용.
 - `scoring.ts` — `axisRanges()`가 **문항 데이터에서 축별 이론적 min/max를 자동 산출**한다. 따라서 문항을 추가·수정해도 정규화 범위를 손으로 고칠 필요가 없다.
 - `prompt.ts` — `PROMPT_VERSION`을 두고 DB에 함께 저장한다. 프롬프트를 의미 있게 바꾸면 버전을 올린다.
 - `llm.ts` — **LLM 교체 지점은 이 파일 하나다.** 폴백 체인: Gemini(`gemini-2.5-flash`) → Claude(`claude-sonnet-5`) → `llm-mock.ts`. 각 단계는 try/catch로 감싸 실패 시 다음으로 넘어간다.
@@ -58,13 +58,17 @@ node scripts/test-groble-webhook.js <share_token> # 웹훅 서명·언락 흐름
 
 문항을 고를 때 세 가지를 더 확인한다 (D-15, D-20): ① **일부 아이에게만 해당하는 상황을 전제하지 않는다** — 예를 들어 "학원 다녀온 날"은 학원에 안 다니는 아이(미취학·초등 저학년 포함)의 부모는 답할 근거가 없어 아무거나 찍게 되고, 그 노이즈가 해당 채점 축에 그대로 섞인다. ② **다른 문항과 소재·방향이 겹치지 않게 한다** — 같은 축을 재는 문항끼리도 서로 다른 장면이어야 다각도 측정의 의미가 있다. ③ **부모가 직접 볼 수 있는 장면이어야 한다** — 교실 안, 부모 없는 캠프처럼 부모의 관찰 범위 밖 장면을 물으면 관찰이 아니라 부모의 추측·인상을 측정하게 된다. 학교·학원 얘기를 다루려면 "집에서 부모에게 보이는 반응"(하교 후 대답, 식탁에서의 표정)으로 묻는다.
 
-문항 자체를 일부 나이대에서 못 쓸 때는 `variants`를 쓴다 (D-17). `Question.variants[ageBand]`로 text/option label만 나이대별로 교체하고 **effects·순서·개수는 base와 완전히 동일하게 유지**한다 — 그래야 `axisRanges()`·`check-scoring.ts`·공유 코드가 영향받지 않는다. 현재 커버리지(D-17·D-19): q4·q18(preschool+elem_low), q2·q11·q12·q15·q24(preschool), q6·q10·q13·q23(middle+high). 문항을 표시하거나 LLM에 전달할 때는 정적 `QUESTIONS` 대신 `getQuestionsForAgeBand(ageBand)`를 쓴다(`app/survey/page.tsx`, `lib/prompt.ts`, `lib/llm-mock.ts`가 이렇게 한다). 반면 채점·공유코드(`lib/scoring.ts`, `lib/share.ts`, `scripts/check-scoring.ts`)는 옵션 순서·effects·id만 쓰므로 base `QUESTIONS`를 그대로 쓰면 된다.
+문항 자체를 일부 나이대·학원 유무에서 못 쓸 때는 `variants`/`hagwonVariants`를 쓴다 (D-17, D-21). `Question.variants[ageBand]` / `Question.hagwonVariants[hagwonStatus]`로 text/option label만 교체하고 **effects·순서·개수는 base와 완전히 동일하게 유지**한다 — 그래야 `axisRanges()`·`check-scoring.ts`·공유 코드가 영향받지 않는다. 둘 다 있으면 hagwonVariants가 나중에 적용돼 우선(더 좁은 문제를 겨냥하므로). 현재 커버리지: `variants`는 q4·q18(preschool+elem_low), q2·q11·q12·q15·q24(preschool), q6·q10·q13·q23(middle+high) — `hagwonVariants`는 q14·q21(none, 실제로 "학원"을 직접 언급하는 문항만). 문항을 표시하거나 LLM에 전달할 때는 정적 `QUESTIONS` 대신 `getQuestions(ageBand, hagwonStatus)`를 쓴다(`app/survey/page.tsx`, `lib/prompt.ts`, `lib/llm-mock.ts`가 이렇게 한다). 반면 채점·공유코드(`lib/scoring.ts`, `lib/share.ts`, `scripts/check-scoring.ts`)는 옵션 순서·effects·id만 쓰므로 base `QUESTIONS`를 그대로 쓰면 된다.
+
+`hagwonStatus`(학원·과외 여부, `lib/hagwon-status.ts`)는 **DB에 저장하지 않는다** — `sessionStorage` → `/api/report` 요청 본문 → 프롬프트로만 흐른다. `child_age_band`(D-13)처럼 컬럼을 추가하려면 마이그레이션 확인 절차가 필요한데, 톤 분기 용도로만 쓰이고 생성된 리포트 텍스트는 기존 `content_md`에 저장되므로 굳이 새 컬럼이 필요 없었다. 학원 유무별 통계가 필요해지면(T-16) 그때 마이그레이션과 함께 추가한다.
 
 ### 리포트 톤 (D-10, D-13, D-16)
 
 - **반전 프레이밍**이 핵심. 부모가 "문제"로 여기던 행동을 강점의 언어로 재해석하되, 미화가 아니라 실천 힌트를 함께 준다. `AXIS_META`의 `positive`/`negative`가 **양극단 모두 강점 언어**로 쓰여 있는 이유다.
 - 연령대(`childAgeBand`)가 주어지면 발달 단계를 반영한다 — 미취학 아이에게 "스스로 계획을 세워야 한다"는 기준을 들이대지 않는 것.
-- "축별로 읽어보기"의 각 축은 관련 이론을 대화체 한 문장으로만 연결한다(자기주도성·유능감·사회성→SDT, 수준 부담→ZPD, 소진 신호→학업 소진 연구). 논문 인용투는 쓰지 않고, 축마다 한 번을 넘지 않는다. 헤더의 '교육심리학 기반' 배지를 "과한 강조"로 뺀 전례(T-14)가 있으니 이 절제 수준을 넘지 않을 것. 학습 선호 방식(스타일·깊이/넓이)은 근거가 약한 참고 지표라 이론을 붙이지 않는다.
+- "축별로 읽어보기"의 각 축은 관련 이론을 대화체 한 문장으로만 연결한다(자율성·동기·유능감·관계·사회성→SDT, 학습 수준·격차→ZPD, 정서·번아웃→학업 소진 연구). 논문 인용투는 쓰지 않고, 축마다 한 번을 넘지 않는다. 헤더의 '교육심리학 기반' 배지를 "과한 강조"로 뺀 전례(T-14)가 있으니 이 절제 수준을 넘지 않을 것. 학습스타일·강점(시각/청각/체험/읽기, 깊이/넓이)은 근거가 약한 참고 지표라 이론을 붙이지 않는다.
+- 각 축 문단 끝에 "(문항 5개 응답 종합)"을 정확히 덧붙인다 (D-21) — 다섯 축 모두 실제로 문항 5개씩이므로 숫자를 바꾸지 않는다. 문항 수가 바뀌면 이 숫자도 함께 고칠 것.
+- "학원을 고른다면" 섹션은 헤딩은 고정하고 톤만 `hagwonStatus`로 분기한다(D-21) — 이미 다니면 "지금 다니는 곳이 맞는지 점검", 아직이면 "첫 학원 고르는 기준". 헤딩 자체를 조건부로 만들지 않는 이유는 아래 "리포트 게이팅" 항목 참고.
 
 ### 리포트 게이팅
 
@@ -106,5 +110,5 @@ Groble 웹훅에는 커스텀 메타데이터·쿼리파라미터가 없다. 그
 
 - `import` 경로에 `.ts` 확장자를 붙인다 (`allowImportingTsExtensions`). `lib/` 내부는 상대경로 + `.ts`, `app/`에서는 `@/lib/...` 별칭을 쓴다.
 - OG 이미지(`opengraph-image.tsx`)는 Satori 기반이라 **자식이 2개 이상인 `<div>`에 `display: flex`를 명시**해야 한다. 한글은 Google Fonts CSS2 API로 서브셋을 fetch해 임베딩한다.
-- `lib/example-report.ts`는 랜딩의 "예시 리포트 보기"용 고정 텍스트다 (매 열람마다 LLM을 부르지 않기 위함). 문항을 크게 바꾸면 재생성 대상 — `scripts/make-example.js` 참고.
+- `lib/example-report.ts`는 랜딩의 "예시 리포트 보기"용 고정 텍스트다 (매 열람마다 LLM을 부르지 않기 위함). 문항을 크게 바꾸면 재생성 대상 — `scripts/make-example.js` 참고. **D-21 이후 우선순위 상승**: 레이더 차트는 `scoreAnswers()`로 실시간 재계산돼 새 축 라벨("자율성·동기" 등)을 쓰는데, 고정 텍스트는 옛 라벨("자기주도성" 등)을 그대로 담고 있어 차트와 본문 라벨이 눈에 띄게 어긋난다.
 - `legacy/`의 HTML 2개는 채점 축의 원본이자 2단계(학원 매칭) 참고 자산이다. `tsconfig`에서 제외돼 있다.

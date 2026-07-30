@@ -3,25 +3,53 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { AGE_BANDS, CHILD_AGE_BAND_STORAGE_KEY, type AgeBand } from '@/lib/age-bands';
-import { getQuestionsForAgeBand } from '@/lib/questions';
+import {
+  CHILD_HAGWON_STATUS_STORAGE_KEY,
+  HAGWON_STATUS_OPTIONS,
+  type HagwonStatus,
+} from '@/lib/hagwon-status';
+import { AXIS_META, CATEGORY_META, getQuestions, type AxisId } from '@/lib/questions';
 import {
   ANSWERS_STORAGE_KEY,
   CHILD_NAME_STORAGE_KEY,
+  scoreAnswers,
   type Answers,
 } from '@/lib/scoring';
+
+const INTERLUDE_STEPS = [10, 20];
+
+/** 지금까지 응답에서 가장 뚜렷하게 드러난 축을 고른다 (50점 기준 편차가 가장 큰 축). */
+function pickInterludeAxis(partialAnswers: Answers): { axis: AxisId; positive: boolean } | null {
+  const scores = scoreAnswers(partialAnswers);
+  const axisIds = Object.keys(AXIS_META) as AxisId[];
+  let best: AxisId | null = null;
+  let bestDist = -1;
+  for (const axis of axisIds) {
+    const dist = Math.abs(scores.axes[axis].normalized - 50);
+    if (dist > bestDist) {
+      bestDist = dist;
+      best = axis;
+    }
+  }
+  if (!best) return null;
+  return { axis: best, positive: scores.axes[best].normalized >= 50 };
+}
 
 export default function SurveyPage() {
   const router = useRouter();
   const [phase, setPhase] = useState<'intake' | 'questions'>('intake');
   const [childName, setChildName] = useState('');
   const [ageBand, setAgeBand] = useState<AgeBand | null>(null);
+  const [hagwonStatus, setHagwonStatus] = useState<HagwonStatus | null>(null);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
+  const [interludeAt, setInterludeAt] = useState<number | null>(null);
 
   function startQuestions() {
-    if (!ageBand) return;
+    if (!ageBand || !hagwonStatus) return;
     sessionStorage.setItem(CHILD_NAME_STORAGE_KEY, childName.trim().slice(0, 20));
     sessionStorage.setItem(CHILD_AGE_BAND_STORAGE_KEY, ageBand);
+    sessionStorage.setItem(CHILD_HAGWON_STATUS_STORAGE_KEY, hagwonStatus);
     setPhase('questions');
   }
 
@@ -83,39 +111,106 @@ export default function SurveyPage() {
           ))}
         </div>
 
+        <p style={{ fontSize: 13, color: 'var(--navy-muted)', marginBottom: '0.9rem' }}>
+          현재 학원이나 과외를 다니고 있나요? 문항을 아이 상황에 맞게
+          보여드려요.
+        </p>
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: '1.75rem' }}>
+          {HAGWON_STATUS_OPTIONS.map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              className={`option-btn${hagwonStatus === opt.id ? ' selected' : ''}`}
+              style={{ width: 'auto', flex: '1 1 auto', textAlign: 'center' }}
+              onClick={() => setHagwonStatus(opt.id)}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        <p style={{ fontSize: 12, color: 'var(--navy-muted)', marginBottom: '1.25rem' }}>
+          30문항 · 약 10분 · 6개 영역 측정
+        </p>
+
         <button
           type="button"
           className="btn-primary"
-          disabled={!ageBand}
-          style={!ageBand ? { opacity: 0.5, cursor: 'default' } : undefined}
+          disabled={!ageBand || !hagwonStatus}
+          style={!ageBand || !hagwonStatus ? { opacity: 0.5, cursor: 'default' } : undefined}
           onClick={startQuestions}
         >
           {childName.trim() ? `${childName.trim()} 진단 시작하기` : '진단 시작하기'}
         </button>
-        {!ageBand && (
+        {(!ageBand || !hagwonStatus) && (
           <p style={{ fontSize: 11, color: 'var(--navy-muted)', marginTop: 8 }}>
-            나이대를 선택하면 시작할 수 있어요.
+            나이대와 학원 여부를 선택하면 시작할 수 있어요.
           </p>
         )}
       </main>
     );
   }
 
-  const questions = getQuestionsForAgeBand(ageBand);
-  const q = questions[step];
+  const questions = getQuestions(ageBand, hagwonStatus);
   const total = questions.length;
+
+  if (interludeAt !== null) {
+    const picked = pickInterludeAxis(answers);
+    const meta = picked ? AXIS_META[picked.axis] : null;
+    return (
+      <main>
+        <div
+          className="card"
+          style={{ borderColor: 'var(--amber-border)', background: 'var(--amber-light)' }}
+        >
+          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--amber)', marginBottom: 10 }}>
+            {interludeAt} / {total} 완료
+          </p>
+          <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 8, lineHeight: 1.6 }}>
+            지금까지의 응답에서 {meta ? meta.label : '아이의'} 성향이 보이기
+            시작했어요
+          </p>
+          {meta && (
+            <p style={{ fontSize: 13, color: 'var(--navy-light)', lineHeight: 1.6 }}>
+              {picked!.positive ? meta.positive : meta.negative}
+            </p>
+          )}
+        </div>
+        <button
+          type="button"
+          className="btn-primary"
+          style={{ marginTop: '1.5rem' }}
+          onClick={() => setInterludeAt(null)}
+        >
+          계속하기
+        </button>
+      </main>
+    );
+  }
+
+  const q = questions[step];
   const selected = answers[q.id];
   const nameLabel = childName.trim();
+  const categoryLabel = CATEGORY_META[q.category].label;
+  const categoryTotal = questions.filter((qq) => qq.category === q.category).length;
+  const categoryIndex = questions
+    .slice(0, step + 1)
+    .filter((qq) => qq.category === q.category).length;
 
   function selectOption(idx: number) {
     const next = { ...answers, [q.id]: idx };
     setAnswers(next);
-    if (step < total - 1) {
-      setStep(step + 1);
-    } else {
+    const nextStep = step + 1;
+    if (nextStep >= total) {
       sessionStorage.setItem(ANSWERS_STORAGE_KEY, JSON.stringify(next));
       router.push('/result');
+      return;
     }
+    if (INTERLUDE_STEPS.includes(nextStep)) {
+      setInterludeAt(nextStep);
+    }
+    setStep(nextStep);
   }
 
   return (
@@ -141,6 +236,10 @@ export default function SurveyPage() {
           style={{ width: `${((step + 1) / total) * 100}%` }}
         />
       </div>
+
+      <p style={{ fontSize: 12, color: 'var(--amber)', fontWeight: 600, margin: '0.9rem 0 0.3rem' }}>
+        {categoryLabel} {categoryIndex}/{categoryTotal}
+      </p>
 
       <h2
         style={{

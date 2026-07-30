@@ -2,7 +2,7 @@
  * T-02 완료 기준 검증: 샘플 응답 → 채점 결과 sanity check
  * 실행: node scripts/check-scoring.ts
  */
-import { QUESTIONS } from '../lib/questions.ts';
+import { CATEGORY_META, QUESTIONS, type QuestionCategory } from '../lib/questions.ts';
 import { axisRanges, describeScores, scoreAnswers, type Answers } from '../lib/scoring.ts';
 
 let failed = 0;
@@ -15,7 +15,7 @@ function check(name: string, cond: boolean, detail = '') {
 }
 
 console.log(`문항 수: ${QUESTIONS.length}`);
-check('문항 수 20~30개 (D-11: 25문항)', QUESTIONS.length >= 20 && QUESTIONS.length <= 30);
+check('문항 수 정확히 30개 (D-21: 6축×5문항)', QUESTIONS.length === 30);
 check(
   '모든 문항에 선택지 2~4개',
   QUESTIONS.every((q) => q.options.length >= 2 && q.options.length <= 4)
@@ -24,6 +24,15 @@ check(
   '문항 id 중복 없음',
   new Set(QUESTIONS.map((q) => q.id)).size === QUESTIONS.length
 );
+
+console.log('\n카테고리별 문항 수 (D-21: 각 5개):');
+const categoryCounts = {} as Record<QuestionCategory, number>;
+for (const q of QUESTIONS) categoryCounts[q.category] = (categoryCounts[q.category] ?? 0) + 1;
+for (const [category, meta] of Object.entries(CATEGORY_META)) {
+  const count = categoryCounts[category as QuestionCategory] ?? 0;
+  console.log(`  ${meta.label}: ${count}`);
+  check(`${meta.label} 정확히 5문항`, count === 5, `got ${count}`);
+}
 
 const ranges = axisRanges();
 console.log('\n축별 이론적 범위:');
@@ -37,6 +46,7 @@ const positive: Answers = {
   q1: 0, q2: 1, q3: 0, q4: 0, q5: 0, q6: 0, q7: 0, q8: 0,
   q9: 0, q10: 0, q11: 0, q12: 0, q13: 2, q14: 0, q15: 1, q16: 0, q17: 0, q18: 1,
   q19: 0, q20: 0, q21: 0, q22: 0, q23: 3, q24: 3, q25: 0,
+  q26: 0, q27: 0, q28: 0, q29: 0, q30: 0,
 };
 const p = scoreAnswers(positive);
 console.log('\n[케이스 1: 자기주도형]', p.headline);
@@ -54,6 +64,7 @@ const strained: Answers = {
   q1: 3, q2: 3, q3: 3, q4: 3, q5: 3, q6: 2, q7: 1, q8: 2,
   q9: 3, q10: 3, q11: 3, q12: 3, q13: 3, q14: 3, q15: 3, q16: 2, q17: 2, q18: 2,
   q19: 3, q20: 3, q21: 3, q22: 3, q23: 1, q24: 1, q25: 3,
+  q26: 3, q27: 3, q28: 3, q29: 3, q30: 2,
 };
 const s = scoreAnswers(strained);
 console.log('\n[케이스 2: 소진형]', s.headline);

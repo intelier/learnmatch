@@ -5,6 +5,11 @@ import { useEffect, useState } from 'react';
 import ResultView from '@/app/components/result-view';
 import { CHILD_AGE_BAND_STORAGE_KEY, isAgeBand, type AgeBand } from '@/lib/age-bands';
 import {
+  CHILD_HAGWON_STATUS_STORAGE_KEY,
+  isHagwonStatus,
+  type HagwonStatus,
+} from '@/lib/hagwon-status';
+import {
   ANSWERS_STORAGE_KEY,
   CHILD_NAME_STORAGE_KEY,
   type Answers,
@@ -14,6 +19,7 @@ export default function ResultPage() {
   const [answers, setAnswers] = useState<Answers | null>(null);
   const [childName, setChildName] = useState<string>('');
   const [childAgeBand, setChildAgeBand] = useState<AgeBand | undefined>(undefined);
+  const [hagwonStatus, setHagwonStatus] = useState<HagwonStatus | undefined>(undefined);
   const [missing, setMissing] = useState(false);
 
   useEffect(() => {
@@ -27,6 +33,8 @@ export default function ResultPage() {
       setChildName(sessionStorage.getItem(CHILD_NAME_STORAGE_KEY)?.trim() ?? '');
       const rawAgeBand = sessionStorage.getItem(CHILD_AGE_BAND_STORAGE_KEY);
       if (isAgeBand(rawAgeBand)) setChildAgeBand(rawAgeBand);
+      const rawHagwonStatus = sessionStorage.getItem(CHILD_HAGWON_STATUS_STORAGE_KEY);
+      if (isHagwonStatus(rawHagwonStatus)) setHagwonStatus(rawHagwonStatus);
     } catch {
       setMissing(true);
     }
@@ -48,6 +56,11 @@ export default function ResultPage() {
   if (!answers) return null;
 
   return (
-    <ResultView answers={answers} childName={childName || undefined} childAgeBand={childAgeBand} />
+    <ResultView
+      answers={answers}
+      childName={childName || undefined}
+      childAgeBand={childAgeBand}
+      childHagwonStatus={hagwonStatus}
+    />
   );
 }
