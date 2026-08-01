@@ -43,7 +43,8 @@ node scripts/test-groble-webhook.js <share_token> # 웹훅 서명·언락 흐름
 
 **`questions.ts` → `scoring.ts` → `prompt.ts` → `llm.ts`** 가 중심축이다.
 
-- `questions.ts` — 30문항, 6개 카테고리(`QuestionCategory`) × 5문항 (D-21). 각 선택지는 `effects: Partial<Record<AxisId, number>>`로 5개 **채점** 축(`autonomy`/`zpd_strain`/`burnout`/`competence`/`social`)에 가중치를 준다. `style`/`focus`는 범주형(최빈값)이라 점수화되지 않고, 이 둘을 묶은 `style_strength`가 UI 표시용 6번째 카테고리다 — `category` 필드는 채점과 무관, 문항 상단 라벨·인터루드용.
+- `questions.ts` — 30문항, 6개 카테고리(`QuestionCategory`) × 5문항 (D-21). 각 선택지는 `effects: Partial<Record<AxisId, number>>`로 5개 **채점** 축(`autonomy`/`zpd_strain`/`burnout`/`competence`/`social`)에 가중치를 준다. `style`/`focus`는 범주형(최빈값)이라 점수화되지 않고, 이 둘을 묶은 `style_strength`가 UI 표시용 6번째 카테고리다 — `category` 필드는 채점과 무관, 문항 상단 라벨·인터루드용. `LEVEL_MEANING`(D-24)은 5축×레벨 1~5의 의미 문장 — "레벨 X/5" 숫자가 화면에 나오는 곳(`result-view.tsx`)엔 항상 이 문장을 같이 보여준다, 숫자만 단독으로 보이면 안 됨.
+- `insights.ts` — "어쩌면 의외의 모습" 재해석 문장 매핑 테이블 (D-24). 2축 조합 규칙 + 5축×상/하 단일 폴백으로 **항상 최소 1개**를 보장한다. mock·실제 LLM 프롬프트가 공유.
 - `scoring.ts` — `axisRanges()`가 **문항 데이터에서 축별 이론적 min/max를 자동 산출**한다. 따라서 문항을 추가·수정해도 정규화 범위를 손으로 고칠 필요가 없다.
 - `prompt.ts` — `PROMPT_VERSION`을 두고 DB에 함께 저장한다. 프롬프트를 의미 있게 바꾸면 버전을 올린다.
 - `llm.ts` — **LLM 교체 지점은 이 파일 하나다.** 폴백 체인: Gemini(`gemini-2.5-flash`) → Claude(`claude-sonnet-5`) → `llm-mock.ts`. 각 단계는 try/catch로 감싸 실패 시 다음으로 넘어간다.
@@ -69,6 +70,7 @@ node scripts/test-groble-webhook.js <share_token> # 웹훅 서명·언락 흐름
 - "축별로 읽어보기"의 각 축은 관련 이론을 대화체 한 문장으로만 연결한다(자율성·동기·유능감·관계·사회성→SDT, 학습 수준·격차→ZPD, 정서·번아웃→학업 소진 연구). 논문 인용투는 쓰지 않고, 축마다 한 번을 넘지 않는다. 헤더의 '교육심리학 기반' 배지를 "과한 강조"로 뺀 전례(T-14)가 있으니 이 절제 수준을 넘지 않을 것. 학습스타일·강점(시각/청각/체험/읽기, 깊이/넓이)은 근거가 약한 참고 지표라 이론을 붙이지 않는다.
 - 각 축 문단 끝에 "(문항 5개 응답 종합)"을 정확히 덧붙인다 (D-21) — 다섯 축 모두 실제로 문항 5개씩이므로 숫자를 바꾸지 않는다. 문항 수가 바뀌면 이 숫자도 함께 고칠 것.
 - "학원을 고른다면" 섹션은 헤딩은 고정하고 톤만 `hagwonStatus`로 분기한다(D-21) — 이미 다니면 "지금 다니는 곳이 맞는지 점검", 아직이면 "첫 학원 고르는 기준". 헤딩 자체를 조건부로 만들지 않는 이유는 아래 "리포트 게이팅" 항목 참고.
+- "어쩌면 의외의 모습"에는 `lib/insights.ts::pickReinterpretationInsights()`가 계산한 재해석 후보를 최소 1개 반드시 녹인다(D-24). 프롬프트 지침만으로는 LLM이 빠뜨릴 수 있어서(D-23에서 겪음), 축 조합→문장 매핑 테이블을 코드로 만들어 "재료"를 프롬프트에 강제로 끼워 넣는 방식을 쓴다 — mock은 이 문장을 그대로 쓰고, 실제 LLM에는 `[재해석 후보]`로 전달. 새 조합 규칙을 추가할 땐 반드시 "부모님은 ~로 보셨을 수 있지만, 사실 ○○는 ~예요" 구조를 지키고, 단일 축 폴백(10개, 5축×상/하)이 있어 콤보가 하나도 안 맞아도 항상 최소 1개는 나온다는 걸 깨지 않을 것.
 
 ### 리포트 게이팅
 

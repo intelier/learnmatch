@@ -3,6 +3,7 @@
  * 실제 LLM과 같은 입력(ReportInput)을 받아 채점 결과 기반 서술형 리포트를 조립한다.
  */
 import { AGE_BAND_LABEL } from './age-bands.ts';
+import { pickReinterpretationInsights } from './insights.ts';
 import { AXIS_META, FOCUS_LABEL, getQuestions, STYLE_LABEL, type AxisId } from './questions.ts';
 import type { ReportInput } from './prompt.ts';
 
@@ -118,21 +119,9 @@ export function generateMockReport(input: ReportInput): string {
 
   const scenes = pickScenes(input, 4);
 
-  /* "부모님 보시기에는 ~하지만, 실제로는 ~" 의외성 문장 (축 조합 기반, v2) */
-  const surprises: string[] = [];
-  const b = (axis: AxisId) => band(scores.axes[axis].normalized);
-  if (b('zpd_strain') === 'high' && b('burnout') === 'high')
-    surprises.push('부모님 보시기에는 그럭저럭 따라가는 것 같지만, 실제로는 수업 수준이 버거워 조용히 지쳐가고 있을 수 있어요.');
-  if (b('social') === 'high' && b('autonomy') === 'low')
-    surprises.push('부모님 보시기에는 혼자서는 공부를 안 하려는 아이 같지만, 실제로는 게으른 게 아니라 누군가와 함께일 때 힘이 나는 유형일 수 있어요.');
-  if (b('competence') === 'low' && b('autonomy') === 'high')
-    surprises.push('부모님 보시기에는 스스로 알아서 하니 걱정이 없어 보이지만, 실제로는 "잘 못하면 어쩌지"라는 불안을 혼자 삭이고 있을 수 있어요.');
-  if (b('burnout') === 'low' && b('zpd_strain') === 'low')
-    surprises.push('부모님 보시기에는 무난히 다니는 것 같지만, 실제로는 지금 수준이 쉬워서 지루함을 느끼고 있을 수 있어요 — 도전이 없으면 흥미가 먼저 식어요.');
-  if (surprises.length === 0)
-    surprises.push(`부모님 보시기에는 ${AXIS_META[strongest[strongest.length - 1]].label}이 걱정되실 수 있지만, 실제로는 ${AXIS_META[strongest[0]].label} 쪽의 힘이 그 모습을 받쳐주고 있어요. 약점보다 강점을 지렛대로 삼아 주세요.`);
-
   const who = input.childName?.trim() || '우리 아이';
+  // "부모님은 ~로 보셨을 수 있지만, 사실 ○○는 ~예요" 재해석 인사이트 — 항상 최소 1개 보장 (D-24)
+  const insights = pickReinterpretationInsights(scores, who, 2);
   const ageNote = input.childAgeBand
     ? ` (${AGE_BAND_LABEL[input.childAgeBand]} 시기의 발달 단계를 함께 고려했어요.)`
     : '';
@@ -146,7 +135,7 @@ export function generateMockReport(input: ReportInput): string {
       : ['- 응답해 주신 내용에서 아이의 평소 모습이 잘 드러났어요.']),
     '',
     '## 어쩌면 의외의 모습',
-    ...surprises.slice(0, 2).map((s) => `- ${s}`),
+    ...insights.map((s) => `- ${s}`),
     '',
     '## 축별로 읽어보기',
     ...axisIds.flatMap((axis) => [

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import type { AgeBand } from '@/lib/age-bands';
 import type { HagwonStatus } from '@/lib/hagwon-status';
-import { AXIS_META, FOCUS_LABEL, STYLE_LABEL, type AxisId } from '@/lib/questions';
+import { AXIS_META, FOCUS_LABEL, LEVEL_MEANING, STYLE_LABEL, type AxisId } from '@/lib/questions';
 import {
   buildCheckoutUrl,
   GROBLE_SINGLE_URL,
@@ -162,8 +162,18 @@ export default function ResultView({
               <p
                 style={{
                   fontSize: 12,
-                  color: 'var(--navy-muted)',
+                  fontWeight: 600,
+                  color: 'var(--amber)',
                   marginTop: 4,
+                }}
+              >
+                {LEVEL_MEANING[axis][s.level - 1]}
+              </p>
+              <p
+                style={{
+                  fontSize: 12,
+                  color: 'var(--navy-muted)',
+                  marginTop: 2,
                 }}
               >
                 {s.normalized >= 50 ? meta.positive : meta.negative}
