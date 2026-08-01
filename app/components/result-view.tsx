@@ -68,6 +68,10 @@ export default function ResultView({
   const [shareToken, setShareToken] = useState<string | null>(initialShareToken ?? null);
   const shareCode = useMemo(() => encodeAnswers(answers), [answers]);
   const paymentReady = isPaymentReady();
+  // 추천 기반 공유 문구 (D-25) — 기본값 제공, 부모가 자기 말투로 고칠 수 있게
+  const [shareMessage, setShareMessage] = useState(
+    `${childName ? `${childName} ` : '우리 아이 '}학습 성향 진단해봤는데 소름... 너네 아이도 해봐`
+  );
 
   useEffect(() => {
     if (initialReport) return;
@@ -103,10 +107,25 @@ export default function ResultView({
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/r/${sharePath}`
     : null;
 
-  async function copyShareUrl() {
+  /**
+   * 공유 (D-25) — 모바일에서는 navigator.share()로 OS 공유 시트를 띄운다.
+   * 카카오톡 정식 SDK 연동(전용 앱키 필요, Groble처럼 별도 등록 필요)은 아직
+   * 없지만, 이 방식으로도 모바일 OS 공유 시트에 카카오톡이 공유 대상으로 뜬다.
+   * 미지원 환경(주로 데스크톱)은 클립보드 복사로 폴백.
+   */
+  async function shareReport() {
     if (!shareUrl) return;
+    const text = shareMessage.trim() || '학습 성향 진단해봤어요';
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: '클래스 핏 — 학습 성향 진단', text, url: shareUrl });
+      } catch {
+        // 사용자가 공유 시트를 취소한 경우 등 — 별도 처리 없이 종료
+      }
+      return;
+    }
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      await navigator.clipboard.writeText(`${text}\n${shareUrl}`);
       setShare('copied');
       setTimeout(() => setShare('idle'), 2500);
     } catch {
@@ -183,7 +202,7 @@ export default function ResultView({
         })}
       </div>
 
-      {report.status === 'loading' && <ReportLoading scores={scores} />}
+      {report.status === 'loading' && <ReportLoading scores={scores} childName={childName} />}
       {report.status === 'error' && (
         <div className="card" style={{ marginBottom: '1.5rem' }}>
           <p style={{ fontSize: 13, marginBottom: 10 }}>
@@ -276,15 +295,39 @@ export default function ResultView({
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {!hideShare && shareUrl && (
-          <button type="button" className="btn-primary" onClick={copyShareUrl}>
-            {share === 'copied' ? '링크가 복사됐어요 ✓' : '결과 공유하기'}
-          </button>
+          <>
+            <label style={{ fontSize: 12, color: 'var(--navy-muted)' }}>
+              공유 문구 (수정 가능)
+            </label>
+            <input
+              value={shareMessage}
+              onChange={(e) => setShareMessage(e.target.value)}
+              maxLength={80}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                fontSize: 13,
+                border: '1px solid var(--ivory-border)',
+                borderRadius: 'var(--radius)',
+                fontFamily: 'var(--sans)',
+                background: 'var(--white)',
+              }}
+            />
+            <button
+              type="button"
+              className={isSharedView ? 'btn-secondary' : 'btn-primary'}
+              onClick={shareReport}
+            >
+              {share === 'copied' ? '복사됐어요 ✓' : '이 리포트 공유하기'}
+            </button>
+          </>
         )}
         {share === 'manual' && shareUrl && (
-          <input
+          <textarea
             readOnly
-            value={shareUrl}
+            value={`${shareMessage}\n${shareUrl}`}
             onFocus={(e) => e.currentTarget.select()}
+            rows={3}
             style={{
               width: '100%',
               padding: '10px 12px',
@@ -292,10 +335,16 @@ export default function ResultView({
               border: '1px solid var(--ivory-border)',
               borderRadius: 'var(--radius)',
               fontFamily: 'var(--sans)',
+              resize: 'none',
             }}
           />
         )}
-        <Link className="btn-secondary" href="/survey">
+        {isSharedView && (
+          <p style={{ textAlign: 'center', fontSize: 14, fontWeight: 600, margin: '4px 0 0' }}>
+            이 진단, 우리 아이는 어떨까요?
+          </p>
+        )}
+        <Link className={isSharedView ? 'btn-primary' : 'btn-secondary'} href="/survey">
           {isSharedView ? '나도 우리 아이 진단해보기' : '다시 진단하기'}
         </Link>
       </div>

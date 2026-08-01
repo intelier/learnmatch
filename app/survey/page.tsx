@@ -8,7 +8,13 @@ import {
   HAGWON_STATUS_OPTIONS,
   type HagwonStatus,
 } from '@/lib/hagwon-status';
-import { AXIS_META, CATEGORY_META, getQuestions, type AxisId } from '@/lib/questions';
+import {
+  AXIS_META,
+  CATEGORY_META,
+  getQuestions,
+  SUPPLEMENTARY_QUESTIONS,
+  type AxisId,
+} from '@/lib/questions';
 import {
   ANSWERS_STORAGE_KEY,
   CHILD_NAME_STORAGE_KEY,
@@ -17,6 +23,16 @@ import {
 } from '@/lib/scoring';
 
 const INTERLUDE_STEPS = [10, 20];
+/** 5문항짜리 축 블록이 끝나는 step → 그 축 id. style_strength(21~25)는 채점 축이 아니라 제외 (D-25). */
+const AXIS_BLOCK_ENDS: Partial<Record<number, AxisId>> = {
+  5: 'autonomy',
+  10: 'zpd_strain',
+  15: 'burnout',
+  20: 'competence',
+  30: 'social',
+};
+/** 이 개수 이상 "잘 모르겠어요"를 고르면 그 축의 보조 문항을 보여준다. */
+const UNCERTAIN_TRIGGER = 2;
 
 /** 지금까지 응답에서 가장 뚜렷하게 드러난 축을 고른다 (50점 기준 편차가 가장 큰 축). */
 function pickInterludeAxis(partialAnswers: Answers): { axis: AxisId; positive: boolean } | null {
@@ -44,6 +60,8 @@ export default function SurveyPage() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const [interludeAt, setInterludeAt] = useState<number | null>(null);
+  const [supplementAxis, setSupplementAxis] = useState<AxisId | null>(null);
+  const [triggeredAxes, setTriggeredAxes] = useState<Set<AxisId>>(new Set());
 
   function startQuestions() {
     if (!ageBand || !hagwonStatus) return;
@@ -131,7 +149,7 @@ export default function SurveyPage() {
         </div>
 
         <p style={{ fontSize: 12, color: 'var(--navy-muted)', marginBottom: '1.25rem' }}>
-          30문항 · 약 10분 · 6개 영역 측정
+          30문항 내외 · 약 10분 · 6개 영역 측정
         </p>
 
         <button
@@ -154,6 +172,19 @@ export default function SurveyPage() {
 
   const questions = getQuestions(ageBand, hagwonStatus);
   const total = questions.length;
+
+  /** 문항 응답 후 공통 진행 로직 — 인터루드 체크 후 다음 문항으로, 끝이면 제출. */
+  function advance(nextStep: number, latestAnswers: Answers) {
+    if (nextStep >= total) {
+      sessionStorage.setItem(ANSWERS_STORAGE_KEY, JSON.stringify(latestAnswers));
+      router.push('/result');
+      return;
+    }
+    if (INTERLUDE_STEPS.includes(nextStep)) {
+      setInterludeAt(nextStep);
+    }
+    setStep(nextStep);
+  }
 
   if (interludeAt !== null) {
     const picked = pickInterludeAxis(answers);
@@ -188,6 +219,55 @@ export default function SurveyPage() {
     );
   }
 
+  if (supplementAxis) {
+    const supQ = SUPPLEMENTARY_QUESTIONS.find((sq) => sq.category === supplementAxis)!;
+    const axisLabel = CATEGORY_META[supplementAxis].label;
+
+    function selectSupplementOption(idx: number) {
+      const next = { ...answers, [supQ.id]: idx };
+      setAnswers(next);
+      setSupplementAxis(null);
+      advance(step, next);
+    }
+
+    return (
+      <main>
+        <div
+          className="card"
+          style={{ borderColor: 'var(--amber-border)', background: 'var(--amber-light)', marginBottom: '1.25rem' }}
+        >
+          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--amber)', lineHeight: 1.6 }}>
+            {axisLabel} 성향을 더 정확히 보기 위한 추가 질문이에요
+          </p>
+        </div>
+
+        <h2
+          style={{
+            fontFamily: 'var(--serif)',
+            fontSize: 20,
+            lineHeight: 1.5,
+            marginBottom: '1.5rem',
+          }}
+        >
+          {supQ.text}
+        </h2>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {supQ.options.map((opt, idx) => (
+            <button
+              key={idx}
+              type="button"
+              className={`option-btn${answers[supQ.id] === idx ? ' selected' : ''}`}
+              onClick={() => selectSupplementOption(idx)}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </main>
+    );
+  }
+
   const q = questions[step];
   const selected = answers[q.id];
   const nameLabel = childName.trim();
@@ -201,15 +281,26 @@ export default function SurveyPage() {
     const next = { ...answers, [q.id]: idx };
     setAnswers(next);
     const nextStep = step + 1;
-    if (nextStep >= total) {
-      sessionStorage.setItem(ANSWERS_STORAGE_KEY, JSON.stringify(next));
-      router.push('/result');
-      return;
+
+    const axisJustFinished = AXIS_BLOCK_ENDS[nextStep];
+    if (axisJustFinished && !triggeredAxes.has(axisJustFinished)) {
+      const blockIds = questions
+        .filter((qq) => qq.category === axisJustFinished)
+        .map((qq) => qq.id);
+      const uncertainCount = blockIds.filter((id) => {
+        const selIdx = next[id];
+        const opt = selIdx !== undefined ? questions.find((qq) => qq.id === id)?.options[selIdx] : undefined;
+        return Boolean(opt?.uncertain);
+      }).length;
+      if (uncertainCount >= UNCERTAIN_TRIGGER) {
+        setTriggeredAxes((prev) => new Set(prev).add(axisJustFinished));
+        setSupplementAxis(axisJustFinished);
+        setStep(nextStep);
+        return;
+      }
     }
-    if (INTERLUDE_STEPS.includes(nextStep)) {
-      setInterludeAt(nextStep);
-    }
-    setStep(nextStep);
+
+    advance(nextStep, next);
   }
 
   return (

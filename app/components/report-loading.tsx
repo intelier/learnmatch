@@ -1,39 +1,26 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AXIS_META, type AxisId } from '@/lib/questions';
 import type { Scores } from '@/lib/scoring';
 
-/** 리포트 생성(약 20초) 동안 진행감·기대감을 주는 로딩 화면 (기다림을 콘텐츠로) */
+/**
+ * 리포트 생성(약 20~30초) 동안 보여주는 로딩 화면 (D-25).
+ * "광고처럼 보여서 지나친다"는 피드백 반영 — 마케팅 문구·이모지 후킹을 빼고,
+ * 실제 처리 단계를 그대로 보여주는 절제된 톤으로 재설계. 완료되면 (기존과
+ * 동일하게) result-view.tsx의 useEffect가 report.status를 'done'으로 바꿔
+ * 클릭 없이 자동으로 리포트로 전환된다 — 이 컴포넌트는 그 전까지만 보인다.
+ */
 
-// 순환 단계 문구 — 실제 생성 단계처럼 보이게 순서대로
-const STEPS = [
-  '설문 응답을 5가지 축으로 정리하고 있어요',
-  '아이의 강점과 숨은 면을 읽어내는 중이에요',
-  '"우리 아이 얘기 같은" 문장으로 옮기고 있어요',
-  '실천 조언과 학원 팁을 다듬고 있어요',
-  '리포트를 마지막으로 손보고 있어요',
-];
+const STEPS = ['응답 분석', '성향 분류', '리포트 작성'];
 
-// 진행 중 하나씩 열어주는 "우리 아이 힌트" — 축 점수를 근거로
-function buildTeasers(scores: Scores): string[] {
-  const axisIds = Object.keys(AXIS_META) as AxisId[];
-  const sorted = [...axisIds].sort(
-    (a, b) => scores.axes[b].normalized - scores.axes[a].normalized
-  );
-  const top = sorted[0];
-  const low = sorted[sorted.length - 1];
-  return [
-    `가장 두드러지는 축은 '${AXIS_META[top].label}'이에요`,
-    `${AXIS_META[top].label} 쪽 힘이 이 아이의 지렛대가 될 수 있어요`,
-    `'${AXIS_META[low].label}'는 걱정거리가 아니라 다르게 읽어드릴게요`,
-    '겉으로 보이는 모습 뒤의 의외의 면도 짚어드려요',
-  ];
-}
-
-export default function ReportLoading({ scores }: { scores: Scores }) {
+export default function ReportLoading({
+  scores,
+  childName,
+}: {
+  scores: Scores;
+  childName?: string;
+}) {
   const [elapsed, setElapsed] = useState(0);
-  const teasers = buildTeasers(scores);
 
   useEffect(() => {
     const t = setInterval(() => setElapsed((e) => e + 1), 1000);
@@ -42,8 +29,10 @@ export default function ReportLoading({ scores }: { scores: Scores }) {
 
   // 25초를 목표로 진행 바를 채우되, 100%엔 도달하지 않게 (90%에서 대기)
   const progress = Math.min(90, Math.round((elapsed / 25) * 90));
-  const stepIndex = Math.min(STEPS.length - 1, Math.floor(elapsed / 5));
-  const teaserIndex = Math.min(teasers.length - 1, Math.floor(elapsed / 6));
+  // 3단계를 시간에 걸쳐 순차적으로 활성화 (0~7초/8~17초/18초~)
+  const activeIndex = elapsed < 8 ? 0 : elapsed < 18 ? 1 : 2;
+
+  const who = childName?.trim() || '우리 아이';
 
   return (
     <div
@@ -58,39 +47,61 @@ export default function ReportLoading({ scores }: { scores: Scores }) {
         맞춤 리포트 생성 중
       </div>
 
-      <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 12, minHeight: 20 }}>
-        {STEPS[stepIndex]}
-        <span className="loading-dots" aria-hidden />
+      <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 4, lineHeight: 1.6 }}>
+        {who}의 응답 {scores.answeredCount}개를 분석하고 있어요.
+      </p>
+      <p style={{ fontSize: 13, color: 'var(--navy-light)', marginBottom: 14 }}>
+        잠시만 기다리시면 상세 해설 리포트가 나와요.
       </p>
 
-      <div className="progress-track" style={{ marginBottom: 6 }}>
-        <div
-          className="progress-fill loading-shimmer"
-          style={{ width: `${progress}%` }}
-        />
+      <div style={{ marginBottom: 14 }}>
+        {STEPS.map((label, i) => {
+          const done = i < activeIndex;
+          const active = i === activeIndex;
+          return (
+            <div
+              key={label}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}
+            >
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 18,
+                  height: 18,
+                  borderRadius: '50%',
+                  flexShrink: 0,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  background: done ? 'var(--amber)' : 'transparent',
+                  border: done ? 'none' : `1.5px solid ${active ? 'var(--amber)' : 'var(--ivory-border)'}`,
+                  color: done ? 'var(--white)' : active ? 'var(--amber)' : 'var(--navy-muted)',
+                }}
+              >
+                {done ? '✓' : i + 1}
+              </span>
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: done || active ? 600 : 400,
+                  color: done || active ? 'var(--navy)' : 'var(--navy-muted)',
+                }}
+              >
+                {label}
+                {active && <span className="loading-dots" aria-hidden />}
+              </span>
+            </div>
+          );
+        })}
       </div>
-      <p style={{ fontSize: 11, color: 'var(--navy-muted)', marginBottom: '1.1rem' }}>
-        보통 20~30초쯤 걸려요. 아이를 떠올리며 잠시만 기다려 주세요.
-      </p>
 
-      <div
-        style={{
-          borderTop: '1px dashed var(--amber-border)',
-          paddingTop: '0.9rem',
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: 8,
-        }}
-      >
-        <span style={{ fontSize: 15 }}>💡</span>
-        <p
-          key={teaserIndex}
-          className="teaser-fade"
-          style={{ fontSize: 13, color: 'var(--navy-light)', lineHeight: 1.6 }}
-        >
-          {teasers[teaserIndex]}
-        </p>
+      <div className="progress-track">
+        <div className="progress-fill loading-shimmer" style={{ width: `${progress}%` }} />
       </div>
+      <p style={{ fontSize: 11, color: 'var(--navy-muted)', marginTop: 6 }}>
+        보통 20~30초쯤 걸려요.
+      </p>
     </div>
   );
 }

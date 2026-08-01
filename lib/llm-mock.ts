@@ -4,7 +4,7 @@
  */
 import { AGE_BAND_LABEL } from './age-bands.ts';
 import { pickReinterpretationInsights } from './insights.ts';
-import { AXIS_META, FOCUS_LABEL, getQuestions, STYLE_LABEL, type AxisId } from './questions.ts';
+import { AXIS_META, FOCUS_LABEL, getQuestions, STYLE_LABEL, SUPPLEMENTARY_QUESTIONS, type AxisId } from './questions.ts';
 import type { ReportInput } from './prompt.ts';
 
 type Band = 'high' | 'mid' | 'low';
@@ -53,10 +53,11 @@ const AXIS_THEORY: Record<AxisId, string> = {
   social: '자기결정성이론(SDT)의 관계성 욕구가 여기서 드러나요.',
 };
 
-/** 설문에서 고른 실제 행동을 장면으로 인용 (우리 아이 얘기 같게) */
+/** 설문에서 고른 실제 행동을 장면으로 인용 (우리 아이 얘기 같게). "잘 모르겠어요"는 effects가 없어 자동으로 제외된다. */
 function pickScenes(input: ReportInput, count: number): string[] {
   const scenes: string[] = [];
-  for (const q of getQuestions(input.childAgeBand, input.hagwonStatus)) {
+  const pool = [...getQuestions(input.childAgeBand, input.hagwonStatus), ...SUPPLEMENTARY_QUESTIONS];
+  for (const q of pool) {
     const idx = input.answers[q.id];
     const opt = idx !== undefined ? q.options[idx] : undefined;
     if (!opt || !opt.effects) continue;
@@ -139,7 +140,7 @@ export function generateMockReport(input: ReportInput): string {
     '',
     '## 축별로 읽어보기',
     ...axisIds.flatMap((axis) => [
-      `**${AXIS_META[axis].label} (레벨 ${scores.axes[axis].level}/5)** — ${AXIS_NARRATIVE[axis][band(scores.axes[axis].normalized)]} ${AXIS_THEORY[axis]} (문항 5개 응답 종합)`,
+      `**${AXIS_META[axis].label} (레벨 ${scores.axes[axis].level}/5)** — ${AXIS_NARRATIVE[axis][band(scores.axes[axis].normalized)]} ${AXIS_THEORY[axis]} (문항 ${scores.axes[axis].answeredCount}개 응답 종합)`,
       '',
     ]),
     '## 이렇게 도와주세요',

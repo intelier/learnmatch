@@ -8,6 +8,7 @@ import {
   FOCUS_LABEL,
   QUESTIONS,
   STYLE_LABEL,
+  SUPPLEMENTARY_QUESTIONS,
   type AxisId,
   type Focus,
   type Style,
@@ -20,6 +21,13 @@ export type Answers = Record<string, number>;
 export const ANSWERS_STORAGE_KEY = 'classfit.answers';
 export const CHILD_NAME_STORAGE_KEY = 'classfit.childName';
 
+/**
+ * 채점 대상 전체 (D-25) — base 30문항 + 축당 보조문항 1개. 보조문항은 대부분
+ * 응답이 없어 raw 합산에 0을 더할 뿐이므로, 안 보여준 사용자에게는 영향이 없다
+ * ("부분 응답" 처리와 같은 원리).
+ */
+export const ALL_SCORABLE_QUESTIONS = [...QUESTIONS, ...SUPPLEMENTARY_QUESTIONS];
+
 export interface AxisScore {
   raw: number;
   min: number;
@@ -28,6 +36,8 @@ export interface AxisScore {
   normalized: number;
   /** 1~5 */
   level: number;
+  /** 이 축에 실제로 신호를 준 응답 수 ("잘 모르겠어요"는 제외, 보조문항은 포함) — D-25 */
+  answeredCount: number;
 }
 
 export interface Scores {
@@ -45,7 +55,7 @@ const AXIS_IDS = Object.keys(AXIS_META) as AxisId[];
 export function axisRanges(): Record<AxisId, { min: number; max: number }> {
   const ranges = {} as Record<AxisId, { min: number; max: number }>;
   for (const axis of AXIS_IDS) ranges[axis] = { min: 0, max: 0 };
-  for (const q of QUESTIONS) {
+  for (const q of ALL_SCORABLE_QUESTIONS) {
     for (const axis of AXIS_IDS) {
       const values = q.options.map((o) => o.effects?.[axis] ?? 0);
       ranges[axis].min += Math.min(...values);
@@ -69,16 +79,23 @@ function mode<T extends string>(counts: Partial<Record<T, number>>, fallback: T)
 
 export function scoreAnswers(answers: Answers): Scores {
   const raw = {} as Record<AxisId, number>;
-  for (const axis of AXIS_IDS) raw[axis] = 0;
+  const axisAnsweredCount = {} as Record<AxisId, number>;
+  for (const axis of AXIS_IDS) {
+    raw[axis] = 0;
+    axisAnsweredCount[axis] = 0;
+  }
   const styleCounts: Partial<Record<Style, number>> = {};
   const focusCounts: Partial<Record<Focus, number>> = {};
   let answeredCount = 0;
 
-  for (const q of QUESTIONS) {
+  for (const q of ALL_SCORABLE_QUESTIONS) {
     const idx = answers[q.id];
     const opt = idx !== undefined ? q.options[idx] : undefined;
     if (!opt) continue;
     answeredCount++;
+    if (!opt.uncertain && q.category in raw) {
+      axisAnsweredCount[q.category as AxisId] = (axisAnsweredCount[q.category as AxisId] ?? 0) + 1;
+    }
     if (opt.effects) {
       for (const [axis, delta] of Object.entries(opt.effects) as [AxisId, number][]) {
         raw[axis] += delta;
@@ -95,7 +112,7 @@ export function scoreAnswers(answers: Answers): Scores {
     const span = max - min || 1;
     const normalized = Math.round(((raw[axis] - min) / span) * 100);
     const level = Math.min(5, Math.max(1, Math.round((normalized / 100) * 4) + 1));
-    axes[axis] = { raw: raw[axis], min, max, normalized, level };
+    axes[axis] = { raw: raw[axis], min, max, normalized, level, answeredCount: axisAnsweredCount[axis] };
   }
 
   const style = mode(styleCounts, 'visual');
@@ -113,7 +130,7 @@ export function describeScores(scores: Scores): string {
     const meta = AXIS_META[axis];
     const s = scores.axes[axis];
     const tendency = s.normalized >= 50 ? meta.positive : meta.negative;
-    return `- ${meta.label}: ${s.normalized}/100 (레벨 ${s.level}) — ${tendency}`;
+    return `- ${meta.label}: ${s.normalized}/100 (레벨 ${s.level}, 문항 ${s.answeredCount}개 응답 기반) — ${tendency}`;
   });
   lines.push(`- 학습스타일: ${STYLE_LABEL[scores.style]}`);
   lines.push(`- 몰입 성향: ${FOCUS_LABEL[scores.focus]}`);

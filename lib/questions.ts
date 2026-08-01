@@ -6,7 +6,8 @@
  *  D-19: 부모가 겪는 대표적 갈등 장면으로 공감도 강화 — 단, 문항 문구는 중립 관찰형 유지,
  *  D-20: 문항 장면은 부모가 직접 관찰 가능해야 한다,
  *  D-21: 25→30문항, 6축(자율성·동기/학습 수준·격차/정서·번아웃/유능감/학습스타일·강점/관계·사회성)
- *        × 5문항 구조로 재편 + 학원 유무 2중 분기 도입)
+ *        × 5문항 구조로 재편 + 학원 유무 2중 분기 도입,
+ *  D-25: 채점 5축 문항에 "잘 모르겠어요" 5번째 선택지 추가 + 축당 보조 문항 1개)
  *
  * ★ 문항 재작성 규칙: 옵션의 순서와 effects 값은 그대로 두고 text/label만 바꾼다.
  *   채점 축 의미와 scripts/check-scoring.ts 검증 케이스가 그대로 유지된다.
@@ -48,7 +49,15 @@ export interface QuestionOption {
   effects?: Partial<Record<AxisId, number>>;
   style?: Style;
   focus?: Focus;
+  /** "아직 못 봤거나 잘 모르겠어요" — 신뢰도 낮은 응답 신호 (D-25). effects는 항상 비워둔다. */
+  uncertain?: boolean;
 }
+
+/** 문항에 항상 다섯 번째로 붙는 "잘 모르겠어요" 선택지 (D-25). */
+const UNCERTAIN_OPTION: QuestionOption = {
+  label: '아직 못 봤거나 잘 모르겠어요',
+  uncertain: true,
+};
 
 /** 나이대·학원유무별 장면 변형 — text/option label만 교체. effects/순서/개수는 base와 동일해야 한다 (D-17). */
 export interface QuestionVariant {
@@ -203,6 +212,7 @@ export const QUESTIONS: Question[] = [
       { label: '조금 생각하다 도움을 요청해요', effects: { autonomy: 1 } },
       { label: '바로 모르겠다고 포기해요', effects: { autonomy: -1, zpd_strain: 1, burnout: 1 } },
       { label: '짜증 내거나 자리를 피해요', effects: { autonomy: -2, zpd_strain: 2, burnout: 2 } },
+      UNCERTAIN_OPTION,
     ],
   },
   {
@@ -214,6 +224,7 @@ export const QUESTIONS: Question[] = [
       { label: '어차피 난 못한다고 해요', effects: { competence: -2, burnout: 1 } },
       { label: '혼자 하기 싫으니 같이 하자고 해요', effects: { social: 2 } },
       { label: '아무 말 없이 그냥 안 해요', effects: { burnout: 2, competence: -1 } },
+      UNCERTAIN_OPTION,
     ],
   },
   {
@@ -225,6 +236,7 @@ export const QUESTIONS: Question[] = [
       { label: '뭐부터 할지 같이 정해달라고 해요', effects: { autonomy: 1 } },
       { label: '말해주기 전까지는 시작하지 않아요', effects: { autonomy: -1 } },
       { label: '말해줘도 "이따 할게"만 반복하다 하루가 그냥 지나가요', effects: { autonomy: -1, burnout: 1 } },
+      UNCERTAIN_OPTION,
     ],
   },
   {
@@ -236,6 +248,7 @@ export const QUESTIONS: Question[] = [
       { label: '바로 "그게 무슨 뜻이야?" 하고 물어봐요', effects: { autonomy: 1, social: 1 } },
       { label: '궁금해하다가 금방 잊어버려요', effects: {} },
       { label: '모르는 게 나와도 별 관심을 안 보여요', effects: { autonomy: -1, burnout: 1 } },
+      UNCERTAIN_OPTION,
     ],
     variants: {
       middle: {
@@ -267,6 +280,7 @@ export const QUESTIONS: Question[] = [
       { label: '"이거 먼저 할까?" 하고 물어보며 같이 정해요', effects: { autonomy: 1 } },
       { label: '정해줘야 그제서야 시작해요', effects: { autonomy: -1 } },
       { label: '정해줘도 이거저거 미루다 결국 부모가 다시 챙겨요', effects: { autonomy: -1, burnout: 1 } },
+      UNCERTAIN_OPTION,
     ],
   },
 
@@ -280,6 +294,7 @@ export const QUESTIONS: Question[] = [
       { label: '가끔 그럴 때가 있어요', effects: {} },
       { label: '한 문제에서 한참 멈춰 있는 일이 잦아요', effects: { zpd_strain: 1 } },
       { label: '멈춰 있다가 한숨을 쉬거나 딴짓으로 새요', effects: { zpd_strain: 2, burnout: 1 } },
+      UNCERTAIN_OPTION,
     ],
     variants: {
       preschool: {
@@ -302,6 +317,7 @@ export const QUESTIONS: Question[] = [
       { label: '가끔 고쳐 쓰는 정도예요', effects: {} },
       { label: '자주 지우고 다시 쓰느라 페이지가 지저분해져요', effects: { zpd_strain: 1 } },
       { label: '지우다가 종이가 헤지거나 찢어질 정도예요', effects: { zpd_strain: 2, burnout: 1 } },
+      UNCERTAIN_OPTION,
     ],
     variants: {
       preschool: {
@@ -324,6 +340,7 @@ export const QUESTIONS: Question[] = [
       { label: '그럭저럭 비슷해요', effects: {} },
       { label: '공부할 때 유독 오래 걸려요', effects: { zpd_strain: 1 } },
       { label: '게임은 금방 배우는데 공부는 유독 힘들어해요', effects: { zpd_strain: 2, burnout: 1 } },
+      UNCERTAIN_OPTION,
     ],
   },
   {
@@ -335,6 +352,7 @@ export const QUESTIONS: Question[] = [
       { label: '아주 가끔, 정말 어려운 것 앞에서만요', effects: {} },
       { label: '종종 그런 말을 해요', effects: { zpd_strain: 1 } },
       { label: '자주 그렇게 말하며 힘들어해요', effects: { zpd_strain: 2, burnout: 1 } },
+      UNCERTAIN_OPTION,
     ],
   },
   {
@@ -346,6 +364,7 @@ export const QUESTIONS: Question[] = [
       { label: '예상한 만큼 걸려요', effects: {} },
       { label: '예상보다 오래 걸려요', effects: { zpd_strain: 1 } },
       { label: '끝까지 못 끝내고 남기는 날이 많아요', effects: { zpd_strain: 2, burnout: 1 } },
+      UNCERTAIN_OPTION,
     ],
   },
 
@@ -359,6 +378,7 @@ export const QUESTIONS: Question[] = [
       { label: '몇 번 부르면 일어나 무리 없이 준비해요', effects: { burnout: -1 } },
       { label: '이불 속에서 한참 못 일어나 늘 시간에 쫓겨요', effects: { burnout: 1 } },
       { label: '"오늘 안 가면 안 돼?"라며 이불을 뒤집어써요', effects: { burnout: 2 } },
+      UNCERTAIN_OPTION,
     ],
   },
   {
@@ -370,6 +390,7 @@ export const QUESTIONS: Question[] = [
       { label: '물어보면 대답하는 정도예요', effects: {} },
       { label: '"그 얘기 좀 그만해"라고 해요', effects: { burnout: 1 } },
       { label: '표정이 굳거나 슬그머니 자리를 피해요', effects: { burnout: 2 } },
+      UNCERTAIN_OPTION,
     ],
     hagwonVariants: {
       none: {
@@ -392,6 +413,7 @@ export const QUESTIONS: Question[] = [
       { label: '조금 더 보고 자겠다며 스스로 챙겨요', effects: { competence: 1, autonomy: 1 } },
       { label: '잠을 설치거나 배가 아프다고 해요', effects: { competence: -1, burnout: 1 } },
       { label: '시험 얘기를 꺼내지도 못하게 해요', effects: { autonomy: -1, burnout: 1 } },
+      UNCERTAIN_OPTION,
     ],
     variants: {
       preschool: {
@@ -423,6 +445,7 @@ export const QUESTIONS: Question[] = [
       { label: '가끔 피곤하다고는 해요', effects: { burnout: -1 } },
       { label: '몸이 안 좋다며 미루는 일이 종종 있어요', effects: { burnout: 1 } },
       { label: '자주 아프다고 하며 공부를 피해요', effects: { burnout: 2 } },
+      UNCERTAIN_OPTION,
     ],
     hagwonVariants: {
       none: {
@@ -445,6 +468,7 @@ export const QUESTIONS: Question[] = [
       { label: '하루 정도 지나면 괜찮아져요', effects: {} },
       { label: '며칠은 기분이 가라앉아 있어요', effects: { burnout: 1 } },
       { label: '한번 가라앉으면 꽤 오래가요', effects: { burnout: 2 } },
+      UNCERTAIN_OPTION,
     ],
   },
 
@@ -458,6 +482,7 @@ export const QUESTIONS: Question[] = [
       { label: '잠깐 시무룩하다가 다시 들여다봐요', effects: { competence: 1 } },
       { label: '점수만 확인하고 덮어버려요', effects: { competence: -2 } },
       { label: '안 보이는 곳에 치우거나 구겨버려요', effects: { competence: -2, burnout: 2 } },
+      UNCERTAIN_OPTION,
     ],
     variants: {
       preschool: {
@@ -489,6 +514,7 @@ export const QUESTIONS: Question[] = [
       { label: '슬쩍 보긴 하는데 별말은 없어요', effects: { competence: 1 } },
       { label: '두께나 어려워 보이는 부분을 보고 걱정부터 해요', effects: { competence: -1, zpd_strain: 1 } },
       { label: '가방에서 꺼내지도 않아요', effects: { competence: -2, burnout: 1 } },
+      UNCERTAIN_OPTION,
     ],
     variants: {
       preschool: {
@@ -511,6 +537,7 @@ export const QUESTIONS: Question[] = [
       { label: '"나 잘했지?" 하며 자랑해요', effects: { competence: 1 } },
       { label: '"이번엔 문제가 쉬웠어"라고 해요', effects: { competence: -1 } },
       { label: '"다음에도 이만큼 해야 되는 거야?"라며 부담스러워해요', effects: { competence: -1, burnout: 1 } },
+      UNCERTAIN_OPTION,
     ],
     variants: {
       preschool: {
@@ -533,6 +560,7 @@ export const QUESTIONS: Question[] = [
       { label: '별 말 없이 일단 시도해요', effects: { competence: 1 } },
       { label: '"나 이런 거 잘 못하는데"', effects: { competence: -1 } },
       { label: '"나는 원래 이런 거 못해"라며 미리 선을 그어요', effects: { competence: -2 } },
+      UNCERTAIN_OPTION,
     ],
   },
   {
@@ -544,6 +572,7 @@ export const QUESTIONS: Question[] = [
       { label: '조금 망설이다 시도해요', effects: { competence: 1 } },
       { label: '"나 이런 거 잘 못하는데" 하며 주저해요', effects: { competence: -1 } },
       { label: '"안 해, 못할 것 같아" 하며 아예 거부해요', effects: { competence: -2 } },
+      UNCERTAIN_OPTION,
     ],
   },
 
@@ -634,6 +663,7 @@ export const QUESTIONS: Question[] = [
       { label: '옆에 누군가 있으면 조금 더 편안해해요', effects: { social: 1 } },
       { label: '네, 정답을 몰라도 같이 있어주면 훨씬 힘을 내요', effects: { social: 2 } },
       { label: '누가 있든 없든 크게 상관없어해요', effects: {} },
+      UNCERTAIN_OPTION,
     ],
   },
   {
@@ -645,6 +675,7 @@ export const QUESTIONS: Question[] = [
       { label: '조금 지켜보다 자연스럽게 섞여요', effects: { social: 1 } },
       { label: '끝까지 혼자 있거나 부모 옆에 붙어 있어요', effects: { social: -2 } },
       { label: '그날 분위기나 모인 아이들에 따라 달라요', effects: {} },
+      UNCERTAIN_OPTION,
     ],
     variants: {
       middle: {
@@ -676,6 +707,7 @@ export const QUESTIONS: Question[] = [
       { label: '부모님께 이야기해요', effects: { social: 1 } },
       { label: '누구에게도 딱히 설명하고 싶어하지 않아요', effects: { social: -1 } },
       { label: '인형이나 혼잣말로 중얼거리며 스스로 정리해요', effects: { social: -2 } },
+      UNCERTAIN_OPTION,
     ],
     variants: {
       middle: {
@@ -707,6 +739,7 @@ export const QUESTIONS: Question[] = [
       { label: '"재밌었어" 하며 몇 가지 얘기해줘요', effects: { social: 1 } },
       { label: '"그냥 뭐" 하고 끝나요', effects: { social: -1 } },
       { label: '"몰라" 하고 방으로 들어가요', effects: { social: -2 } },
+      UNCERTAIN_OPTION,
     ],
     variants: {
       preschool: {
@@ -729,6 +762,73 @@ export const QUESTIONS: Question[] = [
       { label: '맡은 몫은 무난하게 해요', effects: { social: 1 } },
       { label: '있는 듯 없는 듯 조용히 있어요', effects: { social: -1 } },
       { label: '같이 하는 것 자체를 불편해해요', effects: { social: -2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+];
+
+/**
+ * 보조 문항 (D-25) — 한 축에서 "잘 모르겠어요"가 2회 이상 나오면 그 축에 한해
+ * 더 일상적인 장면(놀이·식사·옷 고르기 등)으로 같은 성향을 다시 물어본다.
+ * 기본 30문항엔 포함되지 않고 `app/survey/page.tsx`가 조건부로 삽입한다.
+ * id를 `sup_`로 시작해 base 문항 id와 절대 겹치지 않게 한다.
+ * `scoring.ts`가 `ALL_SCORABLE_QUESTIONS`(= QUESTIONS + 이 배열)로 채점하므로
+ * 보통은 응답이 없어 raw 합산에 0을 더할 뿐 — 안 보여준 사용자에게 영향 없다.
+ */
+export const SUPPLEMENTARY_QUESTIONS: Question[] = [
+  {
+    id: 'sup_autonomy',
+    text: '옷을 고르거나 놀이를 정할 때, 아이는 보통 어떻게 하나요?',
+    category: 'autonomy',
+    options: [
+      { label: '자기가 입고 싶은 옷·하고 싶은 놀이를 스스로 정해요', effects: { autonomy: 2 } },
+      { label: '몇 가지 중에 고르라고 하면 스스로 골라요', effects: { autonomy: 1 } },
+      { label: '정해줘야 그대로 따라요', effects: { autonomy: -1 } },
+      { label: '정해줘도 계속 다른 걸 하겠다며 미뤄요', effects: { autonomy: -1, burnout: 1 } },
+    ],
+  },
+  {
+    id: 'sup_zpd_strain',
+    text: '퍼즐이나 블록처럼 단계가 있는 놀이를 할 때, 아이가 지금 하는 단계는 어때 보이나요?',
+    category: 'zpd_strain',
+    options: [
+      { label: '너무 쉬워서 금방 지루해해요', effects: { zpd_strain: -2 } },
+      { label: '적당히 재미있어하며 몰입해요', effects: {} },
+      { label: '가끔 어려워하지만 시도는 해요', effects: { zpd_strain: 1 } },
+      { label: '너무 어려워서 금방 포기해요', effects: { zpd_strain: 2, burnout: 1 } },
+    ],
+  },
+  {
+    id: 'sup_burnout',
+    text: '저녁 시간, 하루를 마무리할 때 아이의 전반적인 기운은 어떤가요?',
+    category: 'burnout',
+    options: [
+      { label: '저녁까지도 에너지가 넘쳐요', effects: { burnout: -2 } },
+      { label: '적당히 지쳐 있지만 무난해요', effects: { burnout: -1 } },
+      { label: '많이 지쳐 보이고 예민해요', effects: { burnout: 1 } },
+      { label: '아무것도 하기 싫어하며 축 처져 있어요', effects: { burnout: 2 } },
+    ],
+  },
+  {
+    id: 'sup_competence',
+    text: '새로운 놀이 규칙을 처음 배울 때, 아이는 스스로에 대해 어떻게 말하거나 행동하나요?',
+    category: 'competence',
+    options: [
+      { label: '금방 익혀서 또래에게 알려주기도 해요', effects: { competence: 2 } },
+      { label: '몇 번 해보면 곧잘 따라해요', effects: { competence: 1 } },
+      { label: '잘 못 따라가면 금방 시무룩해져요', effects: { competence: -1 } },
+      { label: '해보기도 전에 "나 못해"라고 해요', effects: { competence: -2 } },
+    ],
+  },
+  {
+    id: 'sup_social',
+    text: '밥을 먹거나 놀이를 할 때, 아이가 더 편하게 느끼는 쪽은 어느 쪽인가요?',
+    category: 'social',
+    options: [
+      { label: '누군가와 함께일 때 훨씬 편하고 즐거워해요', effects: { social: 2 } },
+      { label: '같이 있으면 조금 더 편해해요', effects: { social: 1 } },
+      { label: '혼자 있을 때 더 편하고 자기 세계에 몰입해요', effects: { social: -2 } },
+      { label: '누가 있든 없든 크게 신경 안 써요', effects: {} },
     ],
   },
 ];

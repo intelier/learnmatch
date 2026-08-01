@@ -63,6 +63,8 @@ node scripts/test-groble-webhook.js <share_token> # 웹훅 서명·언락 흐름
 
 `hagwonStatus`(학원·과외 여부, `lib/hagwon-status.ts`)는 **DB에 저장하지 않는다** — `sessionStorage` → `/api/report` 요청 본문 → 프롬프트로만 흐른다. `child_age_band`(D-13)처럼 컬럼을 추가하려면 마이그레이션 확인 절차가 필요한데, 톤 분기 용도로만 쓰이고 생성된 리포트 텍스트는 기존 `content_md`에 저장되므로 굳이 새 컬럼이 필요 없었다. 학원 유무별 통계가 필요해지면(T-16) 그때 마이그레이션과 함께 추가한다.
 
+**응답 신뢰도 보강 (D-25)**: 채점 축 25문항(스타일·포커스 5개 제외)엔 다섯 번째로 `uncertain: true` 옵션("아직 못 봤거나 잘 모르겠어요")이 항상 있다. 한 축(5문항)에서 이걸 2번 이상 고르면 `app/survey/page.tsx`가 그 축의 `SUPPLEMENTARY_QUESTIONS`(축당 1개, 더 일상적인 장면)를 배너와 함께 끼워 넣는다. `scoring.ts`는 base 30문항이 아니라 `ALL_SCORABLE_QUESTIONS`(= QUESTIONS + SUPPLEMENTARY_QUESTIONS)로 채점하고, `AxisScore.answeredCount`(uncertain 제외, 보조문항 포함)를 축마다 계산한다 — 리포트의 "(문항 N개 응답 종합)"은 이 값을 그대로 쓴다, **5로 하드코딩하지 말 것.**
+
 ### 리포트 톤 (D-10, D-13, D-16)
 
 - **반전 프레이밍**이 핵심. 부모가 "문제"로 여기던 행동을 강점의 언어로 재해석하되, 미화가 아니라 실천 힌트를 함께 준다. `AXIS_META`의 `positive`/`negative`가 **양극단 모두 강점 언어**로 쓰여 있는 이유다.
@@ -113,4 +115,5 @@ Groble 웹훅에는 커스텀 메타데이터·쿼리파라미터가 없다. 그
 - `import` 경로에 `.ts` 확장자를 붙인다 (`allowImportingTsExtensions`). `lib/` 내부는 상대경로 + `.ts`, `app/`에서는 `@/lib/...` 별칭을 쓴다.
 - OG 이미지(`opengraph-image.tsx`)는 Satori 기반이라 **자식이 2개 이상인 `<div>`에 `display: flex`를 명시**해야 한다. 한글은 Google Fonts CSS2 API로 서브셋을 fetch해 임베딩한다.
 - `lib/example-report.ts`는 랜딩의 "예시 리포트 보기"용 고정 텍스트다 (매 열람마다 LLM을 부르지 않기 위함). 문항을 크게 바꾸면 재생성 대상 — `scripts/make-example.js` 참고. **D-21 이후 우선순위 상승**: 레이더 차트는 `scoreAnswers()`로 실시간 재계산돼 새 축 라벨("자율성·동기" 등)을 쓰는데, 고정 텍스트는 옛 라벨("자기주도성" 등)을 그대로 담고 있어 차트와 본문 라벨이 눈에 띄게 어긋난다.
+- 결과 화면 공유(D-25)는 Kakao SDK 앱키가 없어 `navigator.share()`(모바일 OS 공유 시트 — 카카오톡 포함)로 구현했다. 데스크톱처럼 미지원이면 클립보드 복사로 폴백. 리치 카드 공유가 필요해지면 `lib/groble.ts`와 같은 패턴(환경변수 있으면 SDK 사용, 없으면 지금 방식 유지)으로 추가할 것.
 - `legacy/`의 HTML 2개는 채점 축의 원본이자 2단계(학원 매칭) 참고 자산이다. `tsconfig`에서 제외돼 있다.

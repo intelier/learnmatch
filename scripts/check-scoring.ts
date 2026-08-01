@@ -2,7 +2,7 @@
  * T-02 완료 기준 검증: 샘플 응답 → 채점 결과 sanity check
  * 실행: node scripts/check-scoring.ts
  */
-import { CATEGORY_META, QUESTIONS, type QuestionCategory } from '../lib/questions.ts';
+import { CATEGORY_META, QUESTIONS, SUPPLEMENTARY_QUESTIONS, type AxisId, type QuestionCategory } from '../lib/questions.ts';
 import { axisRanges, describeScores, scoreAnswers, type Answers } from '../lib/scoring.ts';
 
 let failed = 0;
@@ -17,8 +17,14 @@ function check(name: string, cond: boolean, detail = '') {
 console.log(`문항 수: ${QUESTIONS.length}`);
 check('문항 수 정확히 30개 (D-21: 6축×5문항)', QUESTIONS.length === 30);
 check(
-  '모든 문항에 선택지 2~4개',
-  QUESTIONS.every((q) => q.options.length >= 2 && q.options.length <= 4)
+  '모든 문항에 선택지 2~5개 (D-25: "잘 모르겠어요" 포함 시 5개)',
+  QUESTIONS.every((q) => q.options.length >= 2 && q.options.length <= 5)
+);
+check(
+  '채점 축 문항(25개)엔 전부 "잘 모르겠어요" 옵션이 있다 (D-25)',
+  QUESTIONS.filter((q) => q.category !== 'style_strength').every((q) =>
+    q.options.some((o) => o.uncertain)
+  )
 );
 check(
   '문항 id 중복 없음',
@@ -33,6 +39,17 @@ for (const [category, meta] of Object.entries(CATEGORY_META)) {
   console.log(`  ${meta.label}: ${count}`);
   check(`${meta.label} 정확히 5문항`, count === 5, `got ${count}`);
 }
+
+console.log('\n보조문항 (D-25):');
+check('축당 1개, 총 5개', SUPPLEMENTARY_QUESTIONS.length === 5);
+check(
+  '5축을 정확히 하나씩 커버',
+  new Set(SUPPLEMENTARY_QUESTIONS.map((q) => q.category)).size === 5
+);
+check(
+  '모두 4개 선택지 + uncertain 옵션 없음(보조문항은 항상 실답)',
+  SUPPLEMENTARY_QUESTIONS.every((q) => q.options.length === 4 && q.options.every((o) => !o.uncertain))
+);
 
 const ranges = axisRanges();
 console.log('\n축별 이론적 범위:');
@@ -81,6 +98,29 @@ console.log('\n[케이스 3: 부분 응답]');
 check('부분 응답 수 인식', pt.answeredCount === 5, `got ${pt.answeredCount}`);
 check('정규화 0~100 범위 유지', Object.values(pt.axes).every((a) => a.normalized >= 0 && a.normalized <= 100));
 check('레벨 1~5 범위 유지', Object.values(pt.axes).every((a) => a.level >= 1 && a.level <= 5));
+
+/* 케이스 4: 자율성 축에서 "잘 모르겠어요" 2회 + 보조문항 응답 (D-25) */
+const autonomyIds = QUESTIONS.filter((q) => q.category === 'autonomy').map((q) => q.id);
+const uncertainIdx = (id: string) => QUESTIONS.find((q) => q.id === id)!.options.length - 1;
+const withUncertain: Answers = {
+  ...positive,
+  [autonomyIds[0]]: uncertainIdx(autonomyIds[0]),
+  [autonomyIds[1]]: uncertainIdx(autonomyIds[1]),
+};
+const beforeSup = scoreAnswers(withUncertain);
+console.log('\n[케이스 4: 잘 모르겠어요 2회 → 보조문항 전]');
+check('자율성 답변수 3으로 감소', beforeSup.axes.autonomy.answeredCount === 3, `got ${beforeSup.axes.autonomy.answeredCount}`);
+
+const withSupplement: Answers = { ...withUncertain, sup_autonomy: 0 };
+const afterSup = scoreAnswers(withSupplement);
+console.log('[케이스 4: 보조문항 응답 후]');
+check('자율성 답변수 4로 복구', afterSup.axes.autonomy.answeredCount === 4, `got ${afterSup.axes.autonomy.answeredCount}`);
+check(
+  '다른 축 답변수는 그대로(5)',
+  (['zpd_strain', 'burnout', 'competence', 'social'] as AxisId[]).every(
+    (axis) => afterSup.axes[axis].answeredCount === 5
+  )
+);
 
 console.log(failed === 0 ? '\n모든 검증 통과 ✓' : `\n실패 ${failed}건 ✗`);
 process.exit(failed === 0 ? 0 : 1);
