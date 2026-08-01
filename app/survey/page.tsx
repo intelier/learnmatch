@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AGE_BANDS, CHILD_AGE_BAND_STORAGE_KEY, type AgeBand } from '@/lib/age-bands';
 import {
   CHILD_HAGWON_STATUS_STORAGE_KEY,
@@ -21,15 +21,22 @@ import {
   scoreAnswers,
   type Answers,
 } from '@/lib/scoring';
+import {
+  clearSurveyProgress,
+  loadSurveyProgress,
+  saveSurveyProgress,
+  type SavedProgress,
+} from '@/lib/survey-progress';
 
-const INTERLUDE_STEPS = [10, 20];
-/** 5문항짜리 축 블록이 끝나는 step → 그 축 id. style_strength(21~25)는 채점 축이 아니라 제외 (D-25). */
+/** 10문항마다 인터루드 (D-26: 65문항 기준). */
+const INTERLUDE_STEPS = [10, 20, 30, 40, 50, 60];
+/** 12문항짜리 축 블록이 끝나는 step → 그 축 id. style_strength(49~53)는 채점 축이 아니라 제외 (D-26). */
 const AXIS_BLOCK_ENDS: Partial<Record<number, AxisId>> = {
-  5: 'autonomy',
-  10: 'zpd_strain',
-  15: 'burnout',
-  20: 'competence',
-  30: 'social',
+  12: 'autonomy',
+  24: 'zpd_strain',
+  36: 'burnout',
+  48: 'competence',
+  65: 'social',
 };
 /** 이 개수 이상 "잘 모르겠어요"를 고르면 그 축의 보조 문항을 보여준다. */
 const UNCERTAIN_TRIGGER = 2;
@@ -62,6 +69,12 @@ export default function SurveyPage() {
   const [interludeAt, setInterludeAt] = useState<number | null>(null);
   const [supplementAxis, setSupplementAxis] = useState<AxisId | null>(null);
   const [triggeredAxes, setTriggeredAxes] = useState<Set<AxisId>>(new Set());
+  // 응답 유실 방지 (D-26) — 재방문 시 이어서 하기 배너용
+  const [savedProgress, setSavedProgress] = useState<SavedProgress | null>(null);
+
+  useEffect(() => {
+    setSavedProgress(loadSurveyProgress());
+  }, []);
 
   function startQuestions() {
     if (!ageBand || !hagwonStatus) return;
@@ -71,9 +84,64 @@ export default function SurveyPage() {
     setPhase('questions');
   }
 
+  function resumeProgress(saved: SavedProgress) {
+    setChildName(saved.childName);
+    setAgeBand(saved.ageBand);
+    setHagwonStatus(saved.hagwonStatus);
+    setAnswers(saved.answers);
+    setStep(saved.step);
+    setTriggeredAxes(new Set(saved.triggeredAxes));
+    sessionStorage.setItem(CHILD_NAME_STORAGE_KEY, saved.childName);
+    sessionStorage.setItem(CHILD_AGE_BAND_STORAGE_KEY, saved.ageBand);
+    sessionStorage.setItem(CHILD_HAGWON_STATUS_STORAGE_KEY, saved.hagwonStatus);
+    setSavedProgress(null);
+    setPhase('questions');
+  }
+
+  function discardProgress() {
+    clearSurveyProgress();
+    setSavedProgress(null);
+  }
+
   if (phase === 'intake') {
     return (
       <main>
+        {savedProgress && (
+          <div
+            className="card"
+            style={{
+              borderColor: 'var(--amber-border)',
+              background: 'var(--amber-light)',
+              marginBottom: '1.5rem',
+            }}
+          >
+            <p style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>
+              {savedProgress.step}번째 문항까지 답변한 진단이 있어요
+            </p>
+            <p style={{ fontSize: 12, color: 'var(--navy-light)', marginBottom: 12 }}>
+              {savedProgress.childName ? `${savedProgress.childName}의 ` : ''}
+              이어서 하시겠어요?
+            </p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                type="button"
+                className="btn-primary"
+                style={{ padding: '10px 16px' }}
+                onClick={() => resumeProgress(savedProgress)}
+              >
+                이어서 하기
+              </button>
+              <button
+                type="button"
+                className="btn-secondary"
+                style={{ width: 'auto', padding: '10px 16px' }}
+                onClick={discardProgress}
+              >
+                새로 시작
+              </button>
+            </div>
+          </div>
+        )}
         <div className="eyebrow">진단을 시작하기 전에</div>
         <h2
           style={{
@@ -149,7 +217,7 @@ export default function SurveyPage() {
         </div>
 
         <p style={{ fontSize: 12, color: 'var(--navy-muted)', marginBottom: '1.25rem' }}>
-          30문항 내외 · 약 10분 · 6개 영역 측정
+          65문항 · 약 15~20분 · 5개 영역 12문항씩 교차 측정
         </p>
 
         <button
@@ -176,10 +244,19 @@ export default function SurveyPage() {
   /** 문항 응답 후 공통 진행 로직 — 인터루드 체크 후 다음 문항으로, 끝이면 제출. */
   function advance(nextStep: number, latestAnswers: Answers) {
     if (nextStep >= total) {
+      clearSurveyProgress();
       sessionStorage.setItem(ANSWERS_STORAGE_KEY, JSON.stringify(latestAnswers));
       router.push('/result');
       return;
     }
+    saveSurveyProgress({
+      childName,
+      ageBand: ageBand!,
+      hagwonStatus: hagwonStatus!,
+      answers: latestAnswers,
+      step: nextStep,
+      triggeredAxes: [...triggeredAxes],
+    });
     if (INTERLUDE_STEPS.includes(nextStep)) {
       setInterludeAt(nextStep);
     }
@@ -293,9 +370,18 @@ export default function SurveyPage() {
         return Boolean(opt?.uncertain);
       }).length;
       if (uncertainCount >= UNCERTAIN_TRIGGER) {
-        setTriggeredAxes((prev) => new Set(prev).add(axisJustFinished));
+        const nextTriggered = new Set(triggeredAxes).add(axisJustFinished);
+        setTriggeredAxes(nextTriggered);
         setSupplementAxis(axisJustFinished);
         setStep(nextStep);
+        saveSurveyProgress({
+          childName,
+          ageBand: ageBand!,
+          hagwonStatus: hagwonStatus!,
+          answers: next,
+          step: nextStep,
+          triggeredAxes: [...nextTriggered],
+        });
         return;
       }
     }

@@ -7,7 +7,10 @@
  *  D-20: 문항 장면은 부모가 직접 관찰 가능해야 한다,
  *  D-21: 25→30문항, 6축(자율성·동기/학습 수준·격차/정서·번아웃/유능감/학습스타일·강점/관계·사회성)
  *        × 5문항 구조로 재편 + 학원 유무 2중 분기 도입,
- *  D-25: 채점 5축 문항에 "잘 모르겠어요" 5번째 선택지 추가 + 축당 보조 문항 1개)
+ *  D-25: 채점 5축 문항에 "잘 모르겠어요" 5번째 선택지 추가 + 축당 보조 문항 1개,
+ *  D-26: 무료/유료 분리 폐지, 채점 5축 × 12문항(축당 신규 7개) = 60문항 + 학습스타일·강점
+ *        5문항 유지 = 총 65문항. 신규 문항은 놀이/친구/가족/처음 겪는 상황/실패 상황으로
+ *        장면을 다양화하고, 여러 개는 기존 문항과 명시적 교차검증 쌍으로 설계)
  *
  * ★ 문항 재작성 규칙: 옵션의 순서와 effects 값은 그대로 두고 text/label만 바꾼다.
  *   채점 축 의미와 scripts/check-scoring.ts 검증 케이스가 그대로 유지된다.
@@ -283,8 +286,95 @@ export const QUESTIONS: Question[] = [
       UNCERTAIN_OPTION,
     ],
   },
+  /* ↓ D-26: 축당 12문항으로 확장하며 추가한 7문항. [숙제]는 이미 위에서 다뤘으니
+     [놀이·친구·가족·처음 겪는 상황·실패 상황]으로 장면을 다양화했다.
+     "교차검증 쌍"으로 명시한 것은 같은 하위 행동을 다른 생활 장면에서 다시 묻는 문항. */
+  {
+    id: 'q31',
+    text: '새로운 보드게임이나 놀이 앱을 발견하면, 아이는 보통 어떻게 하나요?', // [놀이] — q9(주말 아침 자발적 시작)의 교차검증 쌍
+    category: 'autonomy',
+    options: [
+      { label: '스스로 규칙을 알아보며 바로 시작해요', effects: { autonomy: 2 } },
+      { label: '설명해달라고 하며 시작해요', effects: { autonomy: 1 } },
+      { label: '누가 같이 안 하면 안 하려 해요', effects: { autonomy: -1 } },
+      { label: '시켜야만 해요', effects: { autonomy: -1, burnout: 1 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q32',
+    text: '가족 나들이나 여행 코스를 정할 때, 아이의 의견은 어떻게 반영되나요?', // [가족] — q26(숙제 순서 결정권)의 교차검증 쌍
+    category: 'autonomy',
+    options: [
+      { label: '자기가 가고 싶은 곳을 먼저 제안해요', effects: { autonomy: 2 } },
+      { label: '몇 개 중에 고르라고 하면 골라요', effects: { autonomy: 1 } },
+      { label: '부모가 정해주길 기다려요', effects: { autonomy: -1 } },
+      { label: '관심 없다고 해요', effects: { autonomy: -1 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q33',
+    text: '친구와 놀 계획을 세울 때, 아이가 먼저 나서서 정하는 정도는?', // [친구]
+    category: 'autonomy',
+    options: [
+      { label: '자기가 먼저 뭘 할지 제안해요', effects: { autonomy: 2 } },
+      { label: '같이 의논하며 정해요', effects: { autonomy: 1 } },
+      { label: '친구가 정하는 대로 따라가요', effects: { autonomy: -1 } },
+      { label: '별 계획 없이 그냥 만나요', effects: { autonomy: -1 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q34',
+    text: '새 학년이나 새 학원 첫날처럼 낯선 환경에 놓이면, 아이는 어떻게 하나요?', // [처음 겪는 상황]
+    category: 'autonomy',
+    options: [
+      { label: '스스로 상황을 파악하며 적응해요', effects: { autonomy: 2 } },
+      { label: '물어보며 적응해 나가요', effects: { autonomy: 1 } },
+      { label: '누가 이끌어줘야 움직여요', effects: { autonomy: -1 } },
+      { label: '시작을 계속 미뤄요', effects: { autonomy: -1, burnout: 1 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q35',
+    text: '하려던 일이 뜻대로 안 됐을 때(블록이 무너지거나 게임에서 졌을 때), 아이의 다음 행동은?', // [실패 상황] — q1(막힘 반응-학업)의 교차검증 쌍
+    category: 'autonomy',
+    options: [
+      { label: '바로 다시 시도해요', effects: { autonomy: 2 } },
+      { label: '잠깐 쉬었다가 다시 해요', effects: { autonomy: 1 } },
+      { label: '다른 사람이 해주길 기다려요', effects: { autonomy: -1 } },
+      { label: '포기하고 안 해요', effects: { autonomy: -2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q36',
+    text: '집안일이나 심부름을 부탁하면, 아이는 어떻게 하나요?', // [가족]
+    category: 'autonomy',
+    options: [
+      { label: '스스로 방법을 찾아서 해요', effects: { autonomy: 2 } },
+      { label: '방법을 물어보고 해요', effects: { autonomy: 1 } },
+      { label: '시켜야 마지못해 해요', effects: { autonomy: -1 } },
+      { label: '미루거나 안 해요', effects: { autonomy: -1 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q37',
+    text: '친구가 하자는 놀이가 하기 싫을 때, 아이는 어떻게 하나요?', // [친구]
+    category: 'autonomy',
+    options: [
+      { label: '자기 의견을 분명히 말해요', effects: { autonomy: 2 } },
+      { label: '눈치 보며 조심스레 말해요', effects: { autonomy: 1 } },
+      { label: '싫어도 그냥 따라가요', effects: { autonomy: -2 } },
+      { label: '그 자리를 슬쩍 피해요', effects: { autonomy: -1 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
 
-  /* ══ 학습 수준·격차 (5) ══ */
+  /* ══ 학습 수준·격차 (12) ══ */
   {
     id: 'q2',
     text: '아이가 문제를 풀다 말고 연필을 놓은 채 가만히 있는 모습, 얼마나 자주 보이나요?',
@@ -367,8 +457,93 @@ export const QUESTIONS: Question[] = [
       UNCERTAIN_OPTION,
     ],
   },
+  /* ↓ D-26 추가 7문항 */
+  {
+    id: 'q38',
+    text: '새로운 놀이기구(자전거, 인라인스케이트 등)를 배울 때, 아이의 습득 속도는 또래에 비해 어때 보이나요?', // [놀이]
+    category: 'zpd_strain',
+    options: [
+      { label: '또래보다 빠르게 배워요', effects: { zpd_strain: -2 } },
+      { label: '또래와 비슷하게 배워요', effects: {} },
+      { label: '또래보다 조금 오래 걸려요', effects: { zpd_strain: 1 } },
+      { label: '많이 힘들어하며 오래 걸려요', effects: { zpd_strain: 2, burnout: 1 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q39',
+    text: '가족과 보드게임이나 카드게임을 할 때, 아이가 규칙을 이해하는 정도는?', // [가족]
+    category: 'zpd_strain',
+    options: [
+      { label: '복잡한 규칙도 금방 이해해요', effects: { zpd_strain: -2 } },
+      { label: '무난히 따라와요', effects: {} },
+      { label: '설명을 여러 번 들어야 해요', effects: { zpd_strain: 1 } },
+      { label: '규칙 있는 게임 자체를 버거워해요', effects: { zpd_strain: 2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q40',
+    text: '친구들과 규칙이 있는 놀이(보드게임, 스포츠 룰 등)를 할 때, 따라가는 정도는?', // [친구]
+    category: 'zpd_strain',
+    options: [
+      { label: '친구들보다 앞서 이해해요', effects: { zpd_strain: -2 } },
+      { label: '친구들과 비슷해요', effects: {} },
+      { label: '친구들보다 조금 뒤처져요', effects: { zpd_strain: 1 } },
+      { label: '많이 못 따라가 재미없어해요', effects: { zpd_strain: 2, burnout: 1 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q41',
+    text: '새로운 학원·수업 첫 시간, 진도를 따라가는 모습은?', // [처음 겪는 상황]
+    category: 'zpd_strain',
+    options: [
+      { label: '여유 있게 따라가요', effects: { zpd_strain: -2 } },
+      { label: '무난히 따라가요', effects: {} },
+      { label: '조금 버거워해요', effects: { zpd_strain: 1 } },
+      { label: '많이 못 따라가 힘들어해요', effects: { zpd_strain: 2, burnout: 1 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q42',
+    text: '어려운 문제나 과제에서 두 번 이상 막혔을 때, 다음 시도까지 걸리는 시간은?', // [실패 상황] — q19(게임 vs 공부 속도)의 교차검증 쌍
+    category: 'zpd_strain',
+    options: [
+      { label: '바로 다시 도전해요', effects: { zpd_strain: -1 } },
+      { label: '잠깐 쉬고 다시 해요', effects: {} },
+      { label: '한참 미뤄요', effects: { zpd_strain: 1 } },
+      { label: '아예 다시 안 하려 해요', effects: { zpd_strain: 2, burnout: 1 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q43',
+    text: '집에서 나이보다 조금 어려운 걸 시켜봤을 때(어려운 책 읽기, 복잡한 조립 등), 아이의 반응은?', // [가족] — q20("너무 어렵다" 말)의 교차검증 쌍
+    category: 'zpd_strain',
+    options: [
+      { label: '오히려 좋아하며 도전해요', effects: { zpd_strain: -2 } },
+      { label: '무난히 해요', effects: {} },
+      { label: '버거워해요', effects: { zpd_strain: 1 } },
+      { label: '짜증 내며 거부해요', effects: { zpd_strain: 2, burnout: 1 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q44',
+    text: '혼자 하는 퍼즐이나 미로찾기 같은 활동에서, 아이가 도전하는 난이도는 또래 평균과 비교해 어떤가요?', // [놀이]
+    category: 'zpd_strain',
+    options: [
+      { label: '또래보다 어려운 것도 도전해요', effects: { zpd_strain: -2 } },
+      { label: '또래 평균 수준을 해요', effects: {} },
+      { label: '또래보다 쉬운 것을 선호해요', effects: { zpd_strain: 1 } },
+      { label: '어려운 건 아예 피해요', effects: { zpd_strain: 2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
 
-  /* ══ 정서·번아웃 (5) ══ */
+  /* ══ 정서·번아웃 (12) ══ */
   {
     id: 'q5',
     text: '평일 아침, 아이를 깨울 때의 모습은 어떤가요?',
@@ -471,8 +646,93 @@ export const QUESTIONS: Question[] = [
       UNCERTAIN_OPTION,
     ],
   },
+  /* ↓ D-26 추가 7문항 */
+  {
+    id: 'q45',
+    text: '평소 좋아하던 놀이·취미에 대한 요즘 관심도는 어때 보이나요?', // [놀이]
+    category: 'burnout',
+    options: [
+      { label: '여전히 즐겁게 해요', effects: { burnout: -2 } },
+      { label: '평소와 비슷해요', effects: { burnout: -1 } },
+      { label: '조금 시들해졌어요', effects: { burnout: 1 } },
+      { label: '아예 흥미를 잃었어요', effects: { burnout: 2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q46',
+    text: '주말에 가족과 시간을 보낼 때, 아이의 전반적인 활기는 어때 보이나요?', // [가족]
+    category: 'burnout',
+    options: [
+      { label: '밝고 활기차요', effects: { burnout: -2 } },
+      { label: '무난해요', effects: { burnout: -1 } },
+      { label: '피곤해 보여요', effects: { burnout: 1 } },
+      { label: '짜증이나 무기력함이 잦아요', effects: { burnout: 2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q47',
+    text: '친구를 만나는 약속을 앞두고, 아이의 반응은 어떤가요?', // [친구]
+    category: 'burnout',
+    options: [
+      { label: '기대하며 신나 해요', effects: { burnout: -2 } },
+      { label: '무난히 준비해요', effects: { burnout: -1 } },
+      { label: '귀찮아해요', effects: { burnout: 1 } },
+      { label: '만나기 싫다고 해요', effects: { burnout: 2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q48',
+    text: '새로운 활동(캠프, 신학기 등)을 앞두고 아이의 컨디션 변화는?', // [처음 겪는 상황] — q18(시험 전날)의 교차검증 쌍
+    category: 'burnout',
+    options: [
+      { label: '평소와 다름없어요', effects: { burnout: -2 } },
+      { label: '약간 긴장하는 정도예요', effects: { burnout: -1 } },
+      { label: '잠을 설치거나 컨디션이 안 좋아져요', effects: { burnout: 1 } },
+      { label: '몸이 아프다고 하며 피하려 해요', effects: { burnout: 2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q49',
+    text: '뭔가 실수하거나 혼난 뒤, 아이가 그 일을 다시 언급하거나 곱씹는 정도는?', // [실패 상황] — q22(속상한 날 회복 시간)의 교차검증 쌍
+    category: 'burnout',
+    options: [
+      { label: '금방 잊고 넘어가요', effects: { burnout: -2 } },
+      { label: '하루 정도는 신경 써요', effects: { burnout: -1 } },
+      { label: '며칠은 신경 써요', effects: { burnout: 1 } },
+      { label: '계속 자책하거나 위축돼요', effects: { burnout: 2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q50',
+    text: '요즘 아이가 평소보다 짜증·예민함을 보이는 빈도는?', // [가족]
+    category: 'burnout',
+    options: [
+      { label: '거의 없어요', effects: { burnout: -2 } },
+      { label: '가끔 있어요', effects: { burnout: -1 } },
+      { label: '자주 있어요', effects: { burnout: 1 } },
+      { label: '거의 매일 그래요', effects: { burnout: 2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q51',
+    text: '쉬는 시간이나 자유시간에 아이가 주로 하는 행동은?', // [놀이]
+    category: 'burnout',
+    options: [
+      { label: '활동적으로 놀거나 뭔가를 해요', effects: { burnout: -2 } },
+      { label: '적당히 쉬어요', effects: { burnout: -1 } },
+      { label: '멍하니 있거나 눕기만 해요', effects: { burnout: 1 } },
+      { label: '자겠다고 하거나 아무것도 안 하려 해요', effects: { burnout: 2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
 
-  /* ══ 유능감 (5) ══ */
+  /* ══ 유능감 (12) ══ */
   {
     id: 'q4',
     text: '빨간 색연필로 틀린 표시가 그어진 시험지를 아이에게 건넸을 때, 아이의 첫 행동은?',
@@ -575,6 +835,91 @@ export const QUESTIONS: Question[] = [
       UNCERTAIN_OPTION,
     ],
   },
+  /* ↓ D-26 추가 7문항 */
+  {
+    id: 'q52',
+    text: '새로운 게임이나 놀이에서 처음엔 잘 못했을 때, 아이의 반응은?', // [놀이] — q28(처음 해보는 것)의 교차검증 쌍
+    category: 'competence',
+    options: [
+      { label: '계속 시도하며 나아져요', effects: { competence: 2 } },
+      { label: '몇 번 더 해봐요', effects: { competence: 1 } },
+      { label: '금방 그만둬요', effects: { competence: -1 } },
+      { label: '"나 이거 못해"라며 안 해요', effects: { competence: -2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q53',
+    text: '친구들과 비교해서 뭔가 못한다고 느낄 때, 아이의 반응은?', // [친구]
+    category: 'competence',
+    options: [
+      { label: '더 해보려고 노력해요', effects: { competence: 2 } },
+      { label: '신경 안 써요', effects: { competence: 1 } },
+      { label: '속상해하지만 넘어가요', effects: { competence: -1 } },
+      { label: '아예 안 하려 해요', effects: { competence: -2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q54',
+    text: '집안일이나 심부름을 처음 맡겼을 때, 아이가 스스로 잘할 수 있다고 여기는 정도는?', // [가족]
+    category: 'competence',
+    options: [
+      { label: '자신 있게 나서요', effects: { competence: 2 } },
+      { label: '해보겠다고 해요', effects: { competence: 1 } },
+      { label: '못할까 봐 주저해요', effects: { competence: -1 } },
+      { label: '시작도 전에 거부해요', effects: { competence: -2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q55',
+    text: '새 학기 첫 발표나 첫 시험을 앞두고, 아이가 자신에 대해 하는 말은?', // [처음 겪는 상황]
+    category: 'competence',
+    options: [
+      { label: '"잘할 수 있을 것 같아"라고 해요', effects: { competence: 2 } },
+      { label: '별 말 없이 준비해요', effects: { competence: 1 } },
+      { label: '"떨려, 못할 것 같아"라고 해요', effects: { competence: -1 } },
+      { label: '"안 하고 싶어"라고 해요', effects: { competence: -2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q56',
+    text: '틀리거나 실패한 뒤, 아이가 자기 능력에 대해 하는 말은?', // [실패 상황] — q4(시험지 반응)의 교차검증 쌍
+    category: 'competence',
+    options: [
+      { label: '"다음엔 더 잘할 수 있어"라고 해요', effects: { competence: 2 } },
+      { label: '별 말 없어요', effects: { competence: 1 } },
+      { label: '"난 원래 이런 거 못해"라고 해요', effects: { competence: -1 } },
+      { label: '"나는 뭘 해도 안 돼"라고 해요', effects: { competence: -2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q57',
+    text: '운동이나 신체 활동에서 아이가 스스로에 대해 느끼는 자신감은?', // [놀이]
+    category: 'competence',
+    options: [
+      { label: '자신 있게 도전해요', effects: { competence: 2 } },
+      { label: '무난히 참여해요', effects: { competence: 1 } },
+      { label: '자신 없어해요', effects: { competence: -1 } },
+      { label: '아예 피해요', effects: { competence: -2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q58',
+    text: '가족 앞에서 뭔가를 보여줘야 할 때(장기자랑, 재롱 등), 아이의 태도는?', // [가족]
+    category: 'competence',
+    options: [
+      { label: '자신 있게 나서요', effects: { competence: 2 } },
+      { label: '쭈뼛하지만 해요', effects: { competence: 1 } },
+      { label: '부끄러워하며 피해요', effects: { competence: -1 } },
+      { label: '절대 안 하려 해요', effects: { competence: -2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
 
   /* ══ 학습스타일·강점 (5, 범주형: style/focus) ══ */
   {
@@ -653,7 +998,7 @@ export const QUESTIONS: Question[] = [
     ],
   },
 
-  /* ══ 관계·사회성 (5) ══ */
+  /* ══ 관계·사회성 (12) ══ */
   {
     id: 'q7',
     text: '아이가 어려운 문제를 붙잡고 있을 때, 정답을 몰라도 그냥 "옆에 있어주는 사람"만으로 힘을 내나요?',
@@ -762,6 +1107,91 @@ export const QUESTIONS: Question[] = [
       { label: '맡은 몫은 무난하게 해요', effects: { social: 1 } },
       { label: '있는 듯 없는 듯 조용히 있어요', effects: { social: -1 } },
       { label: '같이 하는 것 자체를 불편해해요', effects: { social: -2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  /* ↓ D-26 추가 7문항 */
+  {
+    id: 'q59',
+    text: '혼자 노는 것과 친구와 노는 것 중, 아이가 더 자주 선택하는 쪽은?', // [놀이]
+    category: 'social',
+    options: [
+      { label: '거의 항상 친구와 놀고 싶어해요', effects: { social: 2 } },
+      { label: '친구와 노는 걸 더 좋아해요', effects: { social: 1 } },
+      { label: '혼자 노는 걸 더 좋아해요', effects: { social: -1 } },
+      { label: '거의 항상 혼자 놀아요', effects: { social: -2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q60',
+    text: '가족 모임이나 친척들과 있을 때, 아이가 대화에 끼는 정도는?', // [가족] — q13(낯선 또래 모임)의 교차검증 쌍
+    category: 'social',
+    options: [
+      { label: '적극적으로 대화에 참여해요', effects: { social: 2 } },
+      { label: '물어보면 대답해요', effects: { social: 1 } },
+      { label: '조용히 있는 편이에요', effects: { social: -1 } },
+      { label: '자리를 피하려 해요', effects: { social: -2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q61',
+    text: '속상한 일이 있을 때, 아이가 먼저 찾는 사람은 누구인가요?', // [친구]
+    category: 'social',
+    options: [
+      { label: '친구나 가족에게 바로 이야기해요', effects: { social: 2 } },
+      { label: '물어보면 이야기해요', effects: { social: 1 } },
+      { label: '혼자 삭이는 편이에요', effects: { social: -1 } },
+      { label: '아무에게도 말 안 해요', effects: { social: -2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q62',
+    text: '새 학기에 새로운 친구를 사귀는 속도는 어떤가요?', // [처음 겪는 상황]
+    category: 'social',
+    options: [
+      { label: '금방 여러 명과 친해져요', effects: { social: 2 } },
+      { label: '한두 명씩 천천히 사귀어요', effects: { social: 1 } },
+      { label: '시간이 꽤 걸려요', effects: { social: -1 } },
+      { label: '거의 못 사귀어요', effects: { social: -2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q63',
+    text: '게임이나 놀이에서 졌을 때, 같이 하던 친구·형제에 대한 태도는?', // [실패 상황]
+    category: 'social',
+    options: [
+      { label: '쿨하게 축하해주고 다시 해요', effects: { social: 2 } },
+      { label: '속상해도 티 안 내요', effects: { social: 1 } },
+      { label: '토라지거나 짜증 내요', effects: { social: -1 } },
+      { label: '같이 안 하겠다고 해요', effects: { social: -2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q64',
+    text: '형제자매나 사촌과 방을 같이 쓰거나 물건을 나눠 써야 할 때, 아이의 태도는?', // [가족]
+    category: 'social',
+    options: [
+      { label: '잘 나누고 함께 지내요', effects: { social: 2 } },
+      { label: '무난히 지내요', effects: { social: 1 } },
+      { label: '자주 다퉈요', effects: { social: -1 } },
+      { label: '같이 있는 걸 힘들어해요', effects: { social: -2 } },
+      UNCERTAIN_OPTION,
+    ],
+  },
+  {
+    id: 'q65',
+    text: '모둠이나 팀으로 하는 놀이·활동에서, 아이가 편하게 느끼는 정도는?', // [놀이]
+    category: 'social',
+    options: [
+      { label: '아주 편하고 즐거워해요', effects: { social: 2 } },
+      { label: '무난해요', effects: { social: 1 } },
+      { label: '불편해해요', effects: { social: -1 } },
+      { label: '팀 활동 자체를 피해요', effects: { social: -2 } },
       UNCERTAIN_OPTION,
     ],
   },
