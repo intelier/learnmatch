@@ -283,3 +283,11 @@
 - **검증(단발 호출 원칙 준수, CLAUDE.md)**: 65문항 전체를 클릭하는 대신, `lib/questions.ts`의 `QUESTIONS`로 유효한 답변 객체를 생성해 `sessionStorage`에 주입 후 `/result` 진입 — `/api/report`를 정확히 1회(의도상) 호출하는 경로로 검증했다. 실제로는 로컬 개발 모드의 알려진 이슈(CLAUDE.md에 기록된 React 18 StrictMode 이중 실행)로 **2건이 생성**됐다 — `child_name`이 둘 다 "테스트"로 일치하는 것을 확인 후 두 진단 모두 삭제, `reports` 테이블에 고아 행이 없는 것도 확인(FK cascade 정상). 브라우저로 게이트 화면("상세 리포트 8,000원 · 런칭 기념 990원" / "무료로 미리보기 시작하기") → 클릭 → 무료 구간("한눈에 보기"·"이런 모습 익숙하시죠") 정상 노출 → 잠긴 4개 섹션(🔒 어쩌면 의외의 모습·축별로 읽어보기·이렇게 도와주세요·학원을 고른다면)이 블러 처리 → CTA "런칭 기념 990원으로 전체 리포트 열기" 링크가 실제 Groble 상품 URL에 `?ref=<share_token>`이 붙어 나가는 것까지 확인. `npx tsc --noEmit` 통과.
 - **남은 것 (코드 밖, 사용자 확인 필요)**: ① Vercel에 `PAYWALL_ENABLED=true` 추가 후 재배포 ② Groble 대시보드에서 두 상품의 "구매 시 질문"에 진단 링크 필수 입력이 설정돼 있는지 ③ 웹훅(payment.completed)이 등록돼 있고 `GROBLE_WEBHOOK_SECRET`이 Vercel에도 반영돼 있는지(TASKS.md T-12의 "대기" 항목) ④ `supabase/migrations/003_purchases.sql` 실행 여부 — 이 넷은 코드로 확인할 수 없어 실제 결제 전 사용자가 직접 점검해야 한다.
 - **영향**: `.env.local`(PAYWALL_ENABLED), `app/components/report-gate-screen.tsx`(locked prop·문구 분기), `app/components/result-view.tsx`(locked 전달).
+
+## D-33 (2026-08-03) 히어로 말풍선 왼쪽으로 원위치 + 글자 확대
+D-30에서 오른쪽으로 옮겼던 걸 다시 왼쪽(원래 위치)으로, 말풍선 안 글자도 키워 달라는 요청.
+
+- `.hero-bubble-row`의 `text-align`을 `right` → `left`로. 꼬리(`::before`/`::after`)도 하단 오른쪽 → **왼쪽**으로 좌우 반전(`border-width`/`border-color`의 left·right 값을 맞바꿔 거울상으로 재배치 — 좌표만 옮기면 삼각형이 엉뚱한 방향을 가리켜서 값 자체를 반전시켰다).
+- `.hero-bubble-text` 폰트 크기 15px→19px(모바일), 420px+ 구간 15px→21px.
+- **검증**: `npx tsc --noEmit` 통과. 375px·1280px 양쪽에서 말풍선 왼쪽 끝이 `.hero-bubble-row` 왼쪽 끝과 사실상 일치(회전 변형 때문에 1~2px 오차는 있음 — 버그 아님), 가로 스크롤 없음, 텍스트 3줄 유지, 반짝이 3개 전부 뷰포트 안, 콘솔 에러 없음.
+- **영향**: `app/page.tsx`(주석), `app/globals.css`(.hero-bubble-row, 꼬리 좌표 반전, .hero-bubble-text 폰트 크기 2곳).

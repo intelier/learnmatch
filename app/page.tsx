@@ -14,7 +14,7 @@ export default function Home() {
           </div>
         )}
         <div className="eyebrow">아이 학습 성향 진단</div>
-        {/* 광고 카피가 아니라 학부모의 속마음을 그대로 옮긴 말풍선 — 오른쪽 정렬 */}
+        {/* 광고 카피가 아니라 학부모의 속마음을 그대로 옮긴 말풍선 — 왼쪽 정렬 */}
         <div className="hero-bubble-row">
           <div className="hero-bubble">
             <span className="hero-sparkle hero-sparkle-1" aria-hidden="true" />

@@ -349,9 +349,10 @@ body {
 }
 
 /* ── 히어로 말풍선 (학부모의 속마음) ── */
-/* 오른쪽 정렬 — inline-block인 말풍선을 컨테이너 우측 끝에 붙인다 */
+/* 왼쪽 정렬(원래 위치) — inline-block인 말풍선은 기본이 왼쪽 시작이라 별도 지정 불필요하지만,
+   나중에 다시 오른쪽으로 옮길 수도 있어 자리는 남겨둔다 */
 .hero-bubble-row {
-  text-align: right;
+  text-align: left;
 }
 /*
  * 손글씨 낙서 스티커 스타일 (D-31, 사용자 제공 참고 이미지 기준) — 크림 배경 +
@@ -376,7 +377,7 @@ body {
   box-shadow: 0 3px 0 rgba(26, 46, 74, 0.14);
 }
 
-/* 말풍선 꼬리 (하단 오른쪽 — 말풍선이 우측 정렬이라 꼬리도 그쪽으로) —
+/* 말풍선 꼬리 (하단 왼쪽 — 원래 위치) —
    테두리색 삼각형 위에 배경색 삼각형을 살짝 겹쳐 테두리 선이 꼬리까지 이어져 보이게 한다.
    두께가 굵어진 테두리에 맞춰 꼬리도 더 크고 뭉툭하게 키웠다 */
 .hero-bubble::before,
@@ -384,25 +385,25 @@ body {
   content: '';
   position: absolute;
   bottom: -15px;
-  right: 22px;
+  left: 22px;
   width: 0;
   height: 0;
   border-style: solid;
-  border-width: 15px 0 0 13px;
-  border-color: transparent transparent transparent var(--navy);
+  border-width: 15px 13px 0 0;
+  border-color: transparent var(--navy) transparent transparent;
 }
 .hero-bubble::after {
   bottom: -11.5px;
-  right: 24.5px;
-  border-width: 11.5px 0 0 10px;
-  border-color: transparent transparent transparent var(--amber-light);
+  left: 24.5px;
+  border-width: 11.5px 10px 0 0;
+  border-color: transparent var(--amber-light) transparent transparent;
 }
 
 /* 손글씨체 — 학부모의 속마음이라는 느낌을 살린다. 한글을 지원하는 Gaegu만 지정하고,
    나머지 문자(., 숫자 등)는 브라우저가 자동으로 다음 폴백(세리프)을 쓴다 */
 .hero-bubble-text {
   font-family: 'Gaegu', var(--serif);
-  font-size: 15px;
+  font-size: 19px;
   font-weight: 700;
   line-height: 1.5;
   color: var(--navy);
@@ -468,7 +469,7 @@ body {
 
 @media (min-width: 420px) {
   .hero-bubble { padding: 0.8rem 1rem; }
-  .hero-bubble-text { font-size: 15px; }
+  .hero-bubble-text { font-size: 21px; }
   .hero-sub { font-size: 23px; }
 }
 
