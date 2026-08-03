@@ -14,18 +14,20 @@ export default function Home() {
           </div>
         )}
         <div className="eyebrow">아이 학습 성향 진단</div>
-        {/* 광고 카피가 아니라 학부모의 속마음을 그대로 옮긴 말풍선 */}
-        <div className="hero-bubble">
-          <span className="hero-sparkle hero-sparkle-1" aria-hidden="true" />
-          <span className="hero-sparkle hero-sparkle-2" aria-hidden="true" />
-          <span className="hero-sparkle hero-sparkle-3" aria-hidden="true" />
-          <p className="hero-bubble-text">
-            전문 검사는 부담스럽고,
-            <br />
-            그래도 우리 아이에게 뭐가 필요한지
-            <br />
-            알아보고 싶다면
-          </p>
+        {/* 광고 카피가 아니라 학부모의 속마음을 그대로 옮긴 말풍선 — 오른쪽 정렬 */}
+        <div className="hero-bubble-row">
+          <div className="hero-bubble">
+            <span className="hero-sparkle hero-sparkle-1" aria-hidden="true" />
+            <span className="hero-sparkle hero-sparkle-2" aria-hidden="true" />
+            <span className="hero-sparkle hero-sparkle-3" aria-hidden="true" />
+            <p className="hero-bubble-text">
+              전문 검사는 부담스럽고,
+              <br />
+              그래도 우리 아이에게 뭐가 필요한지
+              <br />
+              알아보고 싶다면
+            </p>
+          </div>
         </div>
         {/* 말풍선이 작아진 만큼 이 문구가 히어로의 앵커 — h1도 여기로 옮겼다 */}
         <h1 className="hero-sub">

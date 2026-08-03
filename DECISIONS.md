@@ -252,3 +252,10 @@
 - **카피**: "지금까지의 응답에서 이런 모습이 보이기 시작했어요"(15px, 강조) → **"지금까지의 응답에서 이런 모습이 보입니다"(12px, `--navy-muted`)**로 낮추고, 성향 문장을 15px·굵게·`--navy`로 올렸다(사용자 요청 — 리드인은 거들 뿐, 성향 문장이 주인공).
 - **검증**: `npx tsc --noEmit` 통과. 임시 스크립트(커밋 없음)로 ① `INTERLUDE_BLOCK`의 6개 step이 실제 그 시점 마지막 문항의 `category`와 정확히 일치하는지, ② 4가지 응답 패턴(전부 최상단/전부 최하단/번갈아/전부 두 번째)에서 6회 인터루드 멘트가 **매번 서로 다른지** 확인 — 4패턴 모두 6/6 고유. 브라우저로 실제 10문항→20문항 두 인터루드를 완주해 각각 자율성·학습 수준·격차 멘트가 정상 출력되는 것, 리드인 12px/성향 문장 15px 폰트 크기 차이를 `getComputedStyle`로 확인. 콘솔 에러 없음.
 - **영향**: `app/survey/page.tsx`(`pickInterludeAxis` 삭제 → `INTERLUDE_BLOCK`·`interludeMessage` 신설, 인터루드 카드 마크업).
+
+## D-30 (2026-08-03) 히어로 말풍선 우측 정렬 + 손글씨체, 인터루드 카드 글로우
+- **말풍선 우측 정렬**: `inline-block`인 `.hero-bubble`은 자체로 `margin-left: auto`가 안 먹혀서, `text-align: right`를 준 `.hero-bubble-row` 래퍼로 감쌌다. 말풍선 내부 글줄이 오른쪽 정렬을 상속하지 않도록 `.hero-bubble`엔 `text-align: left`로 다시 끊었다. **꼬리도 하단 왼쪽→오른쪽으로 이동** — 정렬 방향과 어긋나면 말풍선이 "어디서 나온 말인지" 헷갈린다.
+- **손글씨체**: `Gaegu`(Google Fonts, 한글 지원 손글씬체) 400/700을 `layout.tsx`의 기존 Noto 폰트 링크에 함께 추가. 말풍선 문구에만 적용(`font-family: 'Gaegu', var(--serif)`), 나머지는 기존 세리프 유지 — 전체 톤을 손글씨로 바꾸면 리포트·설문의 신뢰도 있는 인상이 흐트러진다. Gaegu는 세리프보다 작게 그려지는 느낌이라 폰트 크기를 12/13px → 14/15px로 올렸다.
+- **인터루드 카드 글로우**: `app/survey/page.tsx`의 인터루드(중간 정리) 카드에 `.interlude-card` 클래스 추가 — D-27/D-28에서 만든 히어로 말풍선 글로우(`hero-bubble-glow` 키프레임, 앰버 링)를 그대로 재사용해 "잠깐 멈춰서 짚어주는 순간"이라는 같은 시각 언어로 묶었다. 새 키프레임을 따로 만들지 않아 `prefers-reduced-motion` 전역 처리(D-28)도 별도 작업 없이 그대로 적용된다.
+- **검증**: `npx tsc --noEmit` 통과. 데스크톱(1280px)·모바일(375px) 양쪽에서 말풍선 우측 끝이 컨테이너 우측 끝과 일치(`bubble.right === row.right`)하는 것, 꼬리 삼각형이 `right`쪽 좌표로 옮겨간 것을 `getComputedStyle`로 확인. 폰트가 `Gaegu, "Noto Serif KR", ...`로 적용된 것 확인. 가로 스크롤 없음. 브라우저로 설문 30/65 인터루드까지 실제로 도달해 `.interlude-card`에 `hero-bubble-glow` 애니메이션이 걸려 있는 것 확인(테스트로 쌓인 `localStorage` 진행 상태는 확인 후 정리). 콘솔 에러 없음. **스크린샷은 이번에도 이 환경 제약으로 못 찍었다** — 손글씨체의 실제 느낌·글로우 강도는 눈으로 확인 필요.
+- **영향**: `app/layout.tsx`(Gaegu 폰트 로드), `app/page.tsx`(.hero-bubble-row 래퍼), `app/globals.css`(.hero-bubble-row, 꼬리 좌표 반전, .hero-bubble-text 폰트, .interlude-card), `app/survey/page.tsx`(interlude-card 클래스 부여).

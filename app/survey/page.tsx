@@ -303,7 +303,7 @@ export default function SurveyPage() {
     return (
       <main>
         <div
-          className="card"
+          className="card interlude-card"
           style={{ borderColor: 'var(--amber-border)', background: 'var(--amber-light)' }}
         >
           <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--amber)', marginBottom: 10 }}>
