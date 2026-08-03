@@ -82,7 +82,7 @@ node scripts/test-groble-webhook.js <share_token> # 웹훅 서명·언락 흐름
 
 **① 열람 게이트 (D-26)**: `app/components/report-gate-screen.tsx`. 로딩이 끝나면 리포트를 바로 보여주지 않고 "리포트가 준비됐어요" 화면(목차 미리보기 + 버튼)을 먼저 보여준다. `result-view.tsx`의 `gatePassed` 상태로 제어 — 버튼을 눌러야 `ReportView`가 렌더된다. 이 화면은 **결제를 하지 않는다** — `report.locked`(D-32)를 prop으로 받아 문구만 바꾼다(`locked=false`면 "파일럿 기간 무료로 열람하기", `locked=true`면 "무료로 미리보기 시작하기" + 990원 안내). 항상 무료 미리보기로 들어가는 문이고, 실제 결제는 ②에서 일어난다 — 공감 후킹을 먼저 무료로 보여줘야 전환이 일어난다는 D-07 원칙 때문에 이 순서를 바꾸지 않았다(D-32에서 재확인). `initialReport`로 전달되는 경로(공유 링크 `/r/[code]`, 예시 페이지)는 게이트를 건너뛴다.
 
-**② 부분잠금 (D-07, D-32에서 실전환)**: `report-gate.ts`의 `splitReport()`가 `## 어쩌면 의외의 모습` 헤딩을 기준으로 마크다운을 문자열 분할한다. **프롬프트의 `## 헤딩` 문구와 이 상수가 정확히 일치해야 한다** — 헤딩을 바꾸면 게이팅이 깨진다. `PAYWALL_ENABLED=true`일 때만 켜진다(로컬 `.env.local`은 켜져 있음 — **Vercel 프로덕션은 별도로 같은 값을 추가해야 한다**, 코드 배포만으로는 안 켜짐). ①을 통과한 뒤 리포트 본문 중간(위 헤딩)부터 다시 블러 처리되고, "런칭 기념 990원으로 전체 리포트 열기" CTA가 `lib/groble.ts`의 실제 Groble 상품 URL(`?ref=share_token`)로 연결된다 — 결제 확인은 웹훅(`app/api/webhooks/groble/route.ts`) 또는 관리자 언락(`/api/unlock`)으로만 이루어진다.
+**② 부분잠금 (D-07, D-32에서 실전환, D-37에서 잠금 시작점 앞당김)**: `report-gate.ts`의 `splitReport()`가 `## 한눈에 보기` 헤딩(리포트 본문의 첫 헤딩)을 기준으로 마크다운을 문자열 분할한다 — 즉 본문은 이제 미리보기 없이 전부 잠긴다, 무료인 건 본문 밖의 헤드라인·레이더뿐. **프롬프트의 `## 헤딩` 문구와 이 상수가 정확히 일치해야 한다** — 헤딩을 바꾸면 게이팅이 깨진다. 기본값이 유료(D-34) — `PAYWALL_ENABLED=false`를 명시해야 꺼진다. "서비스 오픈 기념 990원으로 전체 리포트 열기" CTA가 `lib/groble.ts`의 실제 Groble 상품 URL(`?ref=share_token`)로 연결된다 — 결제 확인은 웹훅(`app/api/webhooks/groble/route.ts`) 또는 관리자 언락(`/api/unlock`)으로만 이루어진다.
 
 > 트레이드오프: `content_md`는 항상 전체가 저장되고 ②의 게이팅은 읽을 때 적용된다. 즉 유료 전환 시 무료 기간에 발급된 기존 공유 링크도 그 순간 다시 잠긴다. 전환할 때 이 건을 다시 확인할 것.
 
