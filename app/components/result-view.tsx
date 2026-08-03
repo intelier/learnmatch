@@ -266,6 +266,7 @@ export default function ResultView({
         <ReportGateScreen
           childName={childName}
           answeredCount={scoredAnsweredCount}
+          locked={report.locked}
           onProceed={() => setGatePassed(true)}
         />
       )}
