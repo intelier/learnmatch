@@ -11,7 +11,10 @@ import {
 import {
   AXIS_META,
   CATEGORY_META,
+  FOCUS_LABEL,
   getQuestions,
+  QUESTIONS,
+  STYLE_LABEL,
   SUPPLEMENTARY_QUESTIONS,
   type AxisId,
 } from '@/lib/questions';
@@ -41,21 +44,53 @@ const AXIS_BLOCK_ENDS: Partial<Record<number, AxisId>> = {
 /** 이 개수 이상 "잘 모르겠어요"를 고르면 그 축의 보조 문항을 보여준다. */
 const UNCERTAIN_TRIGGER = 2;
 
-/** 지금까지 응답에서 가장 뚜렷하게 드러난 축을 고른다 (50점 기준 편차가 가장 큰 축). */
-function pickInterludeAxis(partialAnswers: Answers): { axis: AxisId; positive: boolean } | null {
+/**
+ * 인터루드 step → 그때 막 답하고 있던 문항 블록 (D-29).
+ *
+ * 예전에는 "50점 기준 편차가 가장 큰 축"을 골랐는데, 문항이 축별로 12개씩 묶여 있어
+ * 초반에는 첫 블록(자율성)만 값이 다 채워지고 나머지는 미응답분이 중앙값으로 남는다.
+ * 그래서 편차 1위가 계속 자율성이라 6번의 인터루드에 같은 멘트만 반복됐다.
+ * step으로 고정하면 매번 방금 답한 블록의 이야기가 나온다.
+ */
+const INTERLUDE_BLOCK: Partial<Record<number, AxisId | 'style_strength'>> = {
+  10: 'autonomy',
+  20: 'zpd_strain',
+  30: 'burnout',
+  40: 'competence',
+  50: 'style_strength',
+  60: 'social',
+};
+
+/**
+ * 인터루드 카드에 띄울 한 줄. 아직 부분 응답이라 정규화 점수(미응답분이 중앙으로 끌어당김)
+ * 대신 **raw 합의 부호**로 방향을 정한다 — 답한 문항만의 순수 신호이기 때문.
+ */
+function interludeMessage(
+  step: number,
+  partialAnswers: Answers
+): { label: string; message: string } | null {
+  const block = INTERLUDE_BLOCK[step];
+  if (!block) return null;
   const scores = scoreAnswers(partialAnswers);
-  const axisIds = Object.keys(AXIS_META) as AxisId[];
-  let best: AxisId | null = null;
-  let bestDist = -1;
-  for (const axis of axisIds) {
-    const dist = Math.abs(scores.axes[axis].normalized - 50);
-    if (dist > bestDist) {
-      bestDist = dist;
-      best = axis;
-    }
+  if (block === 'style_strength') {
+    // 몰입 성향(focus)은 최빈값이라 응답이 하나도 없어도 폴백('유연한')이 그냥 나온다.
+    // 이 시점엔 보통 style 문항만 답한 상태라, 실제 신호가 있을 때만 덧붙인다.
+    const hasFocus = QUESTIONS.some((q) => {
+      const idx = partialAnswers[q.id];
+      return idx !== undefined && q.options[idx]?.focus !== undefined;
+    });
+    return {
+      label: CATEGORY_META.style_strength.label,
+      message: hasFocus
+        ? `${STYLE_LABEL[scores.style]} 방식이 편하고, ${FOCUS_LABEL[scores.focus]} 성향이 보여요`
+        : `${STYLE_LABEL[scores.style]} 방식이 편해 보여요`,
+    };
   }
-  if (!best) return null;
-  return { axis: best, positive: scores.axes[best].normalized >= 50 };
+  const meta = AXIS_META[block];
+  return {
+    label: meta.label,
+    message: scores.axes[block].raw >= 0 ? meta.positive : meta.negative,
+  };
 }
 
 export default function SurveyPage() {
@@ -264,8 +299,7 @@ export default function SurveyPage() {
   }
 
   if (interludeAt !== null) {
-    const picked = pickInterludeAxis(answers);
-    const meta = picked ? AXIS_META[picked.axis] : null;
+    const info = interludeMessage(interludeAt, answers);
     return (
       <main>
         <div
@@ -273,14 +307,15 @@ export default function SurveyPage() {
           style={{ borderColor: 'var(--amber-border)', background: 'var(--amber-light)' }}
         >
           <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--amber)', marginBottom: 10 }}>
-            {interludeAt} / {total} 완료{meta ? ` · ${meta.label}` : ''}
+            {interludeAt} / {total} 완료{info ? ` · ${info.label}` : ''}
           </p>
-          <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 8, lineHeight: 1.6 }}>
-            지금까지의 응답에서 이런 모습이 보이기 시작했어요
+          {/* 리드인은 거들 뿐 — 아래 성향 문장보다 작게 (사용자 요청) */}
+          <p style={{ fontSize: 12, color: 'var(--navy-muted)', marginBottom: 6 }}>
+            지금까지의 응답에서 이런 모습이 보입니다
           </p>
-          {meta && (
-            <p style={{ fontSize: 13, color: 'var(--navy-light)', lineHeight: 1.6 }}>
-              {picked!.positive ? meta.positive : meta.negative}
+          {info && (
+            <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--navy)', lineHeight: 1.6 }}>
+              {info.message}
             </p>
           )}
         </div>
