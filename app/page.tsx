@@ -5,24 +5,16 @@ export default function Home() {
     <main>
       <section style={{ padding: '2.5rem 0 2rem' }}>
         <div className="eyebrow">아이 학습 성향 진단</div>
-        {/* 광고 카피가 아니라 학부모의 속마음을 그대로 옮긴 말풍선 — 왼쪽 정렬 */}
-        <div className="hero-bubble-row">
-          <div className="hero-bubble">
-            <span className="hero-sparkle hero-sparkle-1" aria-hidden="true" />
-            <span className="hero-sparkle hero-sparkle-2" aria-hidden="true" />
-            <span className="hero-sparkle hero-sparkle-3" aria-hidden="true" />
-            <p className="hero-bubble-text">
-              전문 검사는 부담스럽고,
-              <br />
-              그래도 우리 아이에게 뭐가 필요한지
-              <br />
-              알아보고 싶다면
-            </p>
-          </div>
-        </div>
-        {/* 말풍선이 작아진 만큼 이 문구가 히어로의 앵커 — h1도 여기로 옮겼다 */}
+        {/* 말풍선 장식은 빼고 문구만 남김 (D-35) — 광고 카피가 아니라 학부모의 속마음 */}
+        <p className="hero-bubble-text">
+          전문 검사는 부담스럽고,
+          <br />
+          그래도 우리 아이에게 뭐가 필요한지
+          <br />
+          알아보고 싶다면
+        </p>
         <h1 className="hero-sub">
-          커피 두 잔 값으로 시작하는
+          서비스 오픈 기념 990원으로 시작하는
           <br />
           교육심리학 기반 성향 진단
         </h1>

@@ -327,12 +327,12 @@ export default function ResultView({
               target="_blank"
               rel="noopener noreferrer"
             >
-              런칭 기념 990원으로 전체 리포트 열기
+              서비스 오픈 기념 990원으로 전체 리포트 열기
             </a>
           ) : (
             <>
               <button type="button" className="btn-primary" disabled style={{ opacity: 0.6, cursor: 'default' }}>
-                런칭 기념 990원으로 전체 리포트 열기
+                서비스 오픈 기념 990원으로 전체 리포트 열기
               </button>
               <p style={{ fontSize: 11, color: 'var(--navy-muted)', marginTop: 8 }}>
                 결제 기능 오픈 준비 중이에요.
@@ -340,7 +340,7 @@ export default function ResultView({
             </>
           )}
           <p style={{ fontSize: 11, color: 'var(--navy-muted)', marginTop: 8 }}>
-            정가 8,000원 예정 · 지금은 런칭 기념가로 열람할 수 있어요.
+            정가 8,000원 예정 · 지금은 서비스 오픈 기념가로 열람할 수 있어요.
           </p>
         </div>
       )}

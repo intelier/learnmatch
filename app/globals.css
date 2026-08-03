@@ -315,58 +315,10 @@ body {
 }
 
 /* ── 히어로 말풍선 (학부모의 속마음) ── */
-/* 왼쪽 정렬(원래 위치) — inline-block인 말풍선은 기본이 왼쪽 시작이라 별도 지정 불필요하지만,
-   나중에 다시 오른쪽으로 옮길 수도 있어 자리는 남겨둔다 */
-.hero-bubble-row {
-  text-align: left;
-}
 /*
- * 손글씨 낙서 스티커 스타일 (D-31, 사용자 제공 참고 이미지 기준) — 크림 배경 +
- * 굵은 손그림 테두리 + 살짝 삐뚤어진 각도. 이전의 반짝이는 글로우/시머 카드는
- * "매끈한 프리미엄" 톤이라 이 손그림 스티커 톤과 충돌해서 뺐다 — 대신 은은한
- * 정적 그림자만 남겨 종이가 살짝 떠 있는 느낌만 준다. 반짝이 별은 스티커
- * 옆 낙서 장식으로도 자연스러워 유지.
+ * 학부모의 속마음 (D-35) — 말풍선 장식(배경·테두리·꼬리·반짝이·회전)은 빼고
+ * 손글씨체 문구만 남겼다. 카드처럼 눈에 띄기보다 담백한 도입부 한 줄로.
  */
-.hero-bubble {
-  position: relative;
-  text-align: center; /* 참고 이미지처럼 짧은 문구를 가운데 정렬 */
-  /* 폭을 글줄에 맞춰 줄인다 — 블록으로 두면 항상 전폭이라 "작은 속마음"으로 안 읽힌다 */
-  display: inline-block;
-  max-width: 100%;
-  background-color: var(--amber-light);
-  border: 2.5px solid var(--navy);
-  /* 네 모서리 반경을 서로 다르게 줘서 완벽한 도형이 아닌 손그림 느낌을 낸다 */
-  border-radius: 34px 42px 18px 38px / 28px 20px 36px 42px;
-  padding: 0.85rem 1.15rem;
-  margin-bottom: 1.4rem;
-  transform: rotate(-1.6deg);
-  box-shadow: 0 3px 0 rgba(26, 46, 74, 0.14);
-}
-
-/* 말풍선 꼬리 (하단 왼쪽 — 원래 위치) —
-   테두리색 삼각형 위에 배경색 삼각형을 살짝 겹쳐 테두리 선이 꼬리까지 이어져 보이게 한다.
-   두께가 굵어진 테두리에 맞춰 꼬리도 더 크고 뭉툭하게 키웠다 */
-.hero-bubble::before,
-.hero-bubble::after {
-  content: '';
-  position: absolute;
-  bottom: -15px;
-  left: 22px;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 15px 13px 0 0;
-  border-color: transparent var(--navy) transparent transparent;
-}
-.hero-bubble::after {
-  bottom: -11.5px;
-  left: 24.5px;
-  border-width: 11.5px 10px 0 0;
-  border-color: transparent var(--amber-light) transparent transparent;
-}
-
-/* 손글씨체 — 학부모의 속마음이라는 느낌을 살린다. 한글을 지원하는 Gaegu만 지정하고,
-   나머지 문자(., 숫자 등)는 브라우저가 자동으로 다음 폴백(세리프)을 쓴다 */
 .hero-bubble-text {
   font-family: 'Gaegu', var(--serif);
   font-size: 19px;
@@ -374,30 +326,9 @@ body {
   line-height: 1.5;
   color: var(--navy);
   word-break: keep-all; /* 한글이 어절 중간에서 끊기지 않게 */
+  margin-bottom: 0.9rem;
 }
 
-/* 모서리 근처 반짝이 — 4각 별. 본문 위에 겹치지 않도록 전부 가장자리 바깥에 둔다 */
-.hero-sparkle {
-  position: absolute;
-  width: 9px;
-  height: 9px;
-  background: var(--amber);
-  clip-path: polygon(
-    50% 0%, 61% 39%, 100% 50%, 61% 61%,
-    50% 100%, 39% 61%, 0% 50%, 39% 39%
-  );
-  opacity: 0.18;
-  pointer-events: none;
-  animation: hero-twinkle 3.6s ease-in-out infinite;
-}
-.hero-sparkle-1 { top: -5px; right: 16px; animation-duration: 3.4s; }
-.hero-sparkle-2 { top: 16px; right: -6px; width: 7px; height: 7px; animation-duration: 4.3s; animation-delay: 1.1s; }
-.hero-sparkle-3 { top: -4px; left: 18px; width: 6px; height: 6px; animation-duration: 3.9s; animation-delay: 2.2s; }
-
-@keyframes hero-twinkle {
-  0%, 100% { opacity: 0.16; transform: scale(0.65); }
-  50%      { opacity: 0.85; transform: scale(1); }
-}
 /* 테두리 글로우 — 앰버 링이 은은하게 커졌다 작아진다.
    퍼짐(spread)만 키우면 레이아웃에 영향 없이 빛나 보인다 */
 @keyframes hero-bubble-glow {
@@ -434,7 +365,6 @@ body {
 }
 
 @media (min-width: 420px) {
-  .hero-bubble { padding: 0.8rem 1rem; }
   .hero-bubble-text { font-size: 21px; }
   .hero-sub { font-size: 23px; }
 }
@@ -449,5 +379,4 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .hero-sparkle { opacity: 0.4; transform: scale(0.9); }
 }

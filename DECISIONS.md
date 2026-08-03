@@ -301,3 +301,9 @@ D-30에서 오른쪽으로 옮겼던 걸 다시 왼쪽(원래 위치)으로, 말
 - **검증(계속)**: `npx tsc --noEmit` 통과. 브라우저로 히어로에서 배지가 완전히 사라진 것 확인. 게이트 화면 검증에 쓴 테스트 진단(`child_name: '검증용'`, 2건 — 로컬 개발 모드 중복 호출 이슈로 재확인됨)은 확인 후 삭제.
 - **⚠️ 확인 필요 — 삭제하지 않은 행**: 정리 중 `share_token: c1YGb4u7RTfc`(2026-08-03 오후 2:32:26, `child_name: null`) 행을 발견했다. 내 테스트 직후(약 23초 뒤) 생성됐지만 `child_name`이 내가 넣은 "검증용"이 아니라 `null`이라 **내 테스트로 확신할 수 없어 지우지 않았다** — 로컬 개발도 프로덕션 DB를 공유하므로(CLAUDE.md), 우연히 같은 시각에 실제 방문자가 이름 없이 진단했을 가능성이 있다. CLAUDE.md 지침대로 "출처 불분명한 행은 지우지 말고 물어볼 것"에 따라 그대로 남겨뒀다 — 이 행을 지워도 되는지 확인 바란다.
 - **영향**: `lib/report-gate.ts`(기본값 반전), `app/page.tsx`(배지 삭제), `app/globals.css`(.free-badge 계열 삭제), `app/components/report-gate-screen.tsx`(폴백 문구·주석), `.env.local`(주석 갱신, git 미추적).
+
+## D-35 (2026-08-03) 말풍선 장식 제거 + 가격 문구 정정
+- **말풍선 장식 제거**: D-27~D-31에서 쌓아온 말풍선 카드(배경·굵은 테두리·손그림 모서리·회전·꼬리·반짝이 별 3개)를 전부 걷어내고, 손글씨체(Gaegu) 문구만 남겼다. `.hero-bubble-row`/`.hero-bubble`(배경·테두리·radius·rotate·꼬리 `::before`/`::after`)·`.hero-sparkle` 3종·`hero-twinkle` 키프레임을 CSS에서 삭제 — `.interlude-card`가 쓰는 `hero-bubble-glow`는 건드리지 않았다(용도가 다름). `.hero-bubble-text`만 남겨 담백한 도입부 텍스트로 재정의.
+- **가격 문구 정정**: 히어로의 "커피 두 잔 값으로 시작하는"(추상적 비유)을 **"서비스 오픈 기념 990원으로 시작하는"**(구체적 가격)으로 교체 — D-32에서 사용자가 확정한 "정가 8,000원, 서비스 오픈 기념 990원" 프레이밍이 히어로에는 반영이 안 돼 있었다. 동시에 사이트 전체에서 "런칭 기념" 표현을 **"서비스 오픈 기념"**으로 통일(게이트 화면·result-view CTA·안내문 4곳) — 사용자가 이 표현을 두 번 반복해 써서 선호로 판단.
+- **검증**: `npx tsc --noEmit` 통과. 브라우저에서 `.hero-bubble`/`.hero-bubble-row`/`.hero-sparkle` DOM이 전부 사라진 것, 남은 텍스트의 `background: transparent`·`border: none`·`transform: none`을 `getComputedStyle`로 확인. 375px·1280px 양쪽 가로 스크롤 없음. "서비스 오픈 기념 990원으로 시작하는" 문구 정상 렌더 확인. 콘솔 에러 없음. 전체 "런칭 기념" grep 결과 0건.
+- **영향**: `app/page.tsx`(말풍선 마크업 제거, 히어로 문구 교체), `app/globals.css`(.hero-bubble 계열·반짝이·twinkle 삭제), `app/components/report-gate-screen.tsx`·`app/components/result-view.tsx`(런칭 기념→서비스 오픈 기념).
