@@ -5,6 +5,7 @@
  */
 import {
   AXIS_META,
+  AXIS_SCALE_NOTE,
   FOCUS_LABEL,
   QUESTIONS,
   STYLE_LABEL,
@@ -130,7 +131,9 @@ export function describeScores(scores: Scores): string {
     const meta = AXIS_META[axis];
     const s = scores.axes[axis];
     const tendency = s.normalized >= 50 ? meta.positive : meta.negative;
-    return `- ${meta.label}: ${s.normalized}/100 (레벨 ${s.level}, 문항 ${s.answeredCount}개 응답 기반) — ${tendency}`;
+    // 숫자 방향을 축마다 명시한다 (D-27) — 정서·번아웃/학습 수준·격차는 다른 축과
+    // 방향이 반대라, 알려주지 않으면 높은 점수를 좋은 결과로 서술할 수 있다.
+    return `- ${meta.label}: ${s.normalized}/100 (레벨 ${s.level}, 문항 ${s.answeredCount}개 응답 기반, ${AXIS_SCALE_NOTE[axis]}) — ${tendency}`;
   });
   lines.push(`- 학습스타일: ${STYLE_LABEL[scores.style]}`);
   lines.push(`- 몰입 성향: ${FOCUS_LABEL[scores.focus]}`);

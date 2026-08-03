@@ -3,7 +3,7 @@
  * /r/<code> 를 공유하면 진단 헤드라인·축 요약이 담긴 1200x630 이미지가 생성된다.
  */
 import { ImageResponse } from 'next/og';
-import { AXIS_META, type AxisId } from '@/lib/questions';
+import { AXIS_META, STRAIN_AXES, type AxisId } from '@/lib/questions';
 import { findByShareToken } from '@/lib/db';
 import { scoreAnswers, type Answers, type Scores } from '@/lib/scoring';
 import { decodeAnswers } from '@/lib/share';
@@ -47,10 +47,20 @@ export default async function Image({
   const scores = await resolveScores(code);
   const headline = scores?.headline ?? '우리 아이 학습 성향 진단';
 
+  // 역방향 축은 숫자가 클수록 부담이 크다는 뜻이라, 공유 카드에서도 성취색(sage)을
+  // 쓰지 않고 방향 캡션을 함께 넣는다 (D-27) — 카드만 보는 사람은 맥락이 전혀 없다.
+  // 축 라벨 자체에 가운뎃점이 들어 있어("정서·번아웃") 구분자는 쉼표를 쓰고,
+  // 조사는 라벨 뒤에 바로 붙이지 않는다("두 축은")
+  const strainCaption = `${STRAIN_AXES.map((a) => AXIS_META[a].label).join(', ')} 두 축은 숫자가 높을수록 지금 부담이 크다는 뜻이에요`;
+
   // 이미지에 등장하는 모든 텍스트 (폰트 서브셋용)
   const axisText = AXES.map((a) => AXIS_META[a].label).join('');
   const allText =
-    headline + '클래스핏아이학습성향진단결과우리얘기같은맞춤리포트' + axisText + '레벨0123456789/·';
+    headline +
+    '클래스핏아이학습성향진단결과우리얘기같은맞춤리포트' +
+    axisText +
+    strainCaption +
+    '레벨0123456789/·';
 
   const [regular, bold] = await Promise.all([
     loadFont(allText, 400),
@@ -100,38 +110,46 @@ export default async function Image({
         </div>
 
         {scores && (
-          <div style={{ display: 'flex', gap: 14 }}>
-            {AXES.map((axis) => (
-              <div
-                key={axis}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 8,
-                  background: '#ffffff',
-                  border: '1px solid #e2ddd3',
-                  borderRadius: 14,
-                  padding: '16px 22px',
-                }}
-              >
-                <div style={{ fontSize: 22, color: '#6b7f97' }}>
-                  {AXIS_META[axis].label}
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'baseline',
-                    fontSize: 30,
-                    fontWeight: 600,
-                    color: '#3d6b4f',
-                  }}
-                >
-                  <span>{scores.axes[axis].level}</span>
-                  <span style={{ fontSize: 18, color: '#9ec9aa' }}>&nbsp;/ 5</span>
-                </div>
-              </div>
-            ))}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ display: 'flex', gap: 14 }}>
+              {AXES.map((axis) => {
+                const isStrain = STRAIN_AXES.includes(axis);
+                return (
+                  <div
+                    key={axis}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 8,
+                      background: '#ffffff',
+                      border: '1px solid #e2ddd3',
+                      borderRadius: 14,
+                      padding: '16px 22px',
+                    }}
+                  >
+                    <div style={{ fontSize: 22, color: '#6b7f97' }}>
+                      {AXIS_META[axis].label}
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'baseline',
+                        fontSize: 30,
+                        fontWeight: 600,
+                        color: isStrain ? '#6b7f97' : '#3d6b4f',
+                      }}
+                    >
+                      <span>{scores.axes[axis].level}</span>
+                      <span style={{ fontSize: 18, color: isStrain ? '#a9b6c5' : '#9ec9aa' }}>
+                        &nbsp;/ 5
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ fontSize: 18, color: '#6b7f97' }}>{strainCaption}</div>
           </div>
         )}
       </div>

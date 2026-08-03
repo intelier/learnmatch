@@ -325,6 +325,12 @@ body {
   border-radius: 3px;
 }
 
+/* 역방향 축(정서·번아웃, 학습 수준·격차) — 바가 꽉 차는 게 좋은 결과가 아니므로
+   성취색(amber) 대신 중립색을 쓴다 (D-27, lib/questions.ts STRAIN_AXES) */
+.axis-fill-strain {
+  background: var(--navy-muted);
+}
+
 .card {
   background: var(--white);
   border: 1px solid var(--ivory-border);

@@ -4,7 +4,15 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import type { AgeBand } from '@/lib/age-bands';
 import type { HagwonStatus } from '@/lib/hagwon-status';
-import { AXIS_META, FOCUS_LABEL, LEVEL_MEANING, STYLE_LABEL, type AxisId } from '@/lib/questions';
+import {
+  AXIS_META,
+  AXIS_SCALE_NOTE,
+  FOCUS_LABEL,
+  LEVEL_MEANING,
+  STRAIN_AXES,
+  STYLE_LABEL,
+  type AxisId,
+} from '@/lib/questions';
 import {
   buildCheckoutUrl,
   GROBLE_SINGLE_URL,
@@ -168,9 +176,21 @@ export default function ResultView({
             margin: '1.1rem 0',
           }}
         />
+        {/* 숫자를 만점 대비 점수로 오해하지 않게 하는 안내 (D-27) */}
+        <p
+          style={{
+            fontSize: 12,
+            color: 'var(--navy-muted)',
+            marginBottom: '1rem',
+          }}
+        >
+          아래 숫자는 잘하고 못하고의 점수가 아니라, 지금 아이가 어느 쪽에 가까운지를
+          보여줘요. 축마다 높은 쪽이 뜻하는 게 다릅니다.
+        </p>
         {(Object.keys(AXIS_META) as AxisId[]).map((axis) => {
           const meta = AXIS_META[axis];
           const s = scores.axes[axis];
+          const isStrain = STRAIN_AXES.includes(axis);
           return (
             <div className="axis-row" key={axis}>
               <div
@@ -187,14 +207,27 @@ export default function ResultView({
                 </span>
               </div>
               <div className="axis-track">
-                <div className="axis-fill" style={{ width: `${s.normalized}%` }} />
+                <div
+                  className={isStrain ? 'axis-fill axis-fill-strain' : 'axis-fill'}
+                  style={{ width: `${s.normalized}%` }}
+                />
               </div>
+              {/* 이 축에서 숫자가 커진다는 게 무슨 뜻인지 (D-27) */}
+              <p
+                style={{
+                  fontSize: 11,
+                  color: 'var(--navy-muted)',
+                  marginTop: 4,
+                }}
+              >
+                {AXIS_SCALE_NOTE[axis]}
+              </p>
               <p
                 style={{
                   fontSize: 12,
                   fontWeight: 600,
-                  color: 'var(--amber)',
-                  marginTop: 4,
+                  color: isStrain ? 'var(--navy-light)' : 'var(--amber)',
+                  marginTop: 2,
                 }}
               >
                 {LEVEL_MEANING[axis][s.level - 1]}

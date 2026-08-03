@@ -154,6 +154,31 @@ export const LEVEL_MEANING: Record<AxisId, [string, string, string, string, stri
   ],
 };
 
+/**
+ * 숫자(레벨 1~5 / 정규화 0~100)가 어느 쪽으로 커지는지 (D-27).
+ *
+ * 5축 중 `zpd_strain`·`burnout`은 "높을수록 부담이 크다"는 역방향이라, "레벨 2 / 5"
+ * 같은 표기만 보면 만점 대비 점수로 오해된다(실제 사용자 피드백 — 번아웃 레벨 2를
+ * "5점 만점에 2점"으로 읽음). 그래서 숫자가 보이는 모든 자리에 이 문장을 함께 붙인다.
+ *
+ * 좋고 나쁨을 말하지 않고 "무엇이 커지는지"만 말한다 (D-10 반전 프레이밍).
+ * 5축 전부에 두는 이유도 같다 — 역방향 2축만 캡션을 달면 그 둘이 "나쁜 축"으로 읽힌다.
+ */
+export const AXIS_SCALE_NOTE: Record<AxisId, string> = {
+  autonomy: '높을수록 스스로, 낮을수록 함께할 때 힘을 내요',
+  zpd_strain: '높을수록 지금 난이도가 버겁다는 뜻이에요',
+  burnout: '높을수록 지쳐 있다는 뜻이에요',
+  competence: '높을수록 스스로에 대한 믿음이 단단해요',
+  social: '높을수록 함께, 낮을수록 혼자 배우는 걸 편해해요',
+};
+
+/**
+ * 숫자가 클수록 "지금 부담이 크다"는 뜻인 축 (D-27). 나머지 3축은 양극이 성향 차이일 뿐이다.
+ * 게이지·레이더·OG 카드에서 이 두 축을 성취색(amber/sage)으로 칠하지 않는 근거 —
+ * 바가 꽉 차거나 오각형이 넓은 게 곧 좋은 결과가 아니기 때문.
+ */
+export const STRAIN_AXES: readonly AxisId[] = ['zpd_strain', 'burnout'];
+
 /** 문항 상단 라벨·인터루드에 쓰는 6개 카테고리 표시명 (D-21). */
 export const CATEGORY_META: Record<QuestionCategory, { label: string }> = {
   autonomy: { label: AXIS_META.autonomy.label },

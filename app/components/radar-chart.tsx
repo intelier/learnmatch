@@ -2,7 +2,7 @@
  * 5축 레이더 차트 (T-18) — 순수 SVG, 의존성 없음.
  * 값은 정규화 점수(0~100). 축 이름은 AXIS_META 라벨 사용.
  */
-import { AXIS_META, type AxisId } from '@/lib/questions';
+import { AXIS_META, STRAIN_AXES, type AxisId } from '@/lib/questions';
 import type { Scores } from '@/lib/scoring';
 
 const AXES: AxisId[] = ['autonomy', 'competence', 'social', 'burnout', 'zpd_strain'];
@@ -26,8 +26,13 @@ function polygonPath(ratios: number[]): string {
 
 export default function RadarChart({ scores }: { scores: Scores }) {
   const ratios = AXES.map((axis) => Math.max(scores.axes[axis].normalized, 6) / 100);
+  // 축 라벨 자체에 가운뎃점이 들어 있어("정서·번아웃") 구분자는 쉼표를 쓴다 — D-27
+  const strainLabels = AXES.filter((a) => STRAIN_AXES.includes(a))
+    .map((a) => AXIS_META[a].label)
+    .join(', ');
 
   return (
+    <>
     <svg
       viewBox="0 0 300 276"
       role="img"
@@ -68,11 +73,17 @@ export default function RadarChart({ scores }: { scores: Scores }) {
         strokeWidth={2}
         strokeLinejoin="round"
       />
-      {/* 꼭짓점 + 값 */}
+      {/* 꼭짓점 + 값 — 역방향 축은 성취색을 쓰지 않는다 (D-27) */}
       {AXES.map((axis, i) => {
         const [x, y] = point(i, ratios[i]);
         return (
-          <circle key={axis} cx={x} cy={y} r={3.5} fill="var(--amber)" />
+          <circle
+            key={axis}
+            cx={x}
+            cy={y}
+            r={3.5}
+            fill={STRAIN_AXES.includes(axis) ? 'var(--navy-muted)' : 'var(--amber)'}
+          />
         );
       })}
       {/* 축 라벨 */}
@@ -95,5 +106,20 @@ export default function RadarChart({ scores }: { scores: Scores }) {
         );
       })}
     </svg>
+    {/* 넓은 오각형 = 좋은 결과로 읽히는 걸 막는다 (D-27) */}
+    <p
+      style={{
+        fontSize: 11,
+        lineHeight: 1.6,
+        color: 'var(--navy-muted)',
+        textAlign: 'center',
+        maxWidth: 320,
+        margin: '0.5rem auto 0',
+      }}
+    >
+      회색 점({strainLabels})은 숫자가 높을수록 지금 부담이 크다는 뜻이에요. 오각형이
+      넓다고 좋은 결과인 건 아니에요.
+    </p>
+    </>
   );
 }

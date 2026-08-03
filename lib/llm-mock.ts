@@ -4,7 +4,7 @@
  */
 import { AGE_BAND_LABEL } from './age-bands.ts';
 import { pickReinterpretationInsights } from './insights.ts';
-import { AXIS_META, FOCUS_LABEL, getQuestions, STYLE_LABEL, SUPPLEMENTARY_QUESTIONS, type AxisId } from './questions.ts';
+import { AXIS_META, AXIS_SCALE_NOTE, FOCUS_LABEL, getQuestions, STYLE_LABEL, SUPPLEMENTARY_QUESTIONS, type AxisId } from './questions.ts';
 import type { ReportInput } from './prompt.ts';
 
 type Band = 'high' | 'mid' | 'low';
@@ -140,7 +140,7 @@ export function generateMockReport(input: ReportInput): string {
     '',
     '## 축별로 읽어보기',
     ...axisIds.flatMap((axis) => [
-      `**${AXIS_META[axis].label} (레벨 ${scores.axes[axis].level}/5)** — ${AXIS_NARRATIVE[axis][band(scores.axes[axis].normalized)]} ${AXIS_THEORY[axis]} (문항 ${scores.axes[axis].answeredCount}개 응답 종합)`,
+      `**${AXIS_META[axis].label} (레벨 ${scores.axes[axis].level}/5 — ${AXIS_SCALE_NOTE[axis]})** — ${AXIS_NARRATIVE[axis][band(scores.axes[axis].normalized)]} ${AXIS_THEORY[axis]} (문항 ${scores.axes[axis].answeredCount}개 응답 종합)`,
       '',
     ]),
     '## 이렇게 도와주세요',

@@ -43,7 +43,7 @@ node scripts/test-groble-webhook.js <share_token> # 웹훅 서명·언락 흐름
 
 **`questions.ts` → `scoring.ts` → `prompt.ts` → `llm.ts`** 가 중심축이다.
 
-- `questions.ts` — 65문항: 채점 5축(`autonomy`/`zpd_strain`/`burnout`/`competence`/`social`) × 12문항 = 60 + 범주형 `style_strength` 5문항 (D-21, D-26). 각 선택지는 `effects: Partial<Record<AxisId, number>>`로 가중치를 준다. `style`/`focus`는 범주형(최빈값)이라 점수화되지 않는다 — `category` 필드는 채점과 무관, 문항 상단 라벨·인터루드용. `LEVEL_MEANING`(D-24)은 5축×레벨 1~5의 의미 문장 — "레벨 X/5" 숫자가 화면에 나오는 곳(`result-view.tsx`)엔 항상 이 문장을 같이 보여준다, 숫자만 단독으로 보이면 안 됨.
+- `questions.ts` — 65문항: 채점 5축(`autonomy`/`zpd_strain`/`burnout`/`competence`/`social`) × 12문항 = 60 + 범주형 `style_strength` 5문항 (D-21, D-26). 각 선택지는 `effects: Partial<Record<AxisId, number>>`로 가중치를 준다. `style`/`focus`는 범주형(최빈값)이라 점수화되지 않는다 — `category` 필드는 채점과 무관, 문항 상단 라벨·인터루드용. `LEVEL_MEANING`(D-24)은 5축×레벨 1~5의 의미 문장 — "레벨 X/5" 숫자가 화면에 나오는 곳(`result-view.tsx`)엔 항상 이 문장을 같이 보여준다, 숫자만 단독으로 보이면 안 됨. `AXIS_SCALE_NOTE`·`STRAIN_AXES`(D-27)는 **숫자의 방향**을 다룬다 — `burnout`·`zpd_strain` 두 축은 높을수록 부담이 크다는 뜻이라 나머지 3축과 방향이 반대다. 숫자가 나오는 자리(결과 화면 레벨 배지, 레이더 차트, OG 카드, LLM 프롬프트의 `[채점 결과]`)엔 반드시 방향 문장을 같이 넣고, 이 두 축엔 성취색(amber/sage)을 쓰지 않는다. 캡션을 역방향 2축에만 달면 그 둘이 "나쁜 축"으로 읽혀 반전 프레이밍이 깨지므로 5축 전부에 둔다.
 - `insights.ts` — "어쩌면 의외의 모습" 재해석 문장 매핑 테이블 (D-24). 2축 조합 규칙 + 5축×상/하 단일 폴백으로 **항상 최소 1개**를 보장한다. mock·실제 LLM 프롬프트가 공유.
 - `scoring.ts` — `axisRanges()`가 **문항 데이터에서 축별 이론적 min/max를 자동 산출**한다. 따라서 문항을 추가·수정해도 정규화 범위를 손으로 고칠 필요가 없다.
 - `prompt.ts` — `PROMPT_VERSION`을 두고 DB에 함께 저장한다. 프롬프트를 의미 있게 바꾸면 버전을 올린다.
