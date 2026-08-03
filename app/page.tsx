@@ -23,10 +23,34 @@ export default function Home() {
           <a className="btn-primary" href="/survey">
             진단 시작하기
           </a>
-          <a className="btn-secondary" href="/report/example">
-            예시 리포트 보기
-          </a>
         </div>
+        {/* 예시 리포트 전문 대신 핵심만 먼저 보여주는 미리보기 (D-38) — 실제 리포트가
+            이보다 훨씬 자세하다는 걸 마지막 줄로 짚어 기대치를 올린다 */}
+        <details className="theory-item" style={{ marginTop: 10 }}>
+          <summary>이런 것을 알게 돼요</summary>
+          <div className="theory-body">
+            <p>
+              <b>성향 유형</b> — 우리 아이가 어떤 방식으로 배울 때 가장 잘
+              몰입하는지 한 문장으로.
+            </p>
+            <p>
+              <b>5개 영역 레벨 해설</b> — 자율성·유능감·정서·학습 수준·관계까지,
+              지금 어디쯤인지.
+            </p>
+            <p>
+              <b>어쩌면 의외의 모습</b> — 걱정하시던 행동 뒤에 숨어 있던
+              강점의 재해석.
+            </p>
+            <p>
+              <b>학원을 고른다면</b> — 아이 성향에 맞는 수업 형태를 고르는
+              기준.
+            </p>
+            <p style={{ color: 'var(--navy-muted)', fontSize: 12, marginTop: 4 }}>
+              실제 리포트는 이 요약과 비교할 수 없을 만큼 자세해요 — 우리
+              아이의 실제 응답을 근거로 든 구체적인 장면과 설명이 담겨요.
+            </p>
+          </div>
+        </details>
       </section>
 
       <section style={{ marginTop: '2rem' }}>
