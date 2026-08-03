@@ -19,19 +19,20 @@ export default function Home() {
           <span className="hero-sparkle hero-sparkle-1" aria-hidden="true" />
           <span className="hero-sparkle hero-sparkle-2" aria-hidden="true" />
           <span className="hero-sparkle hero-sparkle-3" aria-hidden="true" />
-          <h1 className="hero-bubble-text">
+          <p className="hero-bubble-text">
             전문 검사는 부담스럽고,
             <br />
             그래도 우리 아이에게 뭐가 필요한지
             <br />
             알아보고 싶다면
-          </h1>
+          </p>
         </div>
-        <p className="hero-sub">
+        {/* 말풍선이 작아진 만큼 이 문구가 히어로의 앵커 — h1도 여기로 옮겼다 */}
+        <h1 className="hero-sub">
           커피 두 잔 값으로 시작하는
           <br />
           교육심리학 기반 성향 진단
-        </p>
+        </h1>
         <p className="hero-trust">65문항 · 5개 영역 교차 측정 · 교육심리학 이론 기반</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <a className="btn-primary" href="/survey">
