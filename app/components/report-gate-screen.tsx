@@ -4,9 +4,10 @@
  * 리포트 열람 게이트 (D-26) — 60문항을 전부 끝낸 뒤 곧바로 리포트를 쏟아내지 않고
  * "볼 준비 됐다"는 확인 한 번을 거치게 하는 화면. 결제 자체는 여기서 하지 않는다 —
  * 이 버튼을 눌러야 무료 미리보기(헤드라인·레이더·한눈에 보기·익숙하시죠)가 열리고,
- * PAYWALL_ENABLED가 켜져 있으면(D-32) 그 아래에서 "어쩌면 의외의 모습"부터는 다시
- * 블러 처리되며 실제 결제 CTA(result-view.tsx, D-07)를 만난다 — 공감을 먼저 무료로
- * 보여줘야 결제 전환이 일어난다는 D-07 원칙을 지키기 위해 이 화면은 항상 무료다.
+ * 기본적으로 켜져 있는 결제 게이팅(D-34, PAYWALL_ENABLED가 'false'가 아닌 한 항상 켜짐)
+ * 아래에서 "어쩌면 의외의 모습"부터는 다시 블러 처리되며 실제 결제 CTA(result-view.tsx,
+ * D-07)를 만난다 — 공감을 먼저 무료로 보여줘야 결제 전환이 일어난다는 D-07 원칙을
+ * 지키기 위해 이 화면 자체는 항상 무료다.
  * `locked`는 그 잠금이 실제로 걸려 있는지에 따라 아래 안내 문구만 바꾼다.
  */
 
@@ -57,7 +58,7 @@ export default function ReportGateScreen({
         {locked && <> · <span style={{ color: 'var(--amber)', fontWeight: 600 }}>런칭 기념 990원</span></>}
       </p>
       <button type="button" className="btn-primary" onClick={onProceed}>
-        {locked ? '무료로 미리보기 시작하기' : '파일럿 기간 무료로 열람하기'}
+        {locked ? '무료로 미리보기 시작하기' : '무료로 리포트 열람하기'}
       </button>
       {locked && (
         <p style={{ fontSize: 11, color: 'var(--navy-muted)', marginTop: 8 }}>

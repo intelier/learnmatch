@@ -1,18 +1,9 @@
 import TheorySection from '@/app/components/theory-section';
-import { isPaywallEnabled } from '@/lib/report-gate';
 
 export default function Home() {
-  const isFree = !isPaywallEnabled();
-
   return (
     <main>
       <section style={{ padding: '2.5rem 0 2rem' }}>
-        {isFree && (
-          <div className="free-badge">
-            <span className="free-badge-dot" />
-            파일럿 기간 · 지금은 무료
-          </div>
-        )}
         <div className="eyebrow">아이 학습 성향 진단</div>
         {/* 광고 카피가 아니라 학부모의 속마음을 그대로 옮긴 말풍선 — 왼쪽 정렬 */}
         <div className="hero-bubble-row">

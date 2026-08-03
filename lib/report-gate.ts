@@ -4,15 +4,16 @@
  * 잠금: "어쩌면 의외의 모습"부터 끝까지.
  * 잠긴 내용은 서버에서 잘라내고 클라이언트로 보내지 않는다.
  *
- * D-12: 초기 배포는 전체 무료 공개. PAYWALL_ENABLED=true로 설정하면
- * 코드 변경 없이 게이팅이 다시 켜진다 (환경변수만 바꾸고 재배포).
+ * D-12: 초기 배포는 전체 무료 공개(PAYWALL_ENABLED 미설정=false)로 시작.
+ * D-34: 파일럿 기간 종료 — 기본값을 유료로 뒤집었다. 환경변수를 깜빡 안 넣어도
+ * 프로덕션이 조용히 무료로 돌아가지 않도록, 이제 명시적으로 'false'를 줘야만 꺼진다.
  */
 
 const LOCK_START = '## 어쩌면 의외의 모습';
 
-/** 결제 게이팅 활성화 여부. 기본값(미설정)은 false = 전체 무료 공개. */
+/** 결제 게이팅 활성화 여부. 기본값은 true(유료) — 'false'를 명시해야 전체 무료 공개로 돌아간다. */
 export function isPaywallEnabled(): boolean {
-  return process.env.PAYWALL_ENABLED === 'true';
+  return process.env.PAYWALL_ENABLED !== 'false';
 }
 
 export interface GatedReport {
