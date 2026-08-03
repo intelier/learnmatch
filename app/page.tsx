@@ -10,43 +10,29 @@ export default function Home() {
         {isFree && (
           <div className="free-badge">
             <span className="free-badge-dot" />
-            지금은 무료 진단 서비스 중
+            파일럿 기간 · 지금은 무료
           </div>
         )}
         <div className="eyebrow">아이 학습 성향 진단</div>
-        <h1
-          style={{
-            fontFamily: 'var(--serif)',
-            fontSize: 26,
-            lineHeight: 1.45,
-            marginBottom: '0.9rem',
-          }}
-        >
-          우리 아이, 어떻게 공부할 때
+        {/* 광고 카피가 아니라 학부모의 속마음을 그대로 옮긴 말풍선 */}
+        <div className="hero-bubble">
+          <span className="hero-sparkle hero-sparkle-1" aria-hidden="true" />
+          <span className="hero-sparkle hero-sparkle-2" aria-hidden="true" />
+          <span className="hero-sparkle hero-sparkle-3" aria-hidden="true" />
+          <h1 className="hero-bubble-text">
+            전문 검사는 부담스럽고,
+            <br />
+            그래도 우리 아이에게 뭐가 필요한지
+            <br />
+            알아보고 싶다면
+          </h1>
+        </div>
+        <p className="hero-sub">
+          커피 두 잔 값으로 시작하는
           <br />
-          가장 빛날까요?
-        </h1>
-        <p style={{ color: 'var(--navy-muted)', marginBottom: '1.25rem' }}>
-          아이를 가장 가까이에서 지켜본 부모님의 관찰을 바탕으로 —
-          <br />
-          5분 만에, 부모님도 몰랐던 <b style={{ color: 'var(--navy)' }}>의외의 모습</b>까지
-          담은 맞춤 리포트를 받아보세요.
+          교육심리학 기반 성향 진단
         </p>
-        <p
-          style={{
-            fontSize: 13,
-            color: 'var(--sage)',
-            background: 'var(--sage-light)',
-            border: '1px solid var(--sage-border)',
-            borderRadius: 'var(--radius)',
-            padding: '10px 14px',
-            marginBottom: '1.75rem',
-            lineHeight: 1.6,
-          }}
-        >
-          자기결정성이론(SDT)·근접발달영역(ZPD)·학업 소진 연구 등 검증된
-          교육심리학 이론을 근거로 아이의 성향을 5개 축으로 분석해요.
-        </p>
+        <p className="hero-trust">65문항 · 5개 영역 교차 측정 · 교육심리학 이론 기반</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <a className="btn-primary" href="/survey">
             진단 시작하기

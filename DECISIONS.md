@@ -226,3 +226,17 @@
 - **검증**: `npx tsc --noEmit`, `check-scoring.ts` 통과. `/report/example`(고정 리포트라 `/api/report` 호출 없음)에서 5축 모두 방향 문장이 레벨 배지 아래 렌더되는 것, 게이지 색이 amber 3축 / navy-muted 2축으로 갈리는 것, 레이더 꼭짓점도 같은 규칙으로 칠해지는 것을 `getComputedStyle`로 확인(`rgb(200,134,10)` × 3, `rgb(107,127,151)` × 2). OG 이미지는 무상태 코드(`'1'×65`)로 실제 라우트를 호출해 200 + Satori 예외 없음 확인(DB 읽기만, 행 생성 없음). 콘솔 에러 없음.
 - **카피 수정**: 축 라벨 자체에 가운뎃점이 들어 있어("정서·번아웃") 축을 `·`로 이어붙이면 한 덩어리로 읽힌다 → 구분자는 쉼표. 조사도 라벨 뒤에 직접 붙이지 않는다(`격차는`/`번아웃은`이 축 순서에 따라 달라짐) — "회색 점(…)은", "… 두 축은"처럼 조사가 붙는 명사를 따로 둔다.
 - **영향**: `lib/questions.ts`(AXIS_SCALE_NOTE, STRAIN_AXES), `lib/scoring.ts`(describeScores), `lib/prompt.ts`(v13), `lib/llm-mock.ts`, `app/components/result-view.tsx`, `app/components/radar-chart.tsx`, `app/r/[code]/opengraph-image.tsx`, `app/globals.css`(.axis-fill-strain).
+
+## D-28 (2026-08-03) 히어로 재작성 — 말풍선 + shimmer, 그리고 걸러낸 마케팅 문구
+새 마케팅 카피를 히어로에 반영. 기존 헤드라인("우리 아이, 어떻게 공부할 때 가장 빛날까요?")·서브 문구·SDT/ZPD 설명 박스를 걷어내고 **학부모의 속마음을 그대로 옮긴 말풍선**을 히어로의 중심에 뒀다. 광고 카피가 아니라 "내 얘기"로 읽히게 하는 게 목적.
+
+- **말풍선(`.hero-bubble`)**: 아이보리 배경 위 흰 카드(radius 22px, 그림자로 떠 있는 느낌), 꼬리는 하단 왼쪽. 꼬리는 **테두리색 삼각형 위에 배경색 삼각형을 2px 겹쳐** 테두리 선이 꼬리까지 이어져 보이게 했다.
+- **shimmer를 `background-image`로 구현한 이유**: `::after`에 빛 띠를 만들면 `overflow: hidden`으로 클리핑해야 하는데, 그러면 **꼬리(`::before`/`::after`)가 잘려 나간다.** 배경은 `border-radius`로 자동 클리핑되므로 `background-position` 애니메이션이면 꼬리를 살린 채 shimmer를 줄 수 있다. 4.5s 중 앞 72%는 화면 밖 대기 → 후반 1.3s에 한 번만 스친다(요청한 "3~4초 간격으로 한 번").
+- **반짝이**: `clip-path` 4각 별 3개, 지속시간·딜레이를 각각 다르게(3.4/4.3/3.9s, 0/1.1/2.2s). **전부 말풍선 가장자리 바깥에 배치** — 본문 위에 겹치면 가독성을 해치기 때문. 최대 불투명도 0.85, 기본 0.16으로 은은하게.
+- **`prefers-reduced-motion`**: 저장소에 이 미디어쿼리가 아예 없었다. 이번에 전역 블록을 추가해 신규 애니메이션뿐 아니라 기존 `free-badge-glow`·`loading-dots`·`progress-shimmer`까지 함께 끈다. 말풍선은 shimmer 그라디언트 자체를 제거하고, 반짝이는 정적 opacity로 고정.
+- **반영하지 않은 카피 2건** (사용자 확인 후 결정):
+  - **"최신 학회 연구 반영 업데이트" → 뺐다.** 저장소 어디에도 근거가 없고, 근거는 SDT·ZPD·학업 소진 연구라는 *확립된* 이론이지 최신 연구가 아니다. 더구나 T-14에서 이보다 약한 '교육심리학 기반' 배지조차 "과한 강조"로 뺀 전례가 있어 그 절제선을 넘는다. "교육심리학 이론 기반"으로 대체.
+  - **"60문항" → "65문항".** 60은 채점 축 문항 수(5영역×12)라 "교차 측정" 맥락에선 맞지만, 사용자가 실제로 답하는 개수는 65다(D-26). 설문 인트로 표기와 어긋나므로 65로 통일.
+- **"커피 두 잔 값" vs 무료 배지**: 히어로 최상단 `isFree` 배지와 정면으로 충돌했다. 배지 문구를 "지금은 무료 진단 서비스 중" → **"파일럿 기간 · 지금은 무료"**로 바꿔 "원래 커피 두 잔 값 → 지금은 파일럿이라 무료"로 읽히게 했다. 게이트 화면의 `8,000원` 취소선 처리와도 일관된다. 유료 전환 시 배지만 내리면 가격 문구는 그대로 살아 있다.
+- **검증**: `npx tsc --noEmit` 통과. 375px에서 가로 스크롤 없음(`scrollWidth === innerWidth === 375`), 말풍선이 wrap 패딩 안에 들어옴(20~355.2px), 하드 `<br/>` 3줄이 추가 줄바꿈 없이 정확히 3줄(`textLines: 3`), 반짝이 3개 모두 뷰포트 안. 600px에서 폰트 19px 분기 정상, 역시 3줄·오버플로 없음. 꼬리 좌표(outer `-13px`/inner `-11px`, 둘 다 `left: 28px`)와 애니메이션(`hero-shimmer 4.5s ease-in-out infinite`, 반짝이 3종 각기 다른 duration/delay), `prefers-reduced-motion` 블록 파싱을 `getComputedStyle`·`document.styleSheets`로 확인. 콘솔 에러 없음. **스크린샷은 이 환경에서 Browser pane이 표시되지 않아 캡처하지 못했다** — 시각 확인은 사용자가 직접 필요.
+- **영향**: `app/page.tsx`(히어로 전체), `app/globals.css`(.hero-bubble/.hero-sparkle/.hero-sub/.hero-trust, prefers-reduced-motion 전역 블록).
