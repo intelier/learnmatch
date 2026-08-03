@@ -307,3 +307,7 @@ D-30에서 오른쪽으로 옮겼던 걸 다시 왼쪽(원래 위치)으로, 말
 - **가격 문구 정정**: 히어로의 "커피 두 잔 값으로 시작하는"(추상적 비유)을 **"서비스 오픈 기념 990원으로 시작하는"**(구체적 가격)으로 교체 — D-32에서 사용자가 확정한 "정가 8,000원, 서비스 오픈 기념 990원" 프레이밍이 히어로에는 반영이 안 돼 있었다. 동시에 사이트 전체에서 "런칭 기념" 표현을 **"서비스 오픈 기념"**으로 통일(게이트 화면·result-view CTA·안내문 4곳) — 사용자가 이 표현을 두 번 반복해 써서 선호로 판단.
 - **검증**: `npx tsc --noEmit` 통과. 브라우저에서 `.hero-bubble`/`.hero-bubble-row`/`.hero-sparkle` DOM이 전부 사라진 것, 남은 텍스트의 `background: transparent`·`border: none`·`transform: none`을 `getComputedStyle`로 확인. 375px·1280px 양쪽 가로 스크롤 없음. "서비스 오픈 기념 990원으로 시작하는" 문구 정상 렌더 확인. 콘솔 에러 없음. 전체 "런칭 기념" grep 결과 0건.
 - **영향**: `app/page.tsx`(말풍선 마크업 제거, 히어로 문구 교체), `app/globals.css`(.hero-bubble 계열·반짝이·twinkle 삭제), `app/components/report-gate-screen.tsx`·`app/components/result-view.tsx`(런칭 기념→서비스 오픈 기념).
+
+## D-36 (2026-08-03) 헤더 버전 표시 "베타3" → "ver.1.1"
+사용자 요청으로 로고 옆 배지 문구만 교체. 배지 스타일·위치는 그대로.
+- **영향**: `app/layout.tsx`.

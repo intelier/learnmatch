@@ -50,7 +50,7 @@ export default function RootLayout({
                   padding: '2px 7px',
                 }}
               >
-                베타3
+                ver.1.1
               </span>
             </div>
           </header>
