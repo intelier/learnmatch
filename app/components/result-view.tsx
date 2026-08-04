@@ -308,8 +308,8 @@ export default function ResultView({
           }}
         >
           <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 6 }}>
-            {childName ? `${childName}의` : '우리 아이의'} 의외의 모습, 이제
-            펼쳐볼까요?
+            결제하시고 {childName ? `${childName}의` : '우리 아이의'} 상세한
+            리포트를 받아보세요!
           </p>
           <p style={{ fontSize: 13, color: 'var(--navy-light)', marginBottom: 10, lineHeight: 1.6 }}>
             교육심리학 이론으로 읽어낸 <b>강점 재해석</b>과, 오늘 바로 써먹는{' '}
