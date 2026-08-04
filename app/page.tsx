@@ -6,18 +6,9 @@ export default function Home() {
       <section style={{ padding: '2.5rem 0 2rem' }}>
         <div className="eyebrow">아이 학습 성향 진단</div>
         {/* 말풍선 장식은 빼고 문구만 남김 (D-35) — 광고 카피가 아니라 학부모의 속마음 */}
-        <p className="hero-bubble-text">
-          전문 검사는 부담스럽고,
-          <br />
-          그래도 우리 아이에게 뭐가 필요한지
-          <br />
-          알아보고 싶다면
-        </p>
-        <h1 className="hero-sub">
-          서비스 오픈 기념 990원으로 시작하는
-          <br />
-          교육심리학 기반 성향 진단
-        </h1>
+        <p className="hero-bubble-text">내 아이를 알고 있다는 착각에서 벗어나고 싶다면</p>
+        <h1 className="hero-sub">교육심리학 기반 성향 진단</h1>
+        <p className="hero-promo">오픈기념 할인 행사 중!</p>
         <p className="hero-trust">65문항 · 5개 영역 교차 측정 · 교육심리학 이론 기반</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <a className="btn-primary" href="/survey">

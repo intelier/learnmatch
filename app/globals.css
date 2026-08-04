@@ -356,6 +356,14 @@ body {
   word-break: keep-all;
   margin-bottom: 0.55rem;
 }
+/* 할인 프로모션 한 줄 (D-41) — 가격 숫자 대신 "행사 중" 톤으로, hero-sub와 hero-trust 사이 */
+.hero-promo {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--amber);
+  word-break: keep-all;
+  margin-bottom: 0.5rem;
+}
 .hero-trust {
   font-size: 12px;
   line-height: 1.6;
