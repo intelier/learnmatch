@@ -32,6 +32,13 @@ type ReportState =
 
 type ShareState = 'idle' | 'copied' | 'manual';
 
+/**
+ * 축별 상세 목록에서 무료로 보여줄 축 개수 (D-42) — AXIS_META 순서(자율성·동기 ·
+ * 학습 수준·격차 · 정서·번아웃 · 유능감 · 관계·사회성) 기준 앞에서부터 2개까지만
+ * 노출하고, 나머지는 블러 처리해 결제 유도한다.
+ */
+const FREE_AXIS_COUNT = 2;
+
 export default function ResultView({
   answers,
   childName,
@@ -149,6 +156,59 @@ export default function ResultView({
     }
   }
 
+  /**
+   * 축별 상세(레벨·게이지·의미 문장) 한 줄 렌더 — 무료로 보이는 축과 결제 후에만
+   * 보이는 축(D-42) 양쪽에서 같은 마크업을 쓰기 위해 분리했다.
+   */
+  function renderAxisRow(axis: AxisId) {
+    const meta = AXIS_META[axis];
+    const s = scores.axes[axis];
+    const isStrain = STRAIN_AXES.includes(axis);
+    return (
+      <div className="axis-row" key={axis}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            fontSize: 13,
+            marginBottom: 4,
+          }}
+        >
+          <span style={{ fontWeight: 500 }}>{meta.label}</span>
+          <span style={{ color: 'var(--navy-muted)' }}>레벨 {s.level} / 5</span>
+        </div>
+        <div className="axis-track">
+          <div
+            className={isStrain ? 'axis-fill axis-fill-strain' : 'axis-fill'}
+            style={{ width: `${s.normalized}%` }}
+          />
+        </div>
+        {/* 이 축에서 숫자가 커진다는 게 무슨 뜻인지 (D-27) */}
+        <p style={{ fontSize: 11, color: 'var(--navy-muted)', marginTop: 4 }}>
+          {AXIS_SCALE_NOTE[axis]}
+        </p>
+        <p
+          style={{
+            fontSize: 12,
+            fontWeight: 600,
+            color: isStrain ? 'var(--navy-light)' : 'var(--amber)',
+            marginTop: 2,
+          }}
+        >
+          {LEVEL_MEANING[axis][s.level - 1]}
+        </p>
+        <p style={{ fontSize: 12, color: 'var(--navy-muted)', marginTop: 2 }}>
+          {s.normalized >= 50 ? meta.positive : meta.negative}
+        </p>
+      </div>
+    );
+  }
+
+  const axisIds = Object.keys(AXIS_META) as AxisId[];
+  // 무료로는 자율성·동기·학습 수준·격차 2개 축까지만 노출, 나머지는 블러 처리 (D-42)
+  const freeAxes = axisIds.slice(0, FREE_AXIS_COUNT);
+  const blurredAxes = axisIds.slice(FREE_AXIS_COUNT);
+
   return (
     <main>
       <div style={{ textAlign: 'center', margin: '1.5rem 0 2rem' }}>
@@ -187,63 +247,35 @@ export default function ResultView({
           아래 숫자는 잘하고 못하고의 점수가 아니라, 지금 아이가 어느 쪽에 가까운지를
           보여줘요. 축마다 높은 쪽이 뜻하는 게 다릅니다.
         </p>
-        {(Object.keys(AXIS_META) as AxisId[]).map((axis) => {
-          const meta = AXIS_META[axis];
-          const s = scores.axes[axis];
-          const isStrain = STRAIN_AXES.includes(axis);
-          return (
-            <div className="axis-row" key={axis}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  fontSize: 13,
-                  marginBottom: 4,
-                }}
-              >
-                <span style={{ fontWeight: 500 }}>{meta.label}</span>
-                <span style={{ color: 'var(--navy-muted)' }}>
-                  레벨 {s.level} / 5
-                </span>
-              </div>
-              <div className="axis-track">
-                <div
-                  className={isStrain ? 'axis-fill axis-fill-strain' : 'axis-fill'}
-                  style={{ width: `${s.normalized}%` }}
-                />
-              </div>
-              {/* 이 축에서 숫자가 커진다는 게 무슨 뜻인지 (D-27) */}
-              <p
-                style={{
-                  fontSize: 11,
-                  color: 'var(--navy-muted)',
-                  marginTop: 4,
-                }}
-              >
-                {AXIS_SCALE_NOTE[axis]}
-              </p>
-              <p
-                style={{
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: isStrain ? 'var(--navy-light)' : 'var(--amber)',
-                  marginTop: 2,
-                }}
-              >
-                {LEVEL_MEANING[axis][s.level - 1]}
-              </p>
-              <p
-                style={{
-                  fontSize: 12,
-                  color: 'var(--navy-muted)',
-                  marginTop: 2,
-                }}
-              >
-                {s.normalized >= 50 ? meta.positive : meta.negative}
-              </p>
-            </div>
-          );
-        })}
+        {freeAxes.map((axis) => renderAxisRow(axis))}
+
+        {/* 학습 수준·격차까지만 무료로 보여주고 나머지 축은 블러 처리 (D-42) —
+            결과 데이터 자체는 클라이언트에 이미 있어(scores는 answers로 즉시 계산)
+            서버에서 잘라내는 markdown 잠금(D-07)과 달리 CSS 블러로 가린다. */}
+        <div style={{ position: 'relative', marginTop: '0.5rem' }}>
+          <div
+            style={{ filter: 'blur(5px)', pointerEvents: 'none', userSelect: 'none' }}
+            aria-hidden="true"
+          >
+            {blurredAxes.map((axis) => renderAxisRow(axis))}
+          </div>
+          <div className="locked-overlay" />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              padding: '0 1rem',
+            }}
+          >
+            <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--navy)' }}>
+              나머지 {blurredAxes.length}개 영역은 결제 후 확인할 수 있어요
+            </p>
+          </div>
+        </div>
       </div>
 
       {report.status === 'loading' && <ReportLoading scores={scores} childName={childName} />}

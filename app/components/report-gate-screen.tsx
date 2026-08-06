@@ -57,11 +57,11 @@ export default function ReportGateScreen({
         {locked && <> · <span style={{ color: 'var(--amber)', fontWeight: 600 }}>서비스 오픈 기념 990원</span></>}
       </p>
       <button type="button" className="btn-primary" onClick={onProceed}>
-        {locked ? '무료로 미리보기 시작하기' : '무료로 리포트 열람하기'}
+        상세 리포트 보기
       </button>
       {locked && (
         <p style={{ fontSize: 11, color: 'var(--navy-muted)', marginTop: 8 }}>
-          공감되는 부분까지 먼저 무료로 보여드려요 — 이어지는 해설·조언은 서비스 오픈 기념가로 열람할 수 있어요.
+          상세 리포트는 서비스 오픈 기념가로 확인할 수 있어요.
         </p>
       )}
     </div>
